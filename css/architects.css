@@ -306,7 +306,7 @@ p.lede { font-size: 18px; line-height: 1.65; max-width: 640px; color: #2b2b2c; }
 
 .orders { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 56px; }
 .order-card { text-align: center; }
-.order-card img { width: 100%; height: 280px; object-fit: contain; background: #dcdad3; }
+.order-card img { width: 100%; height: 280px; object-fit: cover; object-position: top; background: #dcdad3; }
 .order-card .order-name { margin-top: 16px; font-family: 'Archivo Black'; letter-spacing: .02em; }
 
 @media (max-width: 700px) {
