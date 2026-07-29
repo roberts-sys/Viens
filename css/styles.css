@@ -637,6 +637,23 @@ a:hover { color: #0A3A7A; }
   scroll-margin-top: 20px;
 }
 
+.zg-contact__seam-grain {
+  position: absolute;
+  left: 0; right: 0; top: -1px;
+  height: 160px;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, .9) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(0, 0, 0, .6) 1.5px, transparent 1.5px);
+  background-size: 4px 4px, 4px 4px;
+  background-position: 0 0, 2px 2px;
+  opacity: .6;
+  mix-blend-mode: overlay;
+  -webkit-mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 100%);
+  mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .zg-contact__grain {
   position: absolute;
   inset: 0;
@@ -811,6 +828,7 @@ a:hover { color: #0A3A7A; }
   .zg-map__wave { bottom: 3px; height: 100px; filter: blur(14px); }
   .zg-map__wave--2 { height: 150px; filter: blur(20px); }
   .zg-map__seam, .zg-map__seam-grain { height: 100px; }
+  .zg-contact__seam-grain { height: 100px; }
   .zg-map__eyebrow { font-size: 10.5px; letter-spacing: .12em; margin-bottom: 8px; }
   .zg-map__frame { max-width: none; }
   .zg-worldmap { position: relative; z-index: 1; }
