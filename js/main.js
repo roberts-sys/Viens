@@ -11,6 +11,8 @@
 
     var hovering = false;
     var active = 0; // 0 = A visible, 1 = B visible
+    var leaveTimer = null;
+    var DEBOUNCE_MS = 180;
 
     function show(idx) {
       active = idx;
@@ -26,21 +28,27 @@
     }
 
     cell.addEventListener('mouseenter', function () {
+      if (leaveTimer) {
+        clearTimeout(leaveTimer);
+        leaveTimer = null;
+      }
       if (hovering) return;
       hovering = true;
       show(1);
       videoA.pause();
-      videoB.currentTime = 0;
       safePlay(videoB);
     });
 
     cell.addEventListener('mouseleave', function () {
-      if (!hovering) return;
-      hovering = false;
-      show(0);
-      videoB.pause();
-      videoA.currentTime = 0;
-      safePlay(videoA);
+      if (leaveTimer) clearTimeout(leaveTimer);
+      leaveTimer = setTimeout(function () {
+        leaveTimer = null;
+        if (!hovering) return;
+        hovering = false;
+        show(0);
+        videoB.pause();
+        safePlay(videoA);
+      }, DEBOUNCE_MS);
     });
 
     videoA.addEventListener('ended', function () {
