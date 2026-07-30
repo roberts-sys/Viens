@@ -72,7 +72,7 @@ a:hover { color: #0A3A7A; }
     rgba(255, 210, 160, .04) 54%,
     transparent 60%);
   background-size: 240% 100%;
-  animation: zg-nav-sheen-move 11s cubic-bezier(.35, 0, .25, 1) infinite;
+  animation: zg-nav-sheen-move 22s cubic-bezier(.35, 0, .25, 1) infinite;
 }
 
 @keyframes zg-nav-sheen-move {

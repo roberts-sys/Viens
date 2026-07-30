@@ -54,7 +54,7 @@ a { color: inherit; }
     rgba(255, 255, 255, .04) 55%,
     transparent 62%);
   background-size: 260% 100%;
-  animation: nav-sheen-move 7s cubic-bezier(.35, 0, .25, 1) infinite;
+  animation: nav-sheen-move 16s cubic-bezier(.35, 0, .25, 1) infinite;
   display: flex;
   align-items: center;
   justify-content: space-between;
