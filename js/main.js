@@ -99,8 +99,21 @@
     });
   }
 
+  function initNavSheenVisibility() {
+    var sheenEls = document.querySelectorAll('.zg-nav--sheen');
+    if (!sheenEls.length) return;
+
+    document.addEventListener('visibilitychange', function () {
+      var state = document.hidden ? 'paused' : 'running';
+      sheenEls.forEach(function (el) {
+        el.style.animationPlayState = state;
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initVideoCrossfade();
     initWorldMapPing();
+    initNavSheenVisibility();
   });
 })();
