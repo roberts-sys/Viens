@@ -63,9 +63,16 @@ a:hover { color: #0A3A7A; }
 }
 
 .zg-nav--sheen {
-  background-image: linear-gradient(65deg, transparent 44%, rgba(255, 210, 160, .14) 50%, transparent 56%);
-  background-size: 260% 100%;
-  animation: zg-nav-sheen-move 13s ease-in-out infinite;
+  background-image: linear-gradient(65deg,
+    transparent 40%,
+    rgba(255, 210, 160, .04) 46%,
+    rgba(255, 218, 170, .1) 48%,
+    rgba(255, 225, 185, .32) 50%,
+    rgba(255, 218, 170, .1) 52%,
+    rgba(255, 210, 160, .04) 54%,
+    transparent 60%);
+  background-size: 240% 100%;
+  animation: zg-nav-sheen-move 11s cubic-bezier(.35, 0, .25, 1) infinite;
 }
 
 @keyframes zg-nav-sheen-move {

@@ -45,9 +45,16 @@ a { color: inherit; }
   position: absolute;
   top: 0; left: 0; right: 0;
   z-index: 100;
-  background-image: linear-gradient(100deg, transparent 42%, rgba(255, 255, 255, .16) 50%, transparent 58%);
-  background-size: 280% 100%;
-  animation: nav-sheen-move 9s linear infinite;
+  background-image: linear-gradient(100deg,
+    transparent 38%,
+    rgba(255, 255, 255, .04) 45%,
+    rgba(255, 255, 255, .1) 48%,
+    rgba(255, 255, 255, .4) 50%,
+    rgba(255, 255, 255, .1) 52%,
+    rgba(255, 255, 255, .04) 55%,
+    transparent 62%);
+  background-size: 260% 100%;
+  animation: nav-sheen-move 7s cubic-bezier(.35, 0, .25, 1) infinite;
   display: flex;
   align-items: center;
   justify-content: space-between;
