@@ -57,9 +57,20 @@ a:hover { color: #0A3A7A; }
   justify-content: space-between;
   height: 80px;
   padding: 0 56px;
-  background: rgba(26, 30, 36, .32);
+  background-color: rgba(26, 30, 36, .32);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+.zg-nav--sheen {
+  background-image: linear-gradient(65deg, transparent 44%, rgba(255, 210, 160, .14) 50%, transparent 56%);
+  background-size: 260% 100%;
+  animation: zg-nav-sheen-move 13s ease-in-out infinite;
+}
+
+@keyframes zg-nav-sheen-move {
+  0% { background-position: -160% 0; }
+  100% { background-position: 160% 0; }
 }
 
 .zg-nav__brand {
