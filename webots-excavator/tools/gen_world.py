@@ -1,0 +1,1545 @@
+"""Generates construction_site.wbt. Loops let us add a lot of repeated detail
+(track grousers, sprocket teeth, scaffolding, lattice) without hand-writing it."""
+
+import math
+
+import os
+
+# writes into ../worlds/ next to this script
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                   "..", "worlds", "construction_site.wbt")
+
+# ---------------------------------------------------------------- geometry
+CUBE = 0.16
+COLOURS = ("blue", "yellow", "brown", "red", "green", "white")
+HOMES = {
+    "white":  (0.6557, 0.7813),
+    "green":  (0.8356, 0.5851),
+    "red":    (0.9585, 0.3488),
+    "brown":  (1.0161, 0.0889),
+    "yellow": (1.0045, -0.1771),
+    "blue":   (0.9244, -0.4311),
+}
+TOWERS = ((0.5974, -0.6186), (0.2080, -0.8345))
+CUBE_COLOURS = {
+    "blue":   (0.10, 0.32, 0.80),
+    "yellow": (0.95, 0.78, 0.10),
+    "brown":  (0.42, 0.26, 0.13),
+    "red":    (0.80, 0.13, 0.10),
+    "green":  (0.13, 0.55, 0.22),
+    "white":  (0.90, 0.90, 0.88),
+}
+ROCK_COLOURS = {
+    "blue":   ((0.42, 0.45, 0.50), (0.32, 0.35, 0.40), (0.54, 0.57, 0.62)),
+    "yellow": ((0.72, 0.62, 0.38), (0.58, 0.48, 0.28), (0.84, 0.75, 0.52)),
+    "brown":  ((0.40, 0.30, 0.22), (0.30, 0.22, 0.16), (0.52, 0.41, 0.30)),
+    "red":    ((0.55, 0.28, 0.22), (0.42, 0.20, 0.16), (0.68, 0.40, 0.32)),
+    "green":  ((0.38, 0.44, 0.32), (0.28, 0.34, 0.24), (0.50, 0.56, 0.42)),
+    "white":  ((0.76, 0.75, 0.71), (0.62, 0.61, 0.58), (0.88, 0.87, 0.84)),
+}
+
+# ---------------------------------------------------------------- palette
+YEL   = (0.93, 0.69, 0.08)
+YEL_D = (0.84, 0.61, 0.06)
+DARK  = (0.16, 0.17, 0.19)
+CHAR  = (0.10, 0.10, 0.11)
+GREY  = (0.30, 0.31, 0.33)
+STEEL = (0.62, 0.64, 0.67)
+CHROME= (0.78, 0.80, 0.82)
+GLASS = (0.10, 0.14, 0.18)
+ORANGE= (0.85, 0.35, 0.06)
+DIRT  = (0.45, 0.36, 0.27)
+CONC  = (0.66, 0.65, 0.62)
+
+
+def v(t):
+    return " ".join("%.5f" % x for x in t)
+
+
+def indent(s, n):
+    pad = " " * n
+    return "\n".join(pad + ln if ln.strip() else ln for ln in s.split("\n"))
+
+
+def app(color, rough=0.8, metal=0.2, transp=None, emis=None):
+    s = "PBRAppearance {\n  baseColor %s\n  roughness %.2f\n  metalness %.2f\n" % (
+        v(color), rough, metal)
+    if transp is not None:
+        s += "  transparency %.2f\n" % transp
+    if emis is not None:
+        s += "  emissiveColor %s\n" % v(emis)
+    return s + "}"
+
+
+def shape(geom, color, rough=0.8, metal=0.2, transp=None, emis=None):
+    return "Shape {\n  appearance %s\n  geometry %s\n}" % (
+        indent(app(color, rough, metal, transp, emis), 2).lstrip(),
+        indent(geom, 2).lstrip())
+
+
+def pose(children, t=(0, 0, 0), rot=None):
+    if isinstance(children, str):
+        children = [children]
+    body = "\n".join(indent(c, 4) for c in children)
+    s = "Pose {\n  translation %s\n" % v(t)
+    if rot is not None:
+        s += "  rotation %s\n" % (" ".join("%.6f" % x for x in rot))
+    return s + "  children [\n%s\n  ]\n}" % body
+
+
+def box(size, t=(0, 0, 0), rot=None, color=GREY, **kw):
+    return pose(shape("Box {\n  size %s\n}" % v(size), color, **kw), t, rot)
+
+
+def cyl(h, r, t=(0, 0, 0), rot=None, color=GREY, sub=16, **kw):
+    g = "Cylinder {\n  height %.5f\n  radius %.5f\n  subdivision %d\n}" % (h, r, sub)
+    return pose(shape(g, color, **kw), t, rot)
+
+
+def cone(h, r, t=(0, 0, 0), rot=None, color=DIRT, sub=20, **kw):
+    g = "Cone {\n  bottomRadius %.5f\n  height %.5f\n  subdivision %d\n}" % (r, h, sub)
+    return pose(shape(g, color, **kw), t, rot)
+
+
+def vcyl(h, r, t, color=GREY, sub=16, **kw):
+    """Upright cylinder. Webots cylinders are already Z-aligned, so no rotation."""
+    return cyl(h, r, t, None, color, sub, **kw)
+
+
+def ycyl(h, r, t, color=GREY, sub=16, **kw):
+    """Cylinder lying along the Y axis (across the machine): wheels, hinge pins."""
+    return cyl(h, r, t, (1, 0, 0, 1.5708), color, sub, **kw)
+
+
+def xcyl(h, r, t, color=GREY, sub=16, **kw):
+    """Cylinder lying along the X axis (fore-and-aft)."""
+    return cyl(h, r, t, (0, 1, 0, 1.5708), color, sub, **kw)
+
+
+def ucone(h, r, t, color=DIRT, sub=20, **kw):
+    """Upright cone STANDING ON ITS BASE at t.
+
+    Webots centres a Cone on its own axis, so a cone drawn at ground level has
+    half of itself underground. This shifts it up by half its height.
+    """
+    return cone(h, r, (t[0], t[1], t[2] + h / 2.0), None, color, sub, **kw)
+
+
+def aim(d):
+    """Axis-angle rotating the cylinder's local +z axis onto direction d."""
+    n = math.sqrt(sum(c * c for c in d))
+    dh = [c / n for c in d]
+    dot = dh[2]
+    if dot > 0.999999:
+        return (1.0, 0.0, 0.0, 0.0)
+    if dot < -0.999999:
+        return (1.0, 0.0, 0.0, math.pi)
+    ax = (-dh[1], dh[0], 0.0)          # (0,0,1) x dh
+    m = math.sqrt(sum(c * c for c in ax))
+    return (ax[0] / m, ax[1] / m, ax[2] / m, math.acos(dot))
+
+
+def strut(p0, p1, r, color=STEEL, sub=10, **kw):
+    """A cylinder running from p0 to p1 — rams, hoses, handrails, lattice."""
+    d = [p1[i] - p0[i] for i in range(3)]
+    L = math.sqrt(sum(c * c for c in d))
+    mid = [(p0[i] + p1[i]) / 2 for i in range(3)]
+    return cyl(L, r, mid, aim(d), color, sub, **kw)
+
+
+def group(children, t=(0, 0, 0), yaw=0.0):
+    return pose(children, t, (0, 0, 1, yaw))
+
+
+# ======================================================================
+#  EXCAVATOR
+# ======================================================================
+def track(side):
+    """One track assembly. side = +1 (left) or -1 (right)."""
+    y = 0.30 * side
+    p = []
+    p.append(box((0.93, 0.16, 0.155), (0, y, 0.1575), color=DARK, rough=0.85, metal=0.4))
+    # idler + sprocket
+    for x, r in ((0.48, 0.13), (-0.48, 0.13)):
+        p.append(ycyl(0.20, r, (x, y, 0.13), color=(0.22, 0.23, 0.25), sub=24, metal=0.5))
+        p.append(ycyl(0.10, 0.05, (x, y, 0.13), color=CHROME, sub=16, metal=0.9, rough=0.3))
+    # sprocket teeth
+    for i in range(10):
+        a = i * math.pi / 5
+        p.append(box((0.035, 0.20, 0.045),
+                     (-0.48 + 0.145 * math.cos(a), y, 0.13 + 0.145 * math.sin(a)),
+                     (0, 1, 0, -a), color=(0.28, 0.29, 0.31), metal=0.6))
+    # belts
+    p.append(box((0.96, 0.22, 0.05), (0, y, 0.025), color=CHAR, rough=1))
+    p.append(box((0.96, 0.22, 0.05), (0, y, 0.235), color=CHAR, rough=1))
+    # belt wrapping around the ends
+    for cx, sgn in ((0.48, 1), (-0.48, -1)):
+        for i in range(6):
+            a = -math.pi / 2 + i * math.pi / 5
+            aa = a if sgn > 0 else math.pi - a
+            p.append(box((0.05, 0.22, 0.045),
+                         (cx + 0.155 * math.cos(aa), y, 0.13 + 0.155 * math.sin(aa)),
+                         (0, 1, 0, -aa), color=CHAR, rough=1))
+    # grousers (tread bars)
+    for i in range(7):
+        x = -0.42 + i * 0.14
+        p.append(box((0.04, 0.24, 0.03), (x, y, 0.005), color=(0.14, 0.14, 0.15), rough=1))
+        p.append(box((0.04, 0.24, 0.03), (x, y, 0.255), color=(0.14, 0.14, 0.15), rough=1))
+    # road wheels + carrier rollers
+    for x in (-0.30, -0.10, 0.10, 0.30):
+        p.append(ycyl(0.16, 0.06, (x, y, 0.06), color=(0.25, 0.26, 0.28), metal=0.5))
+    for x in (-0.2, 0.2):
+        p.append(ycyl(0.10, 0.035, (x, y, 0.245), color=(0.25, 0.26, 0.28), metal=0.5))
+    # hub bolt circles on the idler and the sprocket
+    for hx in (0.48, -0.48):
+        for i in range(6):
+            a = i * math.pi / 3
+            p.append(ycyl(0.022, 0.010, (hx + 0.062 * math.cos(a), y + 0.101 * side,
+                                         0.13 + 0.062 * math.sin(a)),
+                          CHROME, 6, metal=0.9, rough=0.3))
+    # bolt heads along the track frame
+    for i in range(8):
+        p.append(ycyl(0.02, 0.011, (-0.42 + i * 0.12, y + 0.081 * side, 0.215),
+                      (0.34, 0.35, 0.37), 6, metal=0.7))
+    # mud scrapers front and rear
+    for sx in (0.40, -0.40):
+        p.append(box((0.02, 0.20, 0.07), (sx, y, 0.075), color=(0.30, 0.31, 0.33), metal=0.6))
+    # track tension adjuster + mud guard
+    p.append(xcyl(0.09, 0.045, (0.33, y, 0.19), CHROME, 12, metal=0.9))
+    p.append(box((0.44, 0.26, 0.02), (0, y, 0.30), color=DARK, rough=0.9))
+    # travel motor
+    p.append(ycyl(0.12, 0.09, (-0.48, y - 0.13 * side, 0.13), color=GREY, sub=16, metal=0.6))
+    return p
+
+
+def undercarriage():
+    p = []
+    for s in (1, -1):
+        p += track(s)
+    p.append(box((0.72, 0.46, 0.14), (0, 0, 0.20), color=(0.20, 0.21, 0.23), metal=0.4))
+    p.append(box((0.90, 0.14, 0.10), (0, 0.30, 0.24), color=(0.20, 0.21, 0.23), metal=0.4))
+    p.append(box((0.90, 0.14, 0.10), (0, -0.30, 0.24), color=(0.20, 0.21, 0.23), metal=0.4))
+    p.append(vcyl(0.10, 0.30, (0, 0, 0.29), color=GREY, sub=32, rough=0.6, metal=0.8))
+    # slew ring bolts
+    for i in range(12):
+        a = i * math.pi / 6
+        p.append(vcyl(0.03, 0.014, (0.265 * math.cos(a), 0.265 * math.sin(a), 0.345),
+                      color=CHROME, sub=8, metal=0.9, rough=0.3))
+    p.append(vcyl(0.16, 0.07, (0, 0, 0.24), color=(0.35, 0.36, 0.38), metal=0.7))
+    return p
+
+
+def cab():
+    p = []
+    cx, cy = 0.10, 0.26
+    p.append(box((0.46, 0.42, 0.52), (cx, cy, 0.36), color=YEL, rough=0.7, metal=0.3))
+    # ROPS corner posts
+    for dx in (-0.22, 0.22):
+        for dy in (-0.20, 0.20):
+            p.append(box((0.04, 0.04, 0.54), (cx + dx, cy + dy, 0.36), color=DARK, metal=0.5))
+    # glazing
+    p.append(box((0.02, 0.34, 0.38), (cx + 0.234, cy, 0.40), color=GLASS, rough=0.15, metal=0.1))
+    p.append(box((0.34, 0.02, 0.34), (cx, cy + 0.214, 0.40), color=GLASS, rough=0.15, metal=0.1))
+    p.append(box((0.34, 0.02, 0.34), (cx, cy - 0.214, 0.40), color=GLASS, rough=0.15, metal=0.1))
+    p.append(box((0.02, 0.34, 0.30), (cx - 0.234, cy, 0.38), color=GLASS, rough=0.15, metal=0.1))
+    # door frame + handle
+    p.append(box((0.015, 0.36, 0.44), (cx - 0.242, cy, 0.36), color=YEL_D, rough=0.7))
+    p.append(strut((cx - 0.255, cy - 0.10, 0.34), (cx - 0.255, cy - 0.10, 0.44), 0.012, CHROME,
+                   metal=0.9, rough=0.3))
+    # wiper
+    p.append(strut((cx + 0.245, cy - 0.12, 0.28), (cx + 0.245, cy + 0.06, 0.44), 0.008, CHAR))
+    # roof + hatch + beacon
+    p.append(box((0.50, 0.46, 0.04), (cx, cy, 0.64), color=YEL_D, rough=0.75))
+    p.append(box((0.18, 0.20, 0.015), (cx + 0.06, cy, 0.665), color=GLASS, rough=0.2))
+    p.append(vcyl(0.03, 0.03, (cx - 0.16, cy, 0.675), color=DARK))
+    p.append(vcyl(0.07, 0.035, (cx - 0.16, cy, 0.705), color=(0.95, 0.4, 0.05), rough=0.35,
+                  transp=0.15, emis=(0.6, 0.16, 0.0)))
+    # roof work lights
+    for dy in (-0.14, 0.14):
+        p.append(box((0.06, 0.07, 0.06), (cx + 0.20, cy + dy, 0.69), color=DARK))
+        p.append(box((0.015, 0.06, 0.05), (cx + 0.232, cy + dy, 0.69),
+                     color=(1, 0.97, 0.85), rough=0.1, emis=(1, 0.93, 0.7)))
+    # mirrors
+    for dy, s in ((0.24, 1), (-0.24, -1)):
+        p.append(strut((cx + 0.20, cy + dy, 0.60), (cx + 0.26, cy + dy + 0.10 * s, 0.66),
+                       0.008, CHAR))
+        p.append(box((0.02, 0.05, 0.08), (cx + 0.27, cy + dy + 0.12 * s, 0.67), color=DARK))
+    # rubber seals framing each pane
+    for dz, hh in ((0.595, 0.02), (0.205, 0.02)):
+        p.append(box((0.03, 0.38, hh), (cx + 0.236, cy, dz), color=(0.10, 0.10, 0.12)))
+    for dy2 in (0.185, -0.185):
+        p.append(box((0.03, 0.02, 0.40), (cx + 0.236, cy + dy2, 0.40), color=(0.10, 0.10, 0.12)))
+    for dy2 in (0.216, -0.216):
+        p.append(box((0.38, 0.022, 0.02), (cx, cy + dy2, 0.585), color=(0.10, 0.10, 0.12)))
+        p.append(box((0.38, 0.022, 0.02), (cx, cy + dy2, 0.225), color=(0.10, 0.10, 0.12)))
+    # guard bars in front of the roof lights
+    for dy2 in (-0.14, 0.14):
+        for k in (-0.018, 0.018):
+            p.append(box((0.012, 0.012, 0.06), (cx + 0.243, cy + dy2 + k, 0.69),
+                         color=(0.35, 0.36, 0.38), metal=0.7))
+    # window mullions + sun visor + antenna
+    for dz in (0.24, 0.56):
+        p.append(box((0.025, 0.36, 0.025), (cx + 0.238, cy, dz), color=YEL_D, rough=0.75))
+    p.append(box((0.05, 0.34, 0.02), (cx + 0.215, cy, 0.575), (0, 1, 0, 0.35),
+                 color=(0.20, 0.20, 0.22), rough=0.8))
+    p.append(strut((cx - 0.20, cy - 0.20, 0.66), (cx - 0.22, cy - 0.20, 0.86), 0.006, CHAR, 6))
+    # interior: seat, armrests, joystick consoles, foot pedals
+    p.append(box((0.16, 0.17, 0.05), (cx - 0.04, cy, 0.19), color=(0.12, 0.12, 0.14)))
+    p.append(box((0.06, 0.17, 0.22), (cx - 0.11, cy, 0.32), (0, 1, 0, -0.12),
+                 color=(0.12, 0.12, 0.14)))
+    p.append(box((0.10, 0.19, 0.03), (cx - 0.04, cy, 0.30), color=(0.15, 0.15, 0.17)))
+    for dy in (-0.10, 0.10):
+        p.append(box((0.11, 0.05, 0.05), (cx + 0.02, cy + dy, 0.245), color=(0.15, 0.15, 0.17)))
+        p.append(strut((cx + 0.03, cy + dy, 0.265), (cx + 0.045, cy + dy, 0.34), 0.010, CHAR))
+        p.append(vcyl(0.022, 0.016, (cx + 0.045, cy + dy, 0.35), color=(0.55, 0.12, 0.10), sub=8))
+        p.append(box((0.07, 0.05, 0.015), (cx + 0.17, cy + dy * 0.6, 0.135),
+                     (0, 1, 0, 0.2), color=(0.18, 0.18, 0.20)))
+    # monitor screen, roof grab handle, door hinges, latch
+    p.append(box((0.02, 0.09, 0.07), (cx + 0.14, cy + 0.15, 0.34), (0, 0, 1, -0.3),
+                 color=(0.08, 0.10, 0.13), emis=(0.05, 0.12, 0.10)))
+    p.append(box((0.03, 0.03, 0.09), (cx + 0.14, cy + 0.15, 0.28), color=(0.18, 0.18, 0.20)))
+    p.append(strut((cx - 0.16, cy + 0.17, 0.60), (cx + 0.04, cy + 0.17, 0.60), 0.008, CHROME))
+    for dz in (0.22, 0.50):
+        p.append(box((0.02, 0.03, 0.04), (cx - 0.248, cy + 0.17, dz),
+                     color=(0.35, 0.36, 0.38), metal=0.8))
+    p.append(box((0.015, 0.05, 0.02), (cx - 0.252, cy - 0.12, 0.39), color=CHROME, metal=0.9))
+    return p
+
+
+def house():
+    p = []
+    # deck
+    p.append(box((1.16, 0.78, 0.10), (-0.06, 0, 0.05), color=YEL, rough=0.7, metal=0.3))
+    p.append(box((1.10, 0.72, 0.03), (-0.06, 0, 0.005), color=(0.22, 0.23, 0.25), rough=0.85))
+    for i in range(6):
+        p.append(box((0.02, 0.60, 0.008), (-0.44 + i * 0.13, 0.02, 0.102),
+                     color=(0.75, 0.56, 0.06), rough=0.9))
+    # engine housing + grille + hatch
+    p.append(box((0.52, 0.66, 0.34), (-0.32, -0.04, 0.27), color=YEL, rough=0.7, metal=0.3))
+    for i in range(7):
+        p.append(box((0.012, 0.44, 0.022), (-0.58, -0.04, 0.16 + i * 0.035),
+                     color=DARK, rough=0.9))
+    p.append(box((0.34, 0.52, 0.012), (-0.30, -0.04, 0.447), color=YEL_D, rough=0.75))
+    for dy in (-0.20, 0.12):
+        p.append(box((0.05, 0.03, 0.02), (-0.45, dy - 0.04, 0.452), color=CHROME, metal=0.9))
+    p.append(box((0.03, 0.05, 0.02), (-0.15, -0.04, 0.452), color=CHROME, metal=0.9))
+    p.append(box((0.24, 0.02, 0.24), (-0.44, -0.363, 0.27), color=DARK, rough=0.9))
+    # exhaust + heat shield
+    p.append(vcyl(0.22, 0.035, (-0.30, -0.24, 0.55), color=(0.18, 0.18, 0.19), metal=0.6))
+    p.append(vcyl(0.03, 0.05, (-0.30, -0.24, 0.67), color=(0.12, 0.12, 0.13), metal=0.6))
+    p.append(vcyl(0.10, 0.05, (-0.30, -0.24, 0.49), color=CHROME, metal=0.9, rough=0.35))
+    # tanks
+    p.append(vcyl(0.30, 0.10, (-0.08, -0.28, 0.28), color=GREY, rough=0.6, metal=0.7))
+    p.append(vcyl(0.03, 0.04, (-0.08, -0.28, 0.44), color=CHROME, metal=0.9))
+    p.append(box((0.26, 0.16, 0.22), (0.18, -0.28, 0.21), color=YEL_D, rough=0.7))
+    p.append(vcyl(0.03, 0.035, (0.18, -0.28, 0.334), color=CHROME, metal=0.9))
+    # toolbox
+    p.append(box((0.20, 0.14, 0.12), (-0.02, -0.30, 0.16), color=(0.20, 0.21, 0.23), metal=0.4))
+    # counterweight + hazard stripes + tow hook
+    p.append(box((0.22, 0.755, 0.38), (-0.66, 0, 0.21), color=YEL_D, rough=0.75, metal=0.3))
+    p.append(ycyl(0.78, 0.19, (-0.76, 0, 0.20), YEL_D, 20, rough=0.75))
+    for i in range(6):
+        p.append(box((0.02, 0.09, 0.05), (-0.775, -0.32 + i * 0.13, 0.03),
+                     color=CHAR if i % 2 else (0.95, 0.8, 0.05), rough=0.8))
+    p.append(box((0.08, 0.10, 0.06), (-0.80, 0, 0.10), color=DARK, metal=0.6))
+    # handrails
+    p.append(strut((0.36, 0.40, 0.10), (0.36, 0.40, 0.36), 0.013, CHROME, metal=0.9, rough=0.3))
+    p.append(strut((0.36, 0.40, 0.36), (0.10, 0.44, 0.36), 0.013, CHROME, metal=0.9, rough=0.3))
+    p.append(strut((-0.62, 0.36, 0.10), (-0.62, 0.36, 0.30), 0.013, CHROME, metal=0.9, rough=0.3))
+    p.append(box((0.18, 0.14, 0.03), (0.30, 0.46, 0.06), color=(0.22, 0.23, 0.25), rough=0.9))
+    p.append(box((0.18, 0.14, 0.03), (0.30, 0.46, -0.06), color=(0.22, 0.23, 0.25), rough=0.9))
+    p += cab()
+    # bolt heads round the deck edge
+    for i in range(12):
+        p.append(vcyl(0.014, 0.011, (-0.60 + i * 0.105, 0.375, 0.10), (0.34, 0.35, 0.37),
+                      6, metal=0.8))
+        p.append(vcyl(0.014, 0.011, (-0.60 + i * 0.105, -0.375, 0.10), (0.34, 0.35, 0.37),
+                      6, metal=0.8))
+    # rivet rows on the counterweight face
+    for i in range(8):
+        for dz in (0.08, 0.32):
+            p.append(xcyl(0.014, 0.009, (-0.782, -0.31 + i * 0.089, dz), (0.72, 0.53, 0.05),
+                          6, metal=0.7))
+    # extra grille slats and a hatch handle
+    for i in range(6):
+        p.append(box((0.010, 0.40, 0.016), (-0.582, 0.20, 0.17 + i * 0.036),
+                     color=DARK, rough=0.9))
+    p.append(strut((-0.20, 0.10, 0.455), (-0.20, 0.22, 0.455), 0.010, CHROME, metal=0.9))
+    # tread bars on the steps
+    for i in range(3):
+        p.append(box((0.02, 0.13, 0.012), (0.245 + i * 0.05, 0.46, 0.077),
+                     color=(0.35, 0.36, 0.38), metal=0.7))
+        p.append(box((0.02, 0.13, 0.012), (0.245 + i * 0.05, 0.46, -0.043),
+                     color=(0.35, 0.36, 0.38), metal=0.7))
+    # handrail stanchions
+    for hx in (0.36, 0.20, 0.04):
+        p.append(vcyl(0.05, 0.010, (hx, 0.42, 0.13), (0.45, 0.46, 0.48), 6, metal=0.8))
+    # exhaust clamp rings
+    for dz in (0.48, 0.60):
+        p.append(vcyl(0.018, 0.045, (-0.30, -0.24, dz), (0.30, 0.31, 0.33), 10, metal=0.8))
+    # battery box, air filter canister, hose reel
+    p.append(box((0.16, 0.13, 0.11), (-0.50, -0.26, 0.155), color=(0.16, 0.17, 0.19), metal=0.4))
+    p.append(box((0.17, 0.14, 0.012), (-0.50, -0.26, 0.216), color=(0.35, 0.36, 0.38), metal=0.6))
+    p.append(xcyl(0.20, 0.055, (-0.30, 0.24, 0.50), (0.55, 0.56, 0.58), 16, metal=0.6))
+    p.append(xcyl(0.03, 0.06, (-0.42, 0.24, 0.50), (0.30, 0.31, 0.33), 16))
+    p.append(vcyl(0.05, 0.07, (0.04, -0.30, 0.245), color=(0.20, 0.21, 0.23), sub=16, metal=0.5))
+    # counterweight bolt heads
+    for dy in (-0.24, -0.08, 0.08, 0.24):
+        p.append(xcyl(0.02, 0.018, (-0.775, dy, 0.30), CHROME, 8, metal=0.9))
+    # boom bracket + pin
+    for dy in (0.12, -0.12):
+        p.append(box((0.22, 0.06, 0.28), (0.28, dy, 0.13), color=(0.22, 0.23, 0.25), metal=0.5))
+    p.append(ycyl(0.32, 0.055, (0.30, 0, 0.16), CHROME, 20, metal=0.9, rough=0.3))
+    # boom lift rams, angled up towards the boom
+    for dy in (0.20, -0.20):
+        p.append(strut((0.02, dy, 0.14), (0.30, dy, 0.34), 0.05, GREY, 16, metal=0.8, rough=0.5))
+        p.append(strut((0.28, dy, 0.33), (0.46, dy, 0.46), 0.026, CHROME, 16, metal=1, rough=0.25))
+    return p
+
+
+def boom():
+    p = []
+    p.append(box((0.35, 0.16, 0.13), (0.16, 0, 0.05), (0, 1, 0, -0.303), YEL, rough=0.7, metal=0.3))
+    p.append(box((0.33, 0.15, 0.12), (0.47, 0, 0.05), (0, 1, 0, 0.3217), YEL, rough=0.7, metal=0.3))
+    # gusset plates along the bend
+    for dy in (0.083, -0.083):
+        p.append(box((0.14, 0.012, 0.15), (0.32, dy, 0.10), color=YEL_D, rough=0.75))
+    p.append(box((0.10, 0.17, 0.02), (0.32, 0, 0.135), color=YEL_D, rough=0.75))
+    # pivot ears + pins
+    p.append(ycyl(0.19, 0.065, (0, 0, 0), GREY, 20, metal=0.8, rough=0.6))
+    p.append(ycyl(0.22, 0.032, (0, 0, 0), CHROME, 16, metal=0.9, rough=0.3))
+    p.append(ycyl(0.16, 0.055, (0.62, 0, 0), GREY, 20, metal=0.8, rough=0.6))
+    p.append(ycyl(0.19, 0.028, (0.62, 0, 0), CHROME, 16, metal=0.9, rough=0.3))
+    # stick ram on top
+    p.append(strut((0.26, 0, 0.18), (0.50, 0, 0.14), 0.05, GREY, 16, metal=0.8, rough=0.5))
+    p.append(strut((0.48, 0, 0.145), (0.66, 0, 0.10), 0.026, CHROME, 16, metal=1, rough=0.25))
+    # hydraulic hoses
+    for dy in (0.086, -0.086):
+        p.append(strut((0.03, dy, -0.03), (0.30, dy, 0.03), 0.014, CHAR, 8, rough=0.9))
+        p.append(strut((0.30, dy, 0.03), (0.60, dy, -0.02), 0.014, CHAR, 8, rough=0.9))
+    p.append(strut((0.05, 0.05, -0.05), (0.34, 0.05, 0.00), 0.011, (0.35, 0.12, 0.10), 8))
+    p.append(strut((0.05, -0.05, -0.05), (0.34, -0.05, 0.00), 0.011, (0.35, 0.12, 0.10), 8))
+    # boom work light + lifting eye
+    p.append(box((0.05, 0.06, 0.05), (0.30, 0.10, 0.17), color=DARK))
+    p.append(box((0.012, 0.05, 0.04), (0.327, 0.10, 0.17), color=(1, 0.97, 0.85),
+                 rough=0.1, emis=(1, 0.93, 0.7)))
+    p.append(box((0.05, 0.015, 0.06), (0.20, 0, 0.155), color=CHROME, metal=0.9))
+    # grease nipples at the pivots, hose clamps, and a hazard stripe decal
+    for x in (0.0, 0.62):
+        for sy in (0.10, -0.10):
+            p.append(ycyl(0.02, 0.010, (x, sy, 0.0), CHROME, 6, metal=0.9))
+    for x in (0.16, 0.34, 0.52):
+        p.append(box((0.018, 0.20, 0.018), (x, 0, -0.035), color=(0.30, 0.31, 0.33), metal=0.6))
+    for i in range(4):
+        p.append(box((0.045, 0.012, 0.055), (0.10 + i * 0.05, 0.081, 0.06),
+                     color=CHAR if i % 2 else (0.95, 0.80, 0.05), rough=0.8))
+    # bolts through the gusset plates
+    for dy in (0.090, -0.090):
+        for k in range(3):
+            p.append(ycyl(0.016, 0.009, (0.27 + k * 0.05, dy, 0.10), CHROME, 6, metal=0.9))
+    # pin retainer plates and their bolts
+    for x in (0.0, 0.62):
+        for dy in (0.100, -0.100):
+            p.append(ycyl(0.012, 0.030, (x, dy, 0), (0.30, 0.31, 0.33), 10, metal=0.8))
+            p.append(ycyl(0.018, 0.008, (x, dy, 0.038), CHROME, 6, metal=0.9))
+    # ram gland nuts and hose fittings
+    for dy in (0.10, -0.10):
+        p.append(xcyl(0.022, 0.050, (0.345, dy, 0.135), (0.35, 0.36, 0.38), 10, metal=0.8))
+        p.append(xcyl(0.018, 0.020, (0.05, dy, 0.14), (0.42, 0.43, 0.45), 8, metal=0.8))
+    p.append(xcyl(0.024, 0.055, (0.575, 0, 0.157), (0.35, 0.36, 0.38), 10, metal=0.8))
+    # weld bead strips along the bend
+    for dy in (0.081, -0.081):
+        p.append(box((0.12, 0.014, 0.014), (0.32, dy, 0.017), (0, 1, 0, 0.3),
+                     color=(0.72, 0.54, 0.06), rough=0.9))
+    return p
+
+
+def stick():
+    p = []
+    p.append(box((0.40, 0.14, 0.16), (0.19, 0, 0.01), color=YEL, rough=0.7, metal=0.3))
+    p.append(box((0.18, 0.10, 0.11), (0.46, 0, 0), color=YEL_D, rough=0.7, metal=0.3))
+    for dy in (0.074, -0.074):
+        p.append(box((0.34, 0.012, 0.13), (0.22, dy, 0.02), color=YEL_D, rough=0.75))
+    p.append(ycyl(0.15, 0.055, (0, 0, 0), GREY, 20, metal=0.8, rough=0.6))
+    p.append(ycyl(0.18, 0.028, (0, 0, 0), CHROME, 16, metal=0.9, rough=0.3))
+    p.append(ycyl(0.13, 0.045, (0.52, 0, 0), GREY, 20, metal=0.8, rough=0.6))
+    p.append(ycyl(0.16, 0.024, (0.52, 0, 0), CHROME, 16, metal=0.9, rough=0.3))
+    # grapple ram + H-link
+    p.append(strut((0.06, 0, 0.13), (0.30, 0, 0.11), 0.04, GREY, 16, metal=0.8, rough=0.5))
+    p.append(strut((0.28, 0, 0.115), (0.44, 0, 0.08), 0.022, CHROME, 16, metal=1, rough=0.25))
+    for dy in (0.055, -0.055):
+        p.append(strut((0.44, dy, 0.08), (0.52, dy, 0.01), 0.016, GREY, 10, metal=0.7))
+        p.append(strut((0.10, dy, -0.06), (0.48, dy, -0.03), 0.012, CHAR, 8, rough=0.9))
+    p.append(box((0.20, 0.15, 0.012), (0.24, 0, -0.078), color=(0.30, 0.31, 0.33), metal=0.6))
+    # wear pads, hose clamps, grease nipples, maker's plate
+    for x in (0.14, 0.32):
+        p.append(box((0.016, 0.16, 0.016), (x, 0, -0.072), color=(0.35, 0.36, 0.38), metal=0.6))
+    for sy in (0.078, -0.078):
+        p.append(ycyl(0.018, 0.009, (0.52, sy, 0), CHROME, 6, metal=0.9))
+        p.append(ycyl(0.018, 0.009, (0, sy, 0), CHROME, 6, metal=0.9))
+    p.append(box((0.07, 0.012, 0.04), (0.20, 0.072, 0.06), color=(0.72, 0.73, 0.75), metal=0.8))
+    # gusset bolts
+    for dy in (0.081, -0.081):
+        for k in range(3):
+            p.append(ycyl(0.016, 0.008, (0.10 + k * 0.10, dy, 0.02), CHROME, 6, metal=0.9))
+    # pin retainers
+    for x in (0.0, 0.52):
+        for dy in (0.082, -0.082):
+            p.append(ycyl(0.010, 0.026, (x, dy, 0), (0.30, 0.31, 0.33), 10, metal=0.8))
+    # ram gland nut, hose fittings, wear strip bolts
+    p.append(xcyl(0.020, 0.042, (0.305, 0, 0.112), (0.35, 0.36, 0.38), 10, metal=0.8))
+    for dy in (0.075, -0.075):
+        p.append(xcyl(0.016, 0.017, (0.09, dy, -0.058), (0.42, 0.43, 0.45), 8, metal=0.8))
+        p.append(box((0.014, 0.014, 0.030), (0.24, dy * 0.75, -0.082),
+                     color=CHROME, metal=0.9))
+    return p
+
+
+def jaw(side):
+    """One grapple jaw. side = +1 or -1 (which side of the grapple it hangs on)."""
+    p = []
+    p.append(box((0.04, 0.22, 0.15), (0, 0, -0.075), color=ORANGE, rough=0.65, metal=0.4))
+    p.append(box((0.04, 0.22, 0.14), (-0.014 * side, 0, -0.21), (0, 1, 0, 0.14 * side),
+                 color=(0.80, 0.33, 0.05), rough=0.65, metal=0.4))
+    for dy in (-0.075, 0, 0.075):
+        p.append(box((0.03, 0.035, 0.06), (-0.032 * side, dy, -0.276),
+                     color=(0.50, 0.51, 0.53), rough=0.4, metal=0.9))
+    for dy in (0.106, -0.106):
+        p.append(box((0.035, 0.012, 0.13), (-0.006 * side, dy, -0.10),
+                     color=(0.72, 0.30, 0.05), rough=0.7))
+    p.append(strut((0, -0.10, -0.15), (0, 0.10, -0.15), 0.012, GREY, 10, metal=0.7))
+    # bolts holding each tooth on, plus hinge pin caps
+    for dy in (-0.075, 0, 0.075):
+        p.append(xcyl(0.012, 0.007, (-0.048 * side, dy, -0.252), CHROME, 6, metal=0.9))
+    for dy in (0.108, -0.108):
+        p.append(ycyl(0.010, 0.020, (0, dy, 0), (0.30, 0.31, 0.33), 8, metal=0.8))
+    p.append(box((0.030, 0.20, 0.012), (-0.004 * side, 0, -0.132),
+                 color=(0.62, 0.24, 0.03), rough=0.7))
+    return p
+
+
+
+def tine(phi):
+    """One grapple tine. Authored pointing along +x, then rotated to azimuth phi."""
+    s = []
+    s.append(box((0.05, 0.055, 0.15), (0, 0, -0.075), color=ORANGE, rough=0.65, metal=0.4))
+    s.append(box((0.014, 0.062, 0.12), (0.031, 0, -0.075),
+                 color=(0.72, 0.28, 0.04), rough=0.7))
+    s.append(pose(shape("Box {\n  size 0.045 0.050 0.135\n}",
+                        (0.80, 0.33, 0.05), 0.65, 0.4),
+                  (-0.020, 0, -0.198), (0, 1, 0, 0.24)))
+    for dy in (-0.014, 0.014):
+        s.append(box((0.030, 0.022, 0.055), (-0.046, dy, -0.262),
+                     color=(0.50, 0.51, 0.53), rough=0.4, metal=0.9))
+        s.append(xcyl(0.012, 0.006, (-0.030, dy, -0.238), CHROME, 6, metal=0.9))
+    s.append(ycyl(0.062, 0.021, (0, 0, 0), (0.30, 0.31, 0.33), 10, metal=0.8))
+    for dy in (0.032, -0.032):
+        s.append(ycyl(0.010, 0.026, (0, dy, 0), (0.42, 0.43, 0.45), 8, metal=0.8))
+    return [pose(s, (0, 0, 0), (0, 0, 1, phi))]
+
+
+def grapple_visuals():
+    """The rotating grapple head the tines hang from."""
+    p = []
+    p.append(vcyl(0.06, 0.075, (0, 0, 0.01), color=(0.35, 0.36, 0.38), sub=20, metal=0.85))
+    p.append(vcyl(0.05, 0.095, (0, 0, -0.035), color=ORANGE, sub=20, rough=0.65, metal=0.4))
+    p.append(vcyl(0.045, 0.115, (0, 0, -0.075), color=ORANGE, sub=20, rough=0.65, metal=0.4))
+    p.append(vcyl(0.03, 0.060, (0, 0, -0.105), color=(0.35, 0.36, 0.38), sub=16, metal=0.8))
+    for i in range(10):
+        a = i * math.pi / 5
+        p.append(vcyl(0.018, 0.009, (0.093 * math.cos(a), 0.093 * math.sin(a), -0.008),
+                      color=CHROME, sub=6, metal=0.9, rough=0.3))
+    # a ram and a hose per tine, angled out to the tine it drives
+    for k in range(5):
+        a = k * 2 * math.pi / 5
+        c, s2 = math.cos(a), math.sin(a)
+        p.append(strut((0.035 * c, 0.035 * s2, -0.020),
+                       (0.080 * c, 0.080 * s2, -0.072), 0.020, GREY, 10, metal=0.8))
+        p.append(strut((0.075 * c, 0.075 * s2, -0.068),
+                       (0.104 * c, 0.104 * s2, -0.100), 0.011, CHROME, 8, metal=1, rough=0.25))
+        p.append(strut((0.030 * c, 0.030 * s2, 0.030),
+                       (0.068 * c, 0.068 * s2, -0.030), 0.008, CHAR, 6, rough=0.9))
+    return p
+
+
+def excavator():
+    tines = ""
+    for k in range(5):
+        phi = k * 2 * math.pi / 5
+        cx, cy = 0.105 * math.cos(phi), 0.105 * math.sin(phi)
+        ax, ay = -math.sin(phi), math.cos(phi)
+        tines += """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis %.6f %.6f 0
+    anchor %.4f %.4f -0.08
+  }
+  device [
+    RotationalMotor {
+      name "tine_%d_motor"
+      maxVelocity 1.6
+      maxTorque 120
+    }
+    PositionSensor {
+      name "tine_%d_sensor"
+    }
+  ]
+  endPoint Solid {
+    translation %.4f %.4f -0.08
+    children [
+%s
+    ]
+    name "tine_%d"
+    boundingObject Pose {
+      translation 0 0 -0.045
+      children [
+        Box {
+          size 0.05 0.055 0.05
+        }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass 1.2
+    }
+  }
+}""" % (ax, ay, cx, cy, k, k, cx, cy,
+        "\n".join(indent(c, 6) for c in tine(phi)), k)
+
+    # the grapple head, hanging from the rotator
+    grapple_head = """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis 0 0 1
+    anchor 0 0 -0.07
+  }
+  device [
+    RotationalMotor {
+      name "rotator_motor"
+      maxVelocity 1.2
+      maxTorque 300
+    }
+    PositionSensor {
+      name "rotator_sensor"
+    }
+  ]
+  endPoint DEF GRAPPLE Solid {
+    translation 0 0 -0.07
+    children [
+%s
+%s
+    ]
+    name "grapple"
+    boundingObject Pose {
+      translation 0 0 -0.05
+      children [
+        Box {
+          size 0.23 0.23 0.16
+        }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass 12
+      damping Damping {
+        linear 0.3
+        angular 0.3
+      }
+    }
+  }
+}""" % ("\n".join(indent(c, 6) for c in grapple_visuals()), indent(tines, 6))
+
+    # the wrist keeps the whole head plumb; the rotator spins it about vertical
+    wrist_head = [
+        vcyl(0.10, 0.075, (0, 0, -0.02), color=GREY, sub=20, metal=0.85, rough=0.5),
+        box((0.17, 0.19, 0.08), (0, 0, 0.01), color=ORANGE, rough=0.65, metal=0.4),
+        vcyl(0.035, 0.085, (0, 0, -0.055), color=(0.30, 0.31, 0.33), sub=20, metal=0.85),
+        ycyl(0.20, 0.028, (0, 0, 0.03), CHROME, 12, metal=0.9, rough=0.3),
+    ]
+    for i in range(8):
+        a = i * math.pi / 4
+        wrist_head.append(vcyl(0.014, 0.008,
+                               (0.062 * math.cos(a), 0.062 * math.sin(a), -0.072),
+                               color=CHROME, sub=6, metal=0.9, rough=0.3))
+
+    grapple = """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis 0 1 0
+    anchor 0.52 0 0
+  }
+  device [
+    RotationalMotor {
+      name "wrist_motor"
+      maxVelocity 1.0
+      maxTorque 600
+    }
+    PositionSensor {
+      name "wrist_sensor"
+    }
+  ]
+  endPoint Solid {
+    translation 0.52 0 0
+    children [
+%s
+%s
+    ]
+    name "wrist_head"
+    boundingObject Pose {
+      translation 0 0 -0.02
+      children [
+        Box {
+          size 0.17 0.19 0.14
+        }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass 8
+      damping Damping {
+        linear 0.3
+        angular 0.3
+      }
+    }
+  }
+}""" % ("\n".join(indent(c, 6) for c in wrist_head), indent(grapple_head, 6))
+
+    stick_j = """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis 0 1 0
+    anchor 0.62 0 0
+  }
+  device [
+    RotationalMotor {
+      name "stick_motor"
+      maxVelocity 0.7
+      maxTorque 1800
+    }
+    PositionSensor {
+      name "stick_sensor"
+    }
+  ]
+  endPoint Solid {
+    translation 0.62 0 0
+    children [
+%s
+%s
+    ]
+    name "stick"
+    boundingObject Pose {
+      translation 0.26 0 0.01
+      children [
+        Box {
+          size 0.52 0.14 0.16
+        }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass 30
+      damping Damping {
+        linear 0.3
+        angular 0.3
+      }
+    }
+  }
+}""" % ("\n".join(indent(c, 6) for c in stick()), indent(grapple, 6))
+
+    boom_j = """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis 0 1 0
+    anchor 0.3 0 0.16
+  }
+  device [
+    RotationalMotor {
+      name "boom_motor"
+      maxVelocity 0.6
+      maxTorque 3000
+    }
+    PositionSensor {
+      name "boom_sensor"
+    }
+  ]
+  endPoint Solid {
+    translation 0.3 0 0.16
+    children [
+%s
+%s
+    ]
+    name "boom"
+    boundingObject Pose {
+      translation 0.31 0 0.05
+      children [
+        Box {
+          size 0.62 0.16 0.16
+        }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass 60
+      damping Damping {
+        linear 0.3
+        angular 0.3
+      }
+    }
+  }
+}""" % ("\n".join(indent(c, 6) for c in boom()), indent(stick_j, 6))
+
+    cams = """
+Pose {
+  translation 0.36 0.26 0.3
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.12 0.12 0.13
+        roughness 0.5
+        metalness 0.3
+      }
+      geometry Box {
+        size 0.05 0.07 0.05
+      }
+    }
+  ]
+}
+Camera {
+  translation 0.39 0.26 0.3
+  name "camera_front_left"
+  fieldOfView 1.1
+  width 160
+  height 120
+}
+Pose {
+  translation 0.3 -0.24 0.24
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.12 0.12 0.13
+        roughness 0.5
+        metalness 0.3
+      }
+      geometry Box {
+        size 0.05 0.07 0.05
+      }
+    }
+  ]
+}
+Camera {
+  translation 0.33 -0.24 0.24
+  name "camera_front_right"
+  fieldOfView 1.1
+  width 160
+  height 120
+}
+Pose {
+  translation -0.93 0 0.3
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.12 0.12 0.13
+        roughness 0.5
+        metalness 0.3
+      }
+      geometry Box {
+        size 0.05 0.07 0.05
+      }
+    }
+  ]
+}
+Camera {
+  translation -0.96 0 0.3
+  rotation 0 0 1 3.141593
+  name "camera_rear"
+  fieldOfView 1.2
+  width 160
+  height 120
+}"""
+
+    house_j = """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis 0 0 1
+    anchor 0 0 0.34
+  }
+  device [
+    RotationalMotor {
+      name "slew_motor"
+      maxVelocity 0.7
+      maxTorque 4000
+    }
+    PositionSensor {
+      name "slew_sensor"
+    }
+  ]
+  endPoint Solid {
+    translation 0 0 0.34
+    children [
+%s
+%s
+%s
+    ]
+    name "house"
+    boundingObject Pose {
+      translation -0.1 0 0.2
+      children [
+        Box {
+          size 1.3 0.78 0.5
+        }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass 300
+      damping Damping {
+        linear 0.4
+        angular 0.4
+      }
+    }
+  }
+}""" % ("\n".join(indent(c, 6) for c in house()), indent(cams, 6), indent(boom_j, 6))
+
+
+    # ---- driven wheels, hidden inside the track shells ----
+    wheels = ""
+    for nm, wx, wy in (("fl", 0.36, 0.30), ("fr", 0.36, -0.30),
+                       ("rl", -0.36, 0.30), ("rr", -0.36, -0.30)):
+        wheels += """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis 0 1 0
+    anchor %.3f %.3f 0.13
+  }
+  device [
+    RotationalMotor {
+      name "wheel_%s_motor"
+      maxVelocity 14
+      maxTorque 2000
+    }
+    PositionSensor {
+      name "wheel_%s_sensor"
+    }
+  ]
+  endPoint Solid {
+    translation %.3f %.3f 0.13
+    rotation 1 0 0 1.5708
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.14 0.14 0.15
+          roughness 1
+          metalness 0.2
+        }
+        geometry Cylinder {
+          height 0.15
+          radius 0.13
+          subdivision 16
+        }
+      }
+    ]
+    name "wheel_%s"
+    boundingObject Cylinder {
+      height 0.15
+      radius 0.13
+      subdivision 16
+    }
+    physics Physics {
+      density -1
+      mass 18
+    }
+  }
+}""" % (wx, wy, nm, nm, wx, wy, nm)
+
+    return """DEF EXCAVATOR Robot {
+  translation 0 0 0
+  children [
+%s
+%s
+%s
+  ]
+  name "excavator"
+  boundingObject Group {
+    children [
+      Pose {
+        translation 0 0.3 0.20
+        children [
+          Box {
+            size 1.16 0.24 0.20
+          }
+        ]
+      }
+      Pose {
+        translation 0 -0.3 0.20
+        children [
+          Box {
+            size 1.16 0.24 0.20
+          }
+        ]
+      }
+      Pose {
+        translation 0 0 0.25
+        children [
+          Box {
+            size 0.72 0.46 0.18
+          }
+        ]
+      }
+    ]
+  }
+  physics Physics {
+    density -1
+    mass 650
+    centerOfMass [
+      -0.04 0 0.12
+    ]
+  }
+  controller "excavator_controller"
+  supervisor TRUE
+}""" % ("\n".join(indent(c, 4) for c in undercarriage()), indent(wheels, 4),
+        indent(house_j, 4))
+
+
+
+# ======================================================================
+#  Background structures. Deliberately built from a few large forms
+#  rather than lattice-work: at this distance only the silhouette reads,
+#  and struts cost draw calls the graphics card cannot spare.
+# ======================================================================
+def skyline(t, size, h, yaw=0.0):
+    p = [box((size[0], size[1], h), (0, 0, h / 2), color=(0.60, 0.59, 0.58), rough=1)]
+    for f in range(1, int(h / 1.6)):
+        p.append(box((size[0] + 0.08, size[1] + 0.08, 0.10), (0, 0, f * 1.6),
+                     color=(0.50, 0.49, 0.48), rough=1))
+    for f in range(int(h / 1.6)):
+        p.append(box((size[0] + 0.06, size[1] * 0.55, 0.55), (0, 0, f * 1.6 + 0.85),
+                     color=(0.28, 0.32, 0.38), rough=0.4))
+    return group(p, t, yaw)
+
+
+def crane(t, yaw=0.0):
+    H, JIB = 11.0, 8.5
+    p = [box((0.55, 0.55, H), (0, 0, H / 2), color=YEL, rough=0.7, metal=0.4),
+         box((0.75, 0.75, 0.25), (0, 0, 0.12), color=(0.55, 0.55, 0.56), rough=1)]
+    for i in range(6):
+        p.append(box((0.62, 0.62, 0.10), (0, 0, 0.9 + i * 1.75), color=YEL_D, rough=0.7))
+    p.append(box((0.95, 0.95, 0.70), (0, 0, H + 0.35), color=YEL, rough=0.7, metal=0.4))
+    p.append(box((0.60, 0.66, 0.55), (0.72, 0, H + 0.75), color=(0.25, 0.28, 0.33)))
+    p.append(box((JIB, 0.42, 0.42), (JIB / 2 - 0.4, 0, H + 0.9), color=YEL, rough=0.7, metal=0.4))
+    p.append(box((3.0, 0.40, 0.40), (-1.9, 0, H + 0.9), color=YEL, rough=0.7, metal=0.4))
+    p.append(box((0.9, 0.55, 0.45), (-3.1, 0, H + 0.9), color=(0.38, 0.39, 0.41)))
+    p.append(box((0.35, 0.35, 1.7), (0, 0, H + 1.6), color=YEL_D, rough=0.7))
+    p.append(strut((0, 0, H + 2.4), (JIB - 0.6, 0, H + 1.05), 0.035, (0.35, 0.36, 0.38), 6))
+    p.append(strut((0, 0, H + 2.4), (-3.0, 0, H + 1.05), 0.035, (0.35, 0.36, 0.38), 6))
+    p.append(box((0.45, 0.45, 0.30), (5.4, 0, H + 0.65), color=(0.35, 0.36, 0.38)))
+    p.append(strut((5.4, 0, H + 0.55), (5.4, 0, H - 3.2), 0.022, (0.30, 0.31, 0.33), 6))
+    p.append(box((0.55, 0.55, 0.45), (5.4, 0, H - 3.45), color=(0.85, 0.62, 0.08)))
+    return group(p, t, yaw)
+
+
+def frame_building(t, yaw=0.0):
+    p = []
+    for i in range(3):
+        for j in range(3):
+            p.append(box((0.30, 0.30, 6.4), (i * 2.6, j * 2.6, 3.2),
+                         color=(0.68, 0.67, 0.65), rough=1))
+    for f in range(1, 4):
+        p.append(box((5.7, 5.7, 0.22), (2.6, 2.6, f * 2.1), color=(0.72, 0.71, 0.69), rough=1))
+    p.append(box((5.7, 0.22, 1.5), (2.6, 5.3, 3.2), color=(0.66, 0.65, 0.63), rough=1))
+    p.append(box((0.22, 5.7, 1.5), (5.3, 2.6, 5.3), color=(0.66, 0.65, 0.63), rough=1))
+    for k in range(4):
+        p.append(box((0.06, 0.06, 1.1), (0.6 + k * 1.5, 5.3, 6.9),
+                     color=(0.45, 0.35, 0.25), rough=1))
+    return group(p, t, yaw)
+
+
+def scaffold_wall(t, yaw=0.0):
+    p = []
+    for i in range(5):
+        p.append(strut((i * 1.3, 0, 0), (i * 1.3, 0, 6.2), 0.05, (0.62, 0.64, 0.66), 6))
+        p.append(strut((i * 1.3, 0.9, 0), (i * 1.3, 0.9, 6.2), 0.05, (0.62, 0.64, 0.66), 6))
+    for lv in range(1, 4):
+        z = lv * 2.0
+        p.append(strut((0, 0, z), (5.2, 0, z), 0.045, (0.62, 0.64, 0.66), 6))
+        p.append(strut((0, 0.9, z), (5.2, 0.9, z), 0.045, (0.62, 0.64, 0.66), 6))
+        p.append(box((5.2, 0.85, 0.05), (2.6, 0.45, z + 0.04), color=(0.55, 0.42, 0.26), rough=1))
+        p.append(box((5.2, 0.05, 0.35), (2.6, 0.0, z + 0.35), color=(0.55, 0.42, 0.26), rough=1))
+    p.append(box((5.4, 0.06, 6.0), (2.6, 0.95, 3.1), color=(0.55, 0.58, 0.55),
+                 rough=0.95, transp=0.55))
+    return group(p, t, yaw)
+
+
+def silo2(t):
+    p = [vcyl(3.0, 0.75, (0, 0, 3.3), color=(0.82, 0.83, 0.84), sub=16, rough=0.7, metal=0.5),
+         ucone(0.8, 0.75, (0, 0, 4.8), color=(0.75, 0.76, 0.78), sub=16, rough=0.7, metal=0.5),
+         cone(1.0, 0.75, (0, 0, 1.3), (1, 0, 0, 3.141593), (0.78, 0.79, 0.80), 16,
+              rough=0.7, metal=0.5),
+         vcyl(0.30, 0.16, (0, 0, 0.75), color=(0.45, 0.46, 0.48), sub=12, metal=0.6)]
+    for i in range(4):
+        a = math.pi / 4 + i * math.pi / 2
+        p.append(strut((1.0 * math.cos(a), 1.0 * math.sin(a), 0),
+                       (0.55 * math.cos(a), 0.55 * math.sin(a), 1.9), 0.07,
+                       (0.55, 0.56, 0.58), 8, metal=0.6))
+    return group(p, t)
+
+# ======================================================================
+#  SCENERY
+# ======================================================================
+def traffic_cone(t):
+    """A proper traffic cone: black base, orange body, white reflective band.
+
+    The band is made by stacking three cones, each slightly wider than the one
+    it covers, so the white ring follows the taper instead of being a collar
+    stuck around it.
+    """
+    ORG = (0.93, 0.30, 0.03)
+    S = 0.55        # the machine is ~1:2.5 scale, so cones scale to match it
+    return group([
+        box((0.34 * S, 0.34 * S, 0.025 * S), (0, 0, 0.0125 * S),
+            color=(0.11, 0.11, 0.12), rough=0.9),
+        ucone(0.55 * S, 0.150 * S, (0, 0, 0.025 * S), color=ORG, rough=0.55, sub=20),
+        ucone(0.365 * S, 0.105 * S, (0, 0, 0.210 * S), color=(0.96, 0.96, 0.94),
+              rough=0.35, sub=20),
+        ucone(0.250 * S, 0.076 * S, (0, 0, 0.330 * S), color=ORG, rough=0.55, sub=20),
+    ], t)
+
+
+def barrier(t, yaw=0.0):
+    return group([box((1.6, 0.42, 0.16), (0, 0, 0.08), color=CONC, rough=0.95),
+                  box((1.6, 0.24, 0.24), (0, 0, 0.30), color=(0.70, 0.69, 0.66), rough=0.95),
+                  box((1.62, 0.30, 0.06), (0, 0, 0.45), color=(0.62, 0.61, 0.58), rough=0.95),
+                  box((0.30, 0.26, 0.10), (0.45, 0, 0.30), color=(0.95, 0.5, 0.05), rough=0.9),
+                  box((0.30, 0.26, 0.10), (-0.45, 0, 0.30), color=(0.95, 0.5, 0.05), rough=0.9)],
+                 t, yaw)
+
+
+def drum(t, color=(0.20, 0.45, 0.25)):
+    return group([vcyl(0.58, 0.17, (0, 0, 0.29), color=color, sub=20, rough=0.6, metal=0.4),
+                  vcyl(0.04, 0.18, (0, 0, 0.16), color=color, sub=20, metal=0.5),
+                  vcyl(0.04, 0.18, (0, 0, 0.42), color=color, sub=20, metal=0.5),
+                  vcyl(0.02, 0.16, (0, 0, 0.585), color=(0.35, 0.36, 0.38), sub=20, metal=0.6)], t)
+
+
+def dump_truck(t, yaw=0.0):
+    p = []
+    p.append(box((5.2, 2.2, 0.35), (0, 0, 0.95), color=(0.25, 0.26, 0.28), metal=0.5))
+    p.append(box((1.9, 2.3, 1.5), (1.7, 0, 1.75), color=(0.85, 0.25, 0.10), rough=0.6, metal=0.4))
+    p.append(box((0.08, 1.9, 0.75), (2.62, 0, 2.05), color=GLASS, rough=0.15))
+    p.append(box((3.2, 2.4, 1.1), (-1.1, 0, 1.7), color=(0.85, 0.25, 0.10), rough=0.6, metal=0.4))
+    p.append(box((3.2, 2.5, 0.12), (-1.1, 0, 1.2), color=(0.35, 0.30, 0.26), rough=0.9))
+    p.append(box((0.12, 2.4, 1.1), (-2.7, 0, 1.75), color=(0.75, 0.22, 0.09), rough=0.6))
+    p.append(cone(0.55, 0.95, (-1.1, 0, 1.78), color=(0.42, 0.34, 0.25)))
+    for x in (1.7, -0.6, -1.7):
+        for sy in (1, -1):
+            p.append(ycyl(0.42, 0.55, (x, 1.05 * sy, 0.55), color=(0.09, 0.09, 0.10), sub=24, rough=1))
+            p.append(ycyl(0.44, 0.24, (x, 1.05 * sy, 0.55), color=(0.55, 0.56, 0.58), sub=20, metal=0.7))
+    p.append(box((0.3, 0.3, 0.5), (2.4, 1.05, 2.7), color=(0.30, 0.31, 0.33)))
+    return group(p, t, yaw)
+
+
+def silo(t):
+    p = [vcyl(3.2, 1.05, (0, 0, 3.4), color=(0.82, 0.83, 0.84), sub=24, rough=0.7, metal=0.5),
+         cone(1.1, 1.05, (0, 0, 4.0), color=(0.75, 0.76, 0.78), rough=0.7, metal=0.5),
+         cone(1.3, 1.05, (0, 0, 1.8), rot=(1, 0, 0, -1.5708), color=(0.78, 0.79, 0.80),
+              rough=0.7, metal=0.5)]
+    for i in range(4):
+        a = math.pi / 4 + i * math.pi / 2
+        p.append(strut((1.4 * math.cos(a), 1.4 * math.sin(a), 0),
+                       (0.75 * math.cos(a), 0.75 * math.sin(a), 1.9), 0.09,
+                       (0.55, 0.56, 0.58), 10, metal=0.6))
+    return group(p, t)
+
+
+def scaffold(t, bays=4, levels=3, yaw=0.0):
+    p = []
+    for i in range(bays + 1):
+        x = i * 1.6
+        for dy in (0, 1.2):
+            p.append(strut((x, dy, 0), (x, dy, levels * 1.7), 0.045, (0.60, 0.62, 0.64), 8,
+                           metal=0.7))
+    for lv in range(1, levels + 1):
+        z = lv * 1.7
+        for dy in (0, 1.2):
+            p.append(strut((0, dy, z), (bays * 1.6, dy, z), 0.04, (0.60, 0.62, 0.64), 8, metal=0.7))
+        for i in range(bays + 1):
+            p.append(strut((i * 1.6, 0, z), (i * 1.6, 1.2, z), 0.04, (0.60, 0.62, 0.64), 8,
+                           metal=0.7))
+        for i in range(bays):
+            p.append(strut((i * 1.6, 0, z - 1.7), ((i + 1) * 1.6, 0, z), 0.032,
+                           (0.55, 0.57, 0.59), 8, metal=0.7))
+        p.append(box((bays * 1.6, 1.1, 0.05), (bays * 0.8, 0.6, z + 0.03),
+                     color=(0.55, 0.42, 0.26), rough=1))
+    return group(p, t, yaw)
+
+
+def building_frame(t, nx=4, ny=3, floors=3, yaw=0.0):
+    p = []
+    for i in range(nx):
+        for j in range(ny):
+            p.append(box((0.36, 0.36, floors * 3.2), (i * 3.4, j * 3.4, floors * 1.6),
+                         color=(0.68, 0.67, 0.65), rough=1))
+    for f in range(1, floors + 1):
+        z = f * 3.2
+        p.append(box(((nx - 1) * 3.4 + 0.8, (ny - 1) * 3.4 + 0.8, 0.26),
+                     ((nx - 1) * 1.7, (ny - 1) * 1.7, z), color=(0.72, 0.71, 0.69), rough=1))
+        for i in range(nx):
+            p.append(box((0.26, (ny - 1) * 3.4, 0.5), (i * 3.4, (ny - 1) * 1.7, z - 0.35),
+                         color=(0.64, 0.63, 0.61), rough=1))
+    return group(p, t, yaw)
+
+
+def tower_crane(t, yaw=0.0):
+    p = []
+    H = 24.0
+    for dx, dy in ((-0.7, -0.7), (0.7, -0.7), (0.7, 0.7), (-0.7, 0.7)):
+        p.append(strut((dx, dy, 0), (dx, dy, H), 0.13, YEL, 8, metal=0.5))
+    for i in range(int(H / 2.4)):
+        z = i * 2.4
+        for a, b in (((-0.7, -0.7), (0.7, -0.7)), ((0.7, -0.7), (0.7, 0.7)),
+                     ((0.7, 0.7), (-0.7, 0.7)), ((-0.7, 0.7), (-0.7, -0.7))):
+            p.append(strut((a[0], a[1], z), (b[0], b[1], z), 0.06, YEL_D, 6, metal=0.5))
+            p.append(strut((a[0], a[1], z), (b[0], b[1], z + 2.4), 0.05, YEL_D, 6, metal=0.5))
+    p.append(box((2.2, 2.2, 1.6), (0, 0, H + 0.8), color=YEL, rough=0.7, metal=0.4))
+    p.append(box((1.3, 1.4, 1.3), (1.4, 0, H + 1.6), color=(0.30, 0.31, 0.33)))
+    for dy in (-0.45, 0.45):
+        p.append(strut((-1, dy, H + 1.6), (17, dy, H + 1.6), 0.13, YEL, 8, metal=0.5))
+        p.append(strut((-1, dy, H + 2.6), (-7, dy, H + 2.6), 0.11, YEL, 8, metal=0.5))
+        p.append(strut((-1, dy, H + 1.6), (-7, dy, H + 1.6), 0.11, YEL, 8, metal=0.5))
+    for i in range(0, 17, 2):
+        p.append(strut((i, -0.45, H + 1.6), (i + 2, 0.45, H + 1.6), 0.05, YEL_D, 6, metal=0.5))
+        p.append(strut((i, -0.45, H + 1.6), (i, 0.45, H + 1.6), 0.05, YEL_D, 6, metal=0.5))
+    p.append(strut((0, 0, H + 5.5), (16, 0, H + 1.8), 0.05, (0.35, 0.36, 0.38), 6, metal=0.8))
+    p.append(strut((0, 0, H + 5.5), (-6.5, 0, H + 2.4), 0.05, (0.35, 0.36, 0.38), 6, metal=0.8))
+    p.append(box((1.2, 1.6, 4.2), (0, 0, H + 3.7), color=YEL_D, rough=0.7, metal=0.4))
+    p.append(box((2.6, 1.6, 0.9), (-6.4, 0, H + 1.9), color=(0.40, 0.41, 0.43)))
+    p.append(strut((12, 0, H + 1.5), (12, 0, H - 6), 0.03, (0.30, 0.31, 0.33), 6, metal=0.9))
+    p.append(box((0.7, 0.7, 0.9), (12, 0, H - 6.5), color=(0.35, 0.36, 0.38), metal=0.7))
+    return group(p, t, yaw)
+
+
+def scenery(full=True):
+    p = []
+    # ---- ground wear, puddles, spoil ----
+    p.append(box((5.2, 4.0, 0.0008), (1.5, 0.2, 0.0006), color=(0.36, 0.29, 0.22), rough=1))
+    p.append(box((5.4, 2.6, 0.0008), (-2.4, -1.7, 0.0018), (0, 0, 1, 0.4),
+                 color=(0.38, 0.31, 0.24), rough=1))
+    p.append(box((3.4, 1.0, 0.0008), (3.6, -2.8, 0.0030), (0, 0, 1, -0.3),
+                 color=(0.33, 0.27, 0.20), rough=1))
+    p.append(box((4.6, 1.0, 0.0008), (-3.4, 3.8, 0.0042), (0, 0, 1, 0.25),
+                 color=(0.20, 0.16, 0.12), rough=1))
+    for t, s in (((2.9, -1.4), 0.7), ((-1.9, 2.4), 0.5), ((4.2, 1.1), 0.6)):
+        p.append(box((s * 1.6, s, 0.0008), (t[0], t[1], 0.0054), color=(0.24, 0.24, 0.22),
+                     rough=0.1, metal=0.3))
+    piles = [((3.6, 2.8), 1.25, 0.78, (0.40, 0.31, 0.22)),
+             ((3.4, -4.6), 0.95, 0.55, (0.43, 0.34, 0.25)),
+             ((-4.6, 2.2), 1.45, 0.88, (0.38, 0.30, 0.21))]
+    if full:
+        piles += [((-1.5, 4.6), 1.05, 0.62, (0.52, 0.49, 0.43)),
+                  ((5.0, -0.6), 0.85, 0.5, (0.46, 0.38, 0.28))]
+    for t, r, h, c in piles:
+        p.append(ucone(h, r, (t[0], t[1], 0), color=c))
+    # ---- cones, barriers ----
+    spots = [(2.9, 1.9), (3.2, 0.8), (3.2, -0.7), (2.9, -1.8)]
+    if full:
+        spots += [(2.0, 2.8), (1.9, -2.9), (3.9, 1.5), (4.0, -1.2)]
+    for t in spots:
+        p.append(traffic_cone((t[0], t[1], 0)))
+    bars = [(0.9, 4.5, 0.0), (2.7, 4.5, 0.0)]
+    if full:
+        bars += [(-0.9, 4.5, 0.0), (4.5, 4.5, 0.0), (-3.8, -4.3, 0.35), (-2.0, -4.8, 0.1)]
+    for x, y, yaw in bars:
+        p.append(barrier((x, y, 0), yaw))
+    # ---- container, office, toilet, generator ----
+    p.append(group([box((3.0, 1.2, 1.24), (0, 0, 0.62), color=(0.55, 0.18, 0.13),
+                        rough=0.75, metal=0.35)] +
+                   [box((0.05, 1.22, 1.1), (-1.4 + i * 0.28, 0, 0.62),
+                        color=(0.48, 0.15, 0.11), rough=0.75, metal=0.35) for i in range(11)] +
+                   [box((0.06, 1.16, 1.2), (1.52, 0, 0.62), color=(0.42, 0.14, 0.10),
+                        rough=0.75, metal=0.4),
+                    box((0.03, 0.08, 0.9), (1.56, 0.25, 0.62), color=CHROME, metal=0.9),
+                    box((0.03, 0.08, 0.9), (1.56, -0.25, 0.62), color=CHROME, metal=0.9)],
+                   (-4.8, -2.4, 0), 0.15))
+    # ---- home pads + tower pad (always present) ----
+    # each layer sits proud of the one below so no two faces share a plane
+    for colour in COLOURS:
+        x, y = HOMES[colour]
+        p.append(box((0.34, 0.34, 0.0012), (x, y, 0.0072), color=(0.92, 0.92, 0.90),
+                     rough=0.9))
+        p.append(box((0.26, 0.26, 0.0012), (x, y, 0.0090), color=CUBE_COLOURS[colour],
+                     rough=0.9))
+    for tx, ty in TOWERS:
+        p.append(box((0.36, 0.36, 0.0012), (tx, ty, 0.0072), color=(0.92, 0.92, 0.90),
+                     rough=0.9))
+        p.append(box((0.28, 0.28, 0.0012), (tx, ty, 0.0090), color=(0.30, 0.30, 0.30),
+                     rough=0.9))
+
+    # ---- distant skyline and hills (cheap, and they keep the horizon alive) ----
+    for t2, s2, h2, y2 in (((15.5, -12.0), (5.5, 5.5), 6.4, 0.2),
+                           ((18.5, 4.0), (5.0, 7.5), 4.8, -0.3),
+                           ((-18.0, -17.0), (7.0, 5.0), 5.6, 0.5),
+                           ((1.0, 19.0), (8.5, 4.5), 8.0, 0.0),
+                           ((-20.0, 4.0), (5.5, 6.5), 7.2, 0.4),
+                           ((9.0, 17.0), (6.0, 6.0), 5.0, 1.1)):
+        p.append(skyline((t2[0], t2[1], 0), s2, h2, y2))
+    for t2, r2, h2 in (((-24, 16), 5.0, 2.6), ((22, -20), 6.5, 3.2), ((-6, 24), 5.5, 2.2)):
+        p.append(ucone(h2, r2, (t2[0], t2[1], -0.3), color=(0.46, 0.42, 0.33), sub=14))
+
+    if not full:
+        return p
+
+    p.append(group([box((3.2, 2.2, 1.26), (0, 0, 0.63), color=(0.86, 0.87, 0.85), rough=0.8),
+                    box((3.35, 2.35, 0.1), (0, 0, 1.3), color=(0.45, 0.46, 0.48), rough=0.85),
+                    box((0.06, 1.5, 0.55), (1.62, 0.2, 0.75), color=GLASS, rough=0.2),
+                    box((0.06, 0.7, 1.05), (1.62, -0.7, 0.55), color=(0.55, 0.56, 0.58)),
+                    box((0.05, 0.06, 0.1), (1.68, -0.42, 0.6), color=CHROME, metal=0.9),
+                    box((1.0, 0.5, 0.12), (1.9, -0.7, 0.06), color=(0.45, 0.46, 0.48)),
+                    strut((1.62, 0.9, 0), (1.62, 0.9, 1.3), 0.04, (0.5, 0.5, 0.52), 8)],
+                   (-4.4, 3.4, 0), -0.35))
+    p.append(group([box((0.46, 0.46, 1.02), (0, 0, 0.51), color=(0.18, 0.42, 0.65), rough=0.7),
+                    box((0.50, 0.50, 0.05), (0, 0, 1.05), color=(0.14, 0.34, 0.52)),
+                    box((0.02, 0.26, 0.76), (0.235, 0, 0.50), color=(0.14, 0.34, 0.52)),
+                    box((0.02, 0.05, 0.05), (0.25, 0.09, 0.55), color=(0.75, 0.76, 0.78))],
+                   (-2.6, 4.4, 0), 0.4))
+    p.append(group([box((1.5, 0.9, 0.9), (0, 0, 0.45), color=(0.85, 0.62, 0.08), rough=0.7),
+                    box((1.55, 0.95, 0.1), (0, 0, 0.92), color=(0.70, 0.51, 0.06)),
+                    vcyl(0.3, 0.06, (-0.6, 0.3, 1.05), color=DARK)],
+                   (1.1, -5.0, 0), -0.2))
+    # ---- materials ----
+    p.append(group([box((1.0, 0.8, 0.12), (0, 0, 0.06), color=(0.55, 0.42, 0.26), rough=1),
+                    box((0.9, 0.7, 0.5), (0, 0, 0.37), color=(0.60, 0.31, 0.22), rough=1),
+                    box((0.9, 0.7, 0.06), (0, 0, 0.65), color=(0.55, 0.55, 0.58), transp=0.4)],
+                   (3.4, 3.4, 0), 0.5))
+    p.append(group([box((1.0, 0.8, 0.12), (0, 0, 0.06), color=(0.55, 0.42, 0.26), rough=1),
+                    box((0.9, 0.7, 0.42), (0, 0, 0.33), color=(0.58, 0.30, 0.21), rough=1)],
+                   (4.4, 2.9, 0), 0.15))
+    for i in range(3):
+        p.append(box((2.6, 0.9, 0.14), (-3.2 + 0.05 * i, -5.0, 0.07 + i * 0.16),
+                     (0, 0, 1, 0.9), color=(0.62, 0.48, 0.30), rough=1))
+    for i, (x, y, z) in enumerate(((4.5, -2.85, 0.22), (4.5, -3.35, 0.22), (4.5, -3.10, 0.60))):
+        p.append(xcyl(1.5, 0.24, (x, y, z), (0.63, 0.62, 0.60), 20, rough=0.95))
+        p.append(xcyl(1.52, 0.13, (x, y, z), (0.40, 0.39, 0.38), 20, rough=1))
+    p.append(box((3.4, 0.5, 0.1), (-4.6, -4.6, 0.05), (0, 0, 1, 0.9),
+                 color=(0.42, 0.30, 0.20), rough=0.9, metal=0.5))
+    for i, t in enumerate(((-0.9, -4.7), (-0.4, -4.75), (-0.65, -5.15))):
+        p.append(drum((t[0], t[1], 0), (0.20, 0.45, 0.25) if i % 2 else (0.55, 0.35, 0.10)))
+    # wheelbarrow
+    p.append(group([box((0.75, 0.5, 0.22), (0, 0, 0.42), (0, 1, 0, 0.15),
+                        color=(0.35, 0.36, 0.38), metal=0.5),
+                    ycyl(0.09, 0.16, (0.45, 0, 0.16), color=CHAR, sub=16),
+                    strut((-0.35, 0.2, 0.3), (0.3, 0.2, 0.45), 0.02, (0.5, 0.5, 0.52), 8),
+                    strut((-0.35, -0.2, 0.3), (0.3, -0.2, 0.45), 0.02, (0.5, 0.5, 0.52), 8)],
+                   (2.6, -4.7, 0), 2.2))
+    # ---- floodlight mast + signs ----
+    p.append(group([box((0.8, 0.8, 0.12), (0, 0, 0.06), color=(0.35, 0.36, 0.38)),
+                    vcyl(4.0, 0.08, (0, 0, 2.0), color=(0.85, 0.62, 0.08), sub=12, metal=0.5),
+                    box((0.5, 0.9, 0.28), (0, 0, 4.05), color=(0.30, 0.31, 0.33)),
+                    box((0.06, 0.8, 0.22), (0.26, 0, 4.05), color=(1, 0.97, 0.85),
+                        rough=0.1, emis=(1, 0.94, 0.72))],
+                   (5.2, 3.4, 0)))
+    for t, c in (((2.9, 3.9), (0.90, 0.15, 0.12)), ((-2.2, -4.6), (0.95, 0.75, 0.05))):
+        p.append(group([vcyl(1.5, 0.035, (0, 0, 0.75), color=(0.55, 0.56, 0.58), sub=10),
+                        box((0.04, 0.5, 0.5), (0, 0, 1.5), color=c, rough=0.6),
+                        box((0.05, 0.36, 0.36), (0.01, 0, 1.5), color=(0.95, 0.95, 0.93))], t))
+    # ---- cable drum, sandbags, cement mixer ----
+    p.append(group([ycyl(0.55, 0.42, (0, 0, 0.42), (0.52, 0.40, 0.24), 16, rough=1),
+                    ycyl(0.60, 0.14, (0, 0, 0.42), (0.30, 0.25, 0.18), 12, rough=1),
+                    ycyl(0.10, 0.30, (0, 0, 0.42), (0.20, 0.20, 0.22), 12, rough=0.9)],
+                   (4.6, 2.2, 0), 0.3))
+    for i in range(5):
+        p.append(box((0.42, 0.26, 0.13), (-1.15 + (i % 3) * 0.44, 4.9 + (i // 3) * 0.28,
+                                          0.065 + (i // 3) * 0.13),
+                     (0, 0, 1, 0.1 * i), color=(0.58, 0.54, 0.42), rough=1))
+    p.append(group([box((0.70, 0.60, 0.16), (0, 0, 0.08), color=(0.35, 0.36, 0.38)),
+                    ucone(0.55, 0.34, (0, 0, 0.16), color=(0.80, 0.55, 0.10), sub=14, rough=0.7),
+                    vcyl(0.22, 0.20, (0, 0, 0.70), color=(0.80, 0.55, 0.10), sub=14, rough=0.7),
+                    ycyl(0.10, 0.16, (0.30, 0, 0.30), (0.30, 0.31, 0.33), 12, metal=0.6)],
+                   (3.9, -3.9, 0), -0.5))
+
+    # ---- background structures ----
+    p.append(crane((-13.5, 9.5, 0), -0.5))
+    p.append(crane((16.0, 12.5, 0), 2.2))
+    p.append(frame_building((-16.5, -11.0, 0), 0.25))
+    p.append(scaffold_wall((-16.9, -11.6, 0), 0.25))
+    p.append(silo2((-9.5, 5.2, 0)))
+    p.append(dump_truck((-8.6, -6.2, 0), 0.55))
+    # ---- perimeter fence ----
+    # One long panel per side rather than a run of small ones: the same look at
+    # a fraction of the draw cost.
+    for sgn in (1, -1):
+        p.append(box((12.4, 0.03, 1.15), (0, 6.2 * sgn, 0.63), color=(0.95, 0.45, 0.05),
+                     rough=0.9, transp=0.5))
+        p.append(box((12.4, 0.05, 0.06), (0, 6.2 * sgn, 1.20), color=(0.85, 0.40, 0.04),
+                     rough=0.9))
+        p.append(box((0.03, 12.4, 1.15), (6.2 * sgn, 0, 0.63), color=(0.95, 0.45, 0.05),
+                     rough=0.9, transp=0.5))
+        p.append(box((0.05, 12.4, 0.06), (6.2 * sgn, 0, 1.20), color=(0.85, 0.40, 0.04),
+                     rough=0.9))
+        for k in (-4.2, -1.4, 1.4, 4.2):
+            p.append(vcyl(1.30, 0.04, (k, 6.2 * sgn, 0.65), color=(0.45, 0.46, 0.48),
+                          sub=8, metal=0.5))
+            p.append(vcyl(1.30, 0.04, (6.2 * sgn, k, 0.65), color=(0.45, 0.46, 0.48),
+                          sub=8, metal=0.5))
+        p.append(vcyl(1.30, 0.045, (6.2 * sgn, 6.2, 0.65), color=(0.45, 0.46, 0.48),
+                      sub=8, metal=0.5))
+        p.append(vcyl(1.30, 0.045, (6.2 * sgn, -6.2, 0.65), color=(0.45, 0.46, 0.48),
+                      sub=8, metal=0.5))
+    return p
+
+
+# ======================================================================
+#  Assemble
+# ======================================================================
+
+def rock_shapes(base, dark, light):
+    """An angular rock built only from rotated boxes, sized to fill a CUBE cell."""
+    return [
+        box((0.130, 0.120, 0.100), (0, 0, -0.012), (0, 0, 1, 0.35), color=base, rough=0.95),
+        box((0.112, 0.100, 0.092), (0.018, -0.020, 0.030), (0, 0, 1, 0.95), color=light,
+            rough=0.95),
+        box((0.094, 0.112, 0.082), (-0.028, 0.022, 0.020), (0, 1, 0, 0.42), color=dark,
+            rough=0.95),
+        box((0.074, 0.070, 0.070), (0.038, 0.036, -0.030), (1, 0, 0, 0.55), color=dark,
+            rough=0.95),
+        box((0.056, 0.052, 0.050), (-0.042, -0.038, 0.038), (0, 1, 0, 0.90), color=light,
+            rough=0.95),
+        box((0.044, 0.062, 0.034), (0.048, -0.030, 0.046), (0, 0, 1, 1.15), color=base,
+            rough=0.95),
+    ]
+
+
+def rock_node(defname, name, xy, base, dark, light):
+    return """DEF %s Solid {
+  translation %.4f %.4f %.5f
+  children [
+%s
+  ]
+  name "%s"
+  boundingObject Box {
+    size %s
+  }
+  physics Physics {
+    density -1
+    mass 0.8
+  }
+}""" % (defname, xy[0], xy[1], CUBE / 2 + 0.001,
+        "\n".join(indent(c, 4) for c in rock_shapes(base, dark, light)),
+        name, v((CUBE, CUBE, CUBE)))
+
+
+def cube_node(defname, name, xy, color):
+    return """DEF %s Solid {
+  translation %.4f %.4f %.5f
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor %s
+        roughness 0.55
+        metalness 0.1
+      }
+      geometry Box {
+        size %s
+      }
+    }
+  ]
+  name "%s"
+  boundingObject Box {
+    size %s
+  }
+  physics Physics {
+    density -1
+    mass 0.8
+  }
+}""" % (defname, xy[0], xy[1], CUBE / 2 + 0.001, v(color),
+        v((CUBE, CUBE, CUBE)), name, v((CUBE, CUBE, CUBE)))
+
+
+HEADER = """#VRML_SIM R2023b utf8
+# Construction site with a tracked excavator that stacks and unstacks coloured cubes.
+# Built entirely from Webots' built-in nodes - no external PROTO files are loaded.
+#
+# castShadows is FALSE below. Shadow casting doubles the draw work for every
+# object in the scene and can black out the viewport on weaker graphics
+# hardware. If your machine handles it, set it back to TRUE for a nicer image.
+
+WorldInfo {
+  basicTimeStep 16
+  defaultDamping Damping {
+    linear 0.1
+    angular 0.2
+  }
+  contactProperties [
+    ContactProperties {
+      coulombFriction [
+        1.2
+      ]
+      bounce 0
+      softCFM 0.0001
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.810800 0.311600 0.495500 1.319500
+  position 3.0 -2.6 2.0
+}
+Background {
+  skyColor [
+    0.53 0.68 0.86
+  ]
+}
+DirectionalLight {
+  direction 0.55 0.4 -0.85
+  color 1 0.97 0.9
+  intensity 2.4
+  castShadows FALSE
+}
+DirectionalLight {
+  direction -0.6 -0.5 -0.55
+  color 0.72 0.8 0.95
+  intensity 0.9
+}
+DirectionalLight {
+  direction 0 0 1
+  color 0.5 0.44 0.36
+  intensity 0.35
+}
+Solid {
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.45 0.36 0.27
+        roughness 1
+        metalness 0
+      }
+      geometry Plane {
+        size 80 80
+      }
+    }
+  ]
+  name "ground"
+  boundingObject Plane {
+    size 80 80
+  }
+}"""
+
+def build(path, full):
+    parts = [HEADER]
+    parts.append("Solid {\n  children [\n%s\n  ]\n  name \"site_scenery\"\n}" %
+                 "\n".join(indent(c, 4) for c in scenery(full)))
+    parts.append(excavator())
+    for i, colour in enumerate(COLOURS):
+        parts.append(cube_node("CUBE_%s" % colour.upper(), "cube_%s" % colour,
+                               HOMES[colour], CUBE_COLOURS[colour]))
+    for i, colour in enumerate(COLOURS):
+        parts.append(rock_node("ROCK_%s" % colour.upper(), "rock_%s" % colour,
+                               (i * 0.6, -25.0), *ROCK_COLOURS[colour]))
+    with open(path, "w") as f:
+        f.write("\n".join(parts) + "\n")
+    txt = open(path).read()
+    print("%-28s shapes: %4d   lines: %6d   braces: %d  brackets: %d" % (
+        path.rsplit("/", 1)[-1], txt.count("geometry "), txt.count("\n"),
+        txt.count("{") - txt.count("}"), txt.count("[") - txt.count("]")))
+
+
+WORLDS = OUT.rsplit("/", 1)[0]
+build(WORLDS + "/construction_site.wbt", True)
+build(WORLDS + "/construction_site_lite.wbt", False)
