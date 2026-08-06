@@ -46,7 +46,9 @@ C = {}
 for name in ("BOOM_PIVOT_R", "BOOM_PIVOT_Z", "BOOM_LEN", "STICK_LEN", "TIP_OFFSET",
              "GRAB_DROP", "CUBE", "JAW_OPEN", "JAW_GRIP", "TRANSIT_Z", "APPROACH_DZ",
              "RELEASE_GAP", "MACHINE_R", "SWEEP_R", "STANDOFF", "PAD_R", "CELL",
-             "HELD_TOL", "TINES", "PARK_MIN", "PARK_MAX", "SEAT_RISE"):
+             "HELD_TOL", "TINES", "PARK_MIN", "PARK_MAX", "SEAT_RISE",
+             "EDGE_MARGIN", "MANUAL_GAIN", "BORDER_WARN_AT",
+             "BORDER_WARN_FULL", "LIFT_CHECK", "GRIP_LATERAL"):
     m = re.search(r"^%s\s*=\s*([-\d.]+)" % name, src, re.M)
     assert m, "controller has no %s" % name
     C[name] = float(m.group(1))
@@ -56,7 +58,7 @@ TOWERS = eval(re.search(r"^TOWERS = (\(.*?\))$", src, re.M).group(1))
 LAYOUTS = eval(re.search(r"^LAYOUTS = (\[.*?^\])", src, re.M | re.S).group(1))
 
 REACH = C["BOOM_LEN"] + C["STICK_LEN"]
-LIMIT = FENCE - 0.5
+LIMIT = FENCE - C["EDGE_MARGIN"]
 N = int(2 * LIMIT / C["CELL"]) + 1
 
 
@@ -261,6 +263,26 @@ check(C["PARK_MIN"] - C["CUBE"] * math.sqrt(2) / 2 > C["SWEEP_R"],
       % (C["PARK_MIN"] - C["CUBE"] * math.sqrt(2) / 2, C["SWEEP_R"]))
 check("clamp_arm" in src and src.count("clamp_arm(") >= 3,
       "manual mode clamps the arm to the same stops")
+check(0.0 < C["MANUAL_GAIN"] <= 1.0, "manual gain is a sensible fraction",
+      "%.0f%% of full speed" % (100 * C["MANUAL_GAIN"]))
+
+# The border warning must never fire while the machine is driving itself: the
+# planner is kept further inside the fence than the warning ever reaches.
+check(C["EDGE_MARGIN"] > C["BORDER_WARN_AT"],
+      "the autonomous routine never sets the border warning off",
+      "planner stops %.2f m from the fence, warning starts at %.2f m"
+      % (C["EDGE_MARGIN"], C["BORDER_WARN_AT"]))
+check(C["BORDER_WARN_FULL"] < C["BORDER_WARN_AT"],
+      "the border warning fades in rather than snapping on",
+      "solid at %.2f m, gone by %.2f m" % (C["BORDER_WARN_FULL"], C["BORDER_WARN_AT"]))
+check("setLabel" in src, "the border warning is drawn over the 3D view")
+
+# Proof of grip has to be more than nearness, or an object lying on the ground
+# under a low arm looks held.
+check("gripped(" in src and "ground_z" in src,
+      "a grab is proved by the object rising, not by how near it is")
+check(C["LIFT_CHECK"] > C["GRIP_LATERAL"], "the proof lift is bigger than the slop it allows",
+      "lifts %.2f m, allows %.2f m sideways" % (C["LIFT_CHECK"], C["GRIP_LATERAL"]))
 
 
 # --------------------------------------------------------------------------

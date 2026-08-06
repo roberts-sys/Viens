@@ -43,6 +43,22 @@ The boom, stick and wrist stop before they reach the machine — the same hard
 stops the autonomous routine runs under, so you cannot fold the arm through the
 cab. Steering used to be reversed (right turned left); it is not now.
 
+Everything in manual mode runs at **65% speed** — driving, steering, every arm
+joint and the tines. `MANUAL_GAIN` at the top of the controller is the single
+dial if you want it quicker or slower again.
+
+### You cannot leave the site
+
+The fence is a wall, so the machine physically cannot get out. Drive at it and
+**CANNOT LEAVE CONSTRUCTION SITE** fades up over the 3D view, solid by the time
+you are 0.55 m off the fence, and fades away again as you pull back — gone by
+1.40 m. It is drawn with `setLabel`, so it sits over the viewport wherever the
+camera happens to be pointing.
+
+The route planner keeps 1.60 m clear of the fence, which is further out than the
+warning ever reaches, so the machine driving itself never sets it off. That is
+checked in `verify.py` rather than left to luck.
+
 Press **M** again to hand it back. The autonomous routine picks up from the
 start of a cycle, wherever you happened to leave the machine — the arm works
 out its targets from the machine's actual position, so it does not need to be
@@ -76,9 +92,34 @@ checked before the world was written:
 
 The whole thing used to work by pinning the object to the grapple every
 simulation step, which held perfectly but looked like teleporting. That code is
-gone. In exchange, a grip can now genuinely fail — so after every lift the
-controller checks the object is still within 0.09 m of the grab point, and if it
-is not, it reopens, says so on the console and tries again (three attempts).
+gone.
+
+### Knowing for certain that it picked something up
+
+Checking "is the object near the grab point?" is not proof, and it was giving
+false positives. If a move runs out of time and leaves the arm low, an object
+lying **untouched on the ground** sits a few centimetres from the grab point and
+looks held.
+
+So the machine now proves it. It notes the object's height before closing,
+lifts 0.14 m, and requires all three of:
+
+* the object has **risen** by at least 55% of that lift — this cannot be faked,
+* it is within 0.07 m of the grab point sideways and 0.09 m up and down,
+* and it has held that way for six simulation steps running, not just one.
+
+Three things were changed to make the first attempt the one that works:
+
+* **It waits for the object to stop moving** before reaching, so it never grabs
+  at something still rolling.
+* **It aims at the last moment.** The final descent used to be worked out at the
+  start of the swing. It is now a function evaluated when the arm gets there, so
+  it drops onto wherever the object actually is by then, not where it was.
+* **The tines close more slowly** (maxVelocity 2 → 1.2), so they cradle the
+  object rather than punting it out from between them.
+
+If the proof fails it opens, says `the blue did not come up`, and tries again —
+up to three times.
 
 An object caged in the tines rests on the tips, about 0.022 m above the point
 the arm is aiming at. `SEAT_RISE` in the controller allows for that, so objects
@@ -193,6 +234,12 @@ basalt, red sandstone, mossy greenstone and pale limestone — so you can still
 follow which one ends up on top. They share the cubes' collision box, so they
 grip and stack the same way.
 
+Each is **23 shapes**, up from 6. Six masses give the silhouette, tilted off the
+vertical so there is no flat top; over those go broken facets, quartz veins,
+shadowed crevices, a patch of lichen on the weathered side, and grit stuck to
+the underside. Every piece is tinted from that stone's own three colours, so a
+rock still reads as granite or sandstone at a glance.
+
 ## If the viewport is black
 
 There are two worlds in `worlds/`, both running the same excavator and the same
@@ -200,8 +247,8 @@ controller:
 
 | World | Shapes | What's in it |
 |---|---|---|
-| `construction_site.wbt` | 930 | full site — cranes, buildings, scaffolding, silo, dump truck |
-| `construction_site_lite.wbt` | 682 | same excavator and skyline, no big background structures |
+| `construction_site.wbt` | 1134 | full site — cranes, buildings, scaffolding, silo, dump trucks, pylons, trees, conveyor |
+| `construction_site_lite.wbt` | 811 | same excavator, detailed rocks and skyline, no big background structures |
 
 **Both contain the identical, fully detailed excavator** — only the scenery
 around it differs.
@@ -249,7 +296,16 @@ bricks; stacked concrete pipes; timber; oil drums; a rebar bundle; a
 wheelbarrow; a cable drum; sandbags; a cement mixer; a floodlight mast; warning
 signs; and a fenced perimeter. Beyond the fence: two tower cranes, a concrete
 frame building with a scaffolded face, a cement silo, a loaded dump truck,
-skyline blocks and hills.
+skyline blocks and hills. Added since: two lattice power pylons, a stand of
+eight conifers, two parked vans, an inclined conveyor feeding a stockpile, three
+more skyline blocks and three more hills.
+
+Those background structures are built from a few large forms rather than
+lattice-work. Only the silhouette reads at that distance, and struts cost draw
+calls the graphics card cannot spare. **The full world grew from 930 shapes to
+1134 with this detail** — if that tips your graphics card over and the viewport
+goes black, `construction_site_lite.wbt` has the identical machine and the
+detailed rocks at 811.
 
 ## A note on the primitive axes
 

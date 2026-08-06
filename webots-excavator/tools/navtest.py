@@ -31,7 +31,8 @@ MACHINE_R = const("MACHINE_R")
 PAD_R = const("PAD_R")
 STANDOFF = const("STANDOFF")
 CELL = const("CELL")
-LIMIT = FENCE - 0.5
+EDGE_MARGIN = const("EDGE_MARGIN")
+LIMIT = FENCE - EDGE_MARGIN
 
 HOMES = eval(re.search(r"^HOMES = (\{.*?^\})", src, re.M | re.S).group(1))
 TOWERS = eval(re.search(r"^TOWERS = (\(.*?\))$", src, re.M).group(1))

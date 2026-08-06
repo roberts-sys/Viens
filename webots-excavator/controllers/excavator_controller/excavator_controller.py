@@ -57,7 +57,12 @@ RELEASE_GAP = 0.01    # let go a centimetre high so it settles itself
 SEAT_RISE = 0.022     # a caged object rests on the tine tips, which is this far
                       # above the nominal grab point - allowed for when placing
 HELD_TOL = 0.09       # how far an object may sit from the grab point and still
-                      # count as held
+                      # count as held, measured up and down
+GRIP_LATERAL = 0.07   # ...and side to side
+LIFT_CHECK = 0.14     # lift this far to prove the grip before driving anywhere
+RISE_FRAC = 0.55      # the object must come up at least this share of that lift
+GRIP_STEADY = 6       # ...and stay there for this many steps running
+CARRY_FLOOR = 0.30    # a carried object is always higher than this
 
 # --------------------------------------------------------------------------
 # Where things live. (x, y) in world metres.
@@ -92,7 +97,11 @@ TURN_SPEED = 0.9              # rad/s
 MACHINE_R = 0.78              # footprint radius used for planning
 SWEEP_R = 0.87                # what the counterweight sweeps when it slews
 CELL = 0.15
-LIMIT = FENCE - 0.5
+EDGE_MARGIN = 1.6             # planning stays this far inside the fence: the
+                              # machine's own half-length plus room to turn, and
+                              # far enough out that the autonomous routine never
+                              # sets the border warning off
+LIMIT = FENCE - EDGE_MARGIN
 
 STANDOFF = 1.10               # distance from the slew axis to the object worked on
 PARK_MIN = 1.04               # never work closer: a 3-high stack stands 0.48 m and
@@ -100,6 +109,15 @@ PARK_MIN = 1.04               # never work closer: a 3-high stack stands 0.48 m 
                               # would be back over the tracks
 PARK_MAX = 1.18               # never work further: the arm runs out of reach
 PAD_R = 0.12                  # an object or a stack, as an obstacle
+
+MANUAL_GAIN = 0.65            # manual controls run at this share of full speed
+
+# The machine physically cannot leave - the fence is a wall - but drive at it in
+# manual mode and it says so. The warning fades in between these two distances
+# from the fence line. The route planner never comes within LIMIT of it, so the
+# autonomous routine never triggers the message.
+BORDER_WARN_AT = 1.40
+BORDER_WARN_FULL = 0.55
 
 # --------------------------------------------------------------------------
 # Hard stops on the arm. These mirror minPosition/maxPosition in the world file,
@@ -503,20 +521,92 @@ def grab_point():
             p[2] - m[8] * GRAB_DROP)
 
 
-def holding(colour):
-    """Is that object still inside the tines?"""
+def where_is(colour):
+    """Live position of an object, straight from the simulator."""
+    return objs()[colour].getPosition()
+
+
+def grip_offset(colour):
+    """(sideways, up-and-down, height) of an object about the grab point."""
     node = objs()[colour]
     if node is None:
-        return False
+        return None
     gx, gy, gz = grab_point()
     x, y, z = node.getPosition()
-    return math.hypot(math.hypot(x - gx, y - gy), z - gz) < HELD_TOL
+    return math.hypot(x - gx, y - gy), z - gz, z
+
+
+def in_tines(colour):
+    """Is the object sitting where the tines close?"""
+    off = grip_offset(colour)
+    return off is not None and off[0] < GRIP_LATERAL and abs(off[1]) < HELD_TOL
+
+
+def holding(colour):
+    """Is a carried object still in the grapple?
+
+    Safe to use only while carrying: a carried object is always well off the
+    ground, so being near the grab point means something.
+    """
+    off = grip_offset(colour)
+    return off is not None and in_tines(colour) and off[2] > CARRY_FLOOR
+
+
+def gripped(colour, ground_z):
+    """Proof that the object is really in the tines, not just near them.
+
+    Nearness on its own is not proof. If the arm is still low - because a move
+    ran out of time, say - an object lying untouched on the ground sits a few
+    centimetres from the grab point and looks held. Having *risen* off the
+    ground with the arm cannot be faked, so that is what this waits for, and it
+    wants to see it hold steady rather than catch it in passing.
+    """
+    good = 0
+    for _ in range(GRIP_STEADY * 3):
+        step()
+        off = grip_offset(colour)
+        if off is None:
+            return False
+        sideways, updown, z = off
+        risen = z - ground_z
+        if (sideways < GRIP_LATERAL and abs(updown) < HELD_TOL
+                and risen > RISE_FRAC * LIFT_CHECK):
+            good += 1
+            if good >= GRIP_STEADY:
+                return True
+        else:
+            good = 0
+    return False
+
+
+def wait_still(colour, timeout=1.2):
+    """Let an object stop rolling before reaching for it."""
+    node = objs()[colour]
+    deadline = robot.getTime() + timeout
+    while robot.getTime() < deadline:
+        v = node.getVelocity()
+        if math.hypot(math.hypot(v[0], v[1]), v[2]) < 0.02:
+            return
+        step()
+
+
+def border_warning():
+    """Fade a message in as the machine closes on the fence, and out again."""
+    x, y, _, _ = base_pose()
+    gap = FENCE - max(abs(x), abs(y))
+    a = (BORDER_WARN_AT - gap) / (BORDER_WARN_AT - BORDER_WARN_FULL)
+    a = max(0.0, min(1.0, a))
+    robot.setLabel(0, "CANNOT LEAVE CONSTRUCTION SITE",
+                   0.035, 0.06, 0.095, 0xDD2211, 1.0 - a, "Arial Black")
+    robot.setLabel(1, "turn back", 0.42, 0.20, 0.055, 0xFFCC00,
+                   1.0 - max(0.0, (a - 0.45) / 0.55), "Arial")
 
 
 def step(n=1):
     for _ in range(n):
         if robot.step(timestep) == -1:
             raise Quit
+        border_warning()
         poll_keyboard()
 
 
@@ -586,7 +676,10 @@ def flow(waypoints, timeout=20.0, wait_jaws=False, tol=0.02):
     than a series of moves that each stop dead before the next begins.
     """
     deadline = robot.getTime() + timeout
-    for i, (q, jaws) in enumerate(waypoints):
+    for i, wp in enumerate(waypoints):
+        # a waypoint may be a function, so the arm can re-aim at the last
+        # moment using where the object actually is by then
+        q, jaws = wp() if callable(wp) else wp
         last = i == len(waypoints) - 1
         want = tol if last else BLEND_TOL
         q = clamp_arm(q)
@@ -641,20 +734,28 @@ def pick_up(colour):
     if not dock_at(sx, sy, "the %s" % colour):
         raise Dropped
 
+    wait_still(colour)
     sx, sy, sz = node.getPosition()          # it may have settled since
-    # one continuous swing: out, over, and down onto the object
+
+    # One continuous swing: out, over, and down onto the object. The last
+    # waypoint is worked out when the arm gets there rather than now, so the
+    # descent is aimed at wherever the object actually is by that point - it
+    # may have been nudged on the way in.
     flow([(ik(sx, sy, sz + APPROACH_DZ + CUBE), JAW_OPEN),
           (ik(sx, sy, sz + APPROACH_DZ), JAW_OPEN),
-          (ik(sx, sy, sz), JAW_OPEN)])
+          lambda: (ik(*where_is(colour)), JAW_OPEN)], tol=0.012)
+    ground_z = where_is(colour)[2]           # height before anything lifts it
     squeeze()
 
-    # lift straight up first, so a bad grip shows itself before we drive off
-    drive(ik(sx, sy, sz + APPROACH_DZ), JAW_GRIP)
-    if not holding(colour):
-        print("    lost the %s on the lift - trying again" % colour)
-        drive(ik(sx, sy, sz + APPROACH_DZ + CUBE), JAW_OPEN)
+    # Lift a little and prove it came up with us. Being near the grab point is
+    # not proof; having left the ground is.
+    drive(ik(sx, sy, ground_z + LIFT_CHECK), JAW_GRIP, tol=0.03)
+    if not gripped(colour, ground_z):
+        print("    the %s did not come up - opening and trying again" % colour)
+        drive(ik(sx, sy, ground_z + APPROACH_DZ + CUBE), JAW_OPEN)
         raise Dropped
     held = colour
+    print("    got the %s" % colour)
     drive(ik_local(STANDOFF, 0.0, TRANSIT_Z), JAW_GRIP)
 
 
@@ -714,6 +815,8 @@ def manual_loop():
     print("   T / G      : rotate the grapple")
     print("   Z / X      : close / open the tines")
     print("   the boom, stick and wrist stop before they reach the machine")
+    print("   controls run at %d%% speed - MANUAL_GAIN at the top of the file"
+          % round(MANUAL_GAIN * 100))
     print("-" * 62)
 
     q = list(clamp_arm([s.getValue() for s in arm_sensors]))
@@ -723,21 +826,22 @@ def manual_loop():
     while True:
         v = t = 0.0
         if UP in KEYS:
-            v += DRIVE_SPEED
+            v += DRIVE_SPEED * MANUAL_GAIN
         if DOWN in KEYS:
-            v -= DRIVE_SPEED
+            v -= DRIVE_SPEED * MANUAL_GAIN
         # wheels(left, right): to turn right the left track must run faster,
         # so RIGHT adds to the left side. This was the wrong way round before.
         if LEFT in KEYS:
-            t += TURN_SPEED * 0.30
+            t += TURN_SPEED * 0.30 * MANUAL_GAIN
         if RIGHT in KEYS:
-            t -= TURN_SPEED * 0.30
+            t -= TURN_SPEED * 0.30 * MANUAL_GAIN
         wheels(v - t, v + t)
 
         for lo, hi, idx, rate in ((ord("E"), ord("Q"), 0, 0.7),
                                   (ord("S"), ord("W"), 1, 0.5),
                                   (ord("D"), ord("A"), 2, 0.6),
                                   (ord("G"), ord("T"), 4, 0.8)):
+            rate *= MANUAL_GAIN
             if lo in KEYS:
                 q[idx] -= rate * RATE
             if hi in KEYS:
@@ -748,9 +852,9 @@ def manual_loop():
         # operator cannot fold the boom down through the machine either
         q = list(clamp_arm(q))
         if ord("Z") in KEYS:
-            jaw = max(JAW_GRIP, jaw - 1.6 * RATE)
+            jaw = max(JAW_GRIP, jaw - 1.6 * MANUAL_GAIN * RATE)
         if ord("X") in KEYS:
-            jaw = min(JAW_OPEN, jaw + 1.6 * RATE)
+            jaw = min(JAW_OPEN, jaw + 1.6 * MANUAL_GAIN * RATE)
 
         for m, target in zip(arm_motors, q):
             m.setPosition(target)

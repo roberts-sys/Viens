@@ -649,7 +649,7 @@ HingeJoint {
   device [
     RotationalMotor {
       name "tine_%d_motor"
-      maxVelocity 2
+      maxVelocity 1.2
       maxTorque 8
       minPosition -0.62
       maxPosition -0.06
@@ -1326,6 +1326,55 @@ def tower_crane(t, yaw=0.0):
     return group(p, t, yaw)
 
 
+def pylon(t, h=9.0):
+    """A lattice power pylon: four splayed legs and three crossarms."""
+    p = []
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p.append(strut((sx * 0.9, sy * 0.9, 0), (sx * 0.22, sy * 0.22, h),
+                           0.10, (0.45, 0.46, 0.48), 6))
+    for z, w in ((h * 0.55, 2.6), (h * 0.76, 2.2), (h * 0.93, 1.6)):
+        p.append(box((0.20, 2 * w, 0.18), (0, 0, z), color=(0.45, 0.46, 0.48)))
+        for sy in (-1, 1):
+            p.append(vcyl(0.55, 0.05, (0, sy * w * 0.9, z + 0.30),
+                          color=(0.28, 0.29, 0.31), sub=6))
+    p.append(box((0.55, 0.55, 0.45), (0, 0, h + 0.22), color=(0.45, 0.46, 0.48)))
+    return group(p, t)
+
+
+def tree(t, h=3.4, r=1.4, leaf=(0.22, 0.36, 0.16)):
+    return group([vcyl(h * 0.5, 0.15, (0, 0, h * 0.24), color=(0.28, 0.20, 0.13),
+                       sub=8, rough=1),
+                  ucone(h * 0.78, r, (0, 0, h * 0.28), color=leaf, sub=10, rough=1),
+                  ucone(h * 0.52, r * 0.70, (0, 0, h * 0.58), color=leaf, sub=10,
+                        rough=1)], t)
+
+
+def van(t, yaw=0.0, body=(0.86, 0.87, 0.88)):
+    return group([box((4.6, 2.0, 1.5), (0, 0, 1.15), color=body, rough=0.5, metal=0.3),
+                  box((1.7, 2.0, 0.95), (1.65, 0, 2.08), color=body, rough=0.5,
+                      metal=0.3),
+                  box((0.10, 1.8, 0.6), (2.52, 0, 2.14), color=GLASS, rough=0.15),
+                  box((4.8, 2.1, 0.28), (0, 0, 0.5), color=(0.24, 0.25, 0.27))] +
+                 [ycyl(0.36, 0.45, (dx, dy, 0.45), CHAR, 12)
+                  for dx in (1.5, -1.5) for dy in (1.05, -1.05)], t, yaw)
+
+
+def conveyor(t, yaw=0.0, length=9.0, rise=4.2):
+    """A long inclined belt feeding a stockpile - reads well at a distance."""
+    p = [box((length, 1.0, 0.22), (length / 2, 0, rise / 2), (0, 1, 0, -rise / length),
+             color=(0.55, 0.45, 0.10), rough=0.8),
+         box((length, 0.10, 0.30), (length / 2, 0.52, rise / 2),
+             (0, 1, 0, -rise / length), color=(0.40, 0.33, 0.08), rough=0.85),
+         box((length, 0.10, 0.30), (length / 2, -0.52, rise / 2),
+             (0, 1, 0, -rise / length), color=(0.40, 0.33, 0.08), rough=0.85),
+         box((1.6, 1.6, 0.5), (0, 0, 0.25), color=(0.35, 0.36, 0.38)),
+         strut((length * 0.55, 0, 0), (length * 0.55, 0, rise * 0.62), 0.12, STEEL, 8),
+         strut((length * 0.85, 0, 0), (length * 0.85, 0, rise * 0.92), 0.12, STEEL, 8),
+         ucone(rise * 0.9, 3.4, (length + 1.6, 0, 0), color=(0.44, 0.36, 0.26), sub=14)]
+    return group(p, t, yaw)
+
+
 def scenery(full=True):
     p = []
     # ---- ground wear, puddles, spoil ----
@@ -1373,14 +1422,18 @@ def scenery(full=True):
                      rough=0.9))
 
     # ---- distant skyline and hills (cheap, and they keep the horizon alive) ----
-    for t2, s2, h2, y2 in (((15.5, -12.0), (5.5, 5.5), 6.4, 0.2),
+    for t2, s2, h2, y2 in (((24.0, 8.0), (6.5, 6.0), 9.0, -0.4),
+                           ((-11.0, 23.0), (7.0, 5.0), 6.0, 0.7),
+                           ((15.0, -19.5), (6.0, 6.5), 7.5, 0.15),
+                           ((15.5, -12.0), (5.5, 5.5), 6.4, 0.2),
                            ((18.5, 4.0), (5.0, 7.5), 4.8, -0.3),
                            ((-18.0, -17.0), (7.0, 5.0), 5.6, 0.5),
                            ((1.0, 19.0), (8.5, 4.5), 8.0, 0.0),
                            ((-20.0, 4.0), (5.5, 6.5), 7.2, 0.4),
                            ((9.0, 17.0), (6.0, 6.0), 5.0, 1.1)):
         p.append(skyline((t2[0], t2[1], 0), s2, h2, y2))
-    for t2, r2, h2 in (((-24, 16), 5.0, 2.6), ((22, -20), 6.5, 3.2), ((-6, 24), 5.5, 2.2)):
+    for t2, r2, h2 in (((-24, 16), 5.0, 2.6), ((22, -20), 6.5, 3.2), ((-6, 24), 5.5, 2.2),
+                       ((0, -27), 6.2, 3.0), ((27, 11), 5.6, 2.8), ((-27, -8), 6.0, 2.4)):
         p.append(ucone(h2, r2, (t2[0], t2[1], -0.3), color=(0.46, 0.42, 0.33), sub=14))
 
     if not full:
@@ -1476,6 +1529,23 @@ def scenery(full=True):
                        (x, y, 0), yaw))
 
     # ---- background structures ----
+    # Everything from here out sits beyond the fence. It is built from a few
+    # large forms rather than lattice-work: only the silhouette reads at that
+    # distance, and struts cost draw calls the graphics card cannot spare.
+    p.append(pylon((-13.0, -2.0, 0), 9.5))
+    p.append(pylon((-14.5, 5.2, 0), 8.6))
+    p.append(conveyor((10.5, 6.0, 0), 2.5))
+    p.append(van((10.8, -7.6, 0), 0.45))
+    p.append(van((13.2, -9.4, 0), -0.30, (0.72, 0.24, 0.18)))
+    for t, h, r, leaf in (((11.6, -2.2), 3.6, 1.5, (0.20, 0.34, 0.15)),
+                          ((12.4, 0.6), 3.1, 1.3, (0.24, 0.38, 0.17)),
+                          ((11.9, 3.4), 3.9, 1.6, (0.19, 0.32, 0.14)),
+                          ((13.1, -5.0), 3.3, 1.4, (0.23, 0.37, 0.16)),
+                          ((2.5, -12.4), 3.7, 1.5, (0.21, 0.35, 0.15)),
+                          ((5.6, -12.9), 3.2, 1.3, (0.24, 0.38, 0.17)),
+                          ((-1.8, -12.6), 4.0, 1.7, (0.19, 0.33, 0.14)),
+                          ((-5.2, -13.2), 3.4, 1.4, (0.22, 0.36, 0.16))):
+        p.append(tree((t[0], t[1], 0), h, r, leaf))
     p.append(crane((-13.5, 9.5, 0), -0.5))
     p.append(crane((16.0, 12.5, 0), 2.2))
     p.append(frame_building((-16.5, -11.0, 0), 0.25))
@@ -1574,12 +1644,27 @@ OBSTACLES = [
 #  Assemble
 # ======================================================================
 
+def mix(a, b, t):
+    return tuple(a[i] * (1 - t) + b[i] * t for i in range(3))
+
+
 def rock_shapes(base, dark, light):
-    """An angular rock built only from rotated boxes, sized to fill a CUBE cell."""
+    """An angular rock, sized to fill a CUBE cell.
+
+    Six masses give the silhouette; on top of those go broken facets, quartz
+    veins, shadowed crevices, a patch of lichen on the weathered side and grit
+    stuck to the bottom, so no two faces of a stone look alike. Every piece is
+    tinted from the stone's own three colours, so each rock keeps its identity.
+    """
+    vein = mix(light, (1.0, 1.0, 1.0), 0.45)
+    moss = mix(base, (0.30, 0.42, 0.18), 0.55)
+    grit = mix(dark, (0.0, 0.0, 0.0), 0.25)
     return [
-        box((0.130, 0.120, 0.100), (0, 0, -0.012), (0, 0, 1, 0.35), color=base, rough=0.95),
-        box((0.112, 0.100, 0.092), (0.018, -0.020, 0.030), (0, 0, 1, 0.95), color=light,
-            rough=0.95),
+        # tilted off the vertical, so the stone has no flat horizontal top
+        box((0.130, 0.120, 0.100), (0, 0, -0.012), (0.55, 0.42, 0.72, 0.55),
+            color=base, rough=0.95),
+        box((0.112, 0.100, 0.092), (0.018, -0.020, 0.030), (0.30, -0.36, 0.88, 0.85),
+            color=light, rough=0.95),
         box((0.094, 0.112, 0.082), (-0.028, 0.022, 0.020), (0, 1, 0, 0.42), color=dark,
             rough=0.95),
         box((0.074, 0.070, 0.070), (0.038, 0.036, -0.030), (1, 0, 0, 0.55), color=dark,
@@ -1588,6 +1673,45 @@ def rock_shapes(base, dark, light):
             rough=0.95),
         box((0.044, 0.062, 0.034), (0.048, -0.030, 0.046), (0, 0, 1, 1.15), color=base,
             rough=0.95),
+        # broken facets, each standing proud of the mass under it
+        box((0.046, 0.040, 0.030), (-0.050, 0.030, -0.030), (1, 0, 0, 0.75),
+            color=light, rough=0.92),
+        box((0.038, 0.044, 0.026), (0.030, 0.052, 0.006), (0, 1, 0, 1.25),
+            color=base, rough=0.92),
+        box((0.034, 0.030, 0.036), (-0.020, -0.052, -0.008), (0, 0, 1, 0.62),
+            color=light, rough=0.92),
+        box((0.030, 0.036, 0.024), (0.056, 0.008, -0.004), (1, 0, 0, 1.05),
+            color=dark, rough=0.92),
+        box((0.028, 0.026, 0.022), (-0.044, 0.010, 0.050), (0, 1, 0, 0.55),
+            color=dark, rough=0.92),
+        # quartz veins
+        box((0.070, 0.010, 0.008), (0.004, -0.034, 0.052), (0, 0, 1, 0.50),
+            color=vein, rough=0.55, metal=0.15),
+        box((0.008, 0.058, 0.007), (-0.036, 0.004, 0.044), (0, 1, 0, 0.30),
+            color=vein, rough=0.55, metal=0.15),
+        box((0.040, 0.007, 0.006), (0.034, 0.020, -0.044), (0, 0, 1, -0.9),
+            color=vein, rough=0.55, metal=0.15),
+        # crevices, shadowed
+        box((0.052, 0.006, 0.014), (0.010, 0.030, 0.044), (0, 0, 1, -0.4),
+            color=grit, rough=1),
+        box((0.006, 0.046, 0.012), (0.040, -0.012, 0.018), (1, 0, 0, 0.3),
+            color=grit, rough=1),
+        # lichen on the weathered side
+        box((0.040, 0.034, 0.006), (-0.026, 0.028, 0.052), (0, 0, 1, 0.8),
+            color=moss, rough=1),
+        box((0.020, 0.024, 0.005), (0.006, 0.044, 0.040), (0, 0, 1, -0.6),
+            color=moss, rough=1),
+        box((0.016, 0.018, 0.005), (-0.048, -0.026, 0.030), (0, 1, 0, 0.4),
+            color=moss, rough=1),
+        # grit stuck to it
+        box((0.014, 0.012, 0.010), (0.052, 0.038, 0.012), (0, 1, 0, 0.9),
+            color=grit, rough=1),
+        box((0.011, 0.014, 0.009), (-0.056, -0.014, 0.006), (1, 0, 0, 1.2),
+            color=grit, rough=1),
+        box((0.010, 0.010, 0.008), (0.024, -0.056, 0.026), (0, 0, 1, 0.4),
+            color=light, rough=1),
+        box((0.009, 0.012, 0.007), (-0.010, 0.056, -0.020), (0, 1, 0, 0.7),
+            color=base, rough=1),
     ]
 
 
