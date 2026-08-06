@@ -46,7 +46,7 @@ C = {}
 for name in ("BOOM_PIVOT_R", "BOOM_PIVOT_Z", "BOOM_LEN", "STICK_LEN", "TIP_OFFSET",
              "GRAB_DROP", "CUBE", "JAW_OPEN", "JAW_GRIP", "TRANSIT_Z", "APPROACH_DZ",
              "RELEASE_GAP", "MACHINE_R", "SWEEP_R", "STANDOFF", "PAD_R", "CELL",
-             "HELD_TOL", "TINES"):
+             "HELD_TOL", "TINES", "PARK_MIN", "PARK_MAX", "SEAT_RISE"):
     m = re.search(r"^%s\s*=\s*([-\d.]+)" % name, src, re.M)
     assert m, "controller has no %s" % name
     C[name] = float(m.group(1))
@@ -199,6 +199,68 @@ for name, x, y, z in poses:
     gt = box_gap(TRACKS, gx, gy, gz, TINE_R, TINE_DROP)
     check(gh > 0.02 and gt > 0.02, "grapple clears the machine at the %s pose" % name,
           "house %+.3f m, tracks %+.3f m" % (gh, gt))
+
+
+# --------------------------------------------------------------------------
+print("\narm stops")
+# --------------------------------------------------------------------------
+# selfCollision cannot police two solids joined by a joint, so the boom would
+# otherwise fold straight through the house. These are the limits that stop it,
+# and the controller must carry the same numbers so manual mode agrees.
+LIMS = {}
+for name in ("BOOM_LIM", "STICK_LIM", "WRIST_LIM"):
+    m = re.search(r"^%s = \(([-\d.]+), ([-\d.]+)\)" % name, src, re.M)
+    check(m is not None, "the controller declares %s" % name)
+    if m:
+        LIMS[name] = (float(m.group(1)), float(m.group(2)))
+
+world = open(os.path.join(HERE, "..", "worlds", "construction_site.wbt")).read()
+for motor, key in (("boom_motor", "BOOM_LIM"), ("stick_motor", "STICK_LIM"),
+                   ("wrist_motor", "WRIST_LIM")):
+    m = re.search(r'name "%s".*?minPosition ([-\d.]+).*?maxPosition ([-\d.]+)'
+                  % motor, world, re.S)
+    check(m is not None, "%s has stops in the world" % motor)
+    if m and key in LIMS:
+        got = (float(m.group(1)), float(m.group(2)))
+        check(abs(got[0] - LIMS[key][0]) < 1e-6 and abs(got[1] - LIMS[key][1]) < 1e-6,
+              "%s stops match the controller" % motor,
+              "world %s, controller %s" % (got, LIMS[key]))
+
+# Webots requires the physical stops to straddle zero and to contain the motor
+# range, or it refuses to load the world.
+for motor in ("boom_motor", "stick_motor", "wrist_motor"):
+    # the stops sit in the jointParameters just above the motor, so the match
+    # must not be allowed to run back into the joint before it
+    blk = re.search(r"minStop ([-\d.]+)\s+maxStop ([-\d.]+)"
+                    r"(?:(?!minStop).)*?name \"%s\""
+                    r"(?:(?!minStop).)*?minPosition ([-\d.]+)"
+                    r"\s+maxPosition ([-\d.]+)" % motor, world, re.S)
+    check(blk is not None, "%s has physical stops too" % motor)
+    if blk:
+        lo, hi, plo, phi = (float(blk.group(i)) for i in range(1, 5))
+        check(lo <= 0 <= hi, "%s stops straddle zero as Webots requires" % motor,
+              "minStop %+.2f, maxStop %+.2f" % (lo, hi))
+        check(lo <= plo and phi <= hi, "%s motor range sits inside its stops" % motor,
+              "%.2f..%.2f inside %.2f..%.2f" % (plo, phi, lo, hi))
+
+# the stops must not bind on anything the routine actually asks for
+for level in range(3):
+    centre = C["CUBE"] * level + C["CUBE"] / 2
+    for z in (centre + C["RELEASE_GAP"], centre + C["APPROACH_DZ"]):
+        for r in (C["PARK_MIN"], C["STANDOFF"], C["PARK_MAX"]):
+            q = ik_local(r, 0.0, z)
+            inside = (LIMS["BOOM_LIM"][0] <= q[1] <= LIMS["BOOM_LIM"][1]
+                      and LIMS["STICK_LIM"][0] <= q[2] <= LIMS["STICK_LIM"][1]
+                      and LIMS["WRIST_LIM"][0] <= q[3] <= LIMS["WRIST_LIM"][1])
+            check(inside, "stops leave room for level %d at %.2f m, z %.2f"
+                  % (level + 1, r, z))
+
+check(C["PARK_MIN"] - C["CUBE"] * math.sqrt(2) / 2 > C["SWEEP_R"],
+      "even the closest allowed parking clears the counterweight sweep",
+      "%.2f m nearest corner vs %.2f m sweep"
+      % (C["PARK_MIN"] - C["CUBE"] * math.sqrt(2) / 2, C["SWEEP_R"]))
+check("clamp_arm" in src and src.count("clamp_arm(") >= 3,
+      "manual mode clamps the arm to the same stops")
 
 
 # --------------------------------------------------------------------------

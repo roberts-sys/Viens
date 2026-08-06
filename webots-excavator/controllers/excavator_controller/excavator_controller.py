@@ -95,10 +95,28 @@ CELL = 0.15
 LIMIT = FENCE - 0.5
 
 STANDOFF = 1.10               # distance from the slew axis to the object worked on
-                              # (a 3-high stack stands 0.48 m; the counterweight
-                              #  sweeps at 0.87 m, so anything closer would clip it)
-STANDOFF_TOL = 0.06           # how exactly that distance is held
+PARK_MIN = 1.04               # never work closer: a 3-high stack stands 0.48 m and
+                              # the counterweight sweeps at 0.87 m, and the tines
+                              # would be back over the tracks
+PARK_MAX = 1.18               # never work further: the arm runs out of reach
 PAD_R = 0.12                  # an object or a stack, as an obstacle
+
+# --------------------------------------------------------------------------
+# Hard stops on the arm. These mirror minPosition/maxPosition in the world file,
+# so the operator runs into exactly the same limits the autonomous routine does.
+#
+# They are needed because Webots does not collide two solids joined directly by
+# a joint - so selfCollision can never stop the boom rotating down through the
+# house it is pinned to, however it is configured. Every other pair (grapple
+# against the tracks, tines against the boom, tine against tine) is collided
+# normally. See tools/limits.py.
+# --------------------------------------------------------------------------
+BOOM_LIM = (-1.40, -0.10)     # boom raised 6 to 80 degrees above horizontal
+STICK_LIM = (0.20, 2.20)      # stick nearly straight out, to folded right back
+WRIST_LIM = (-1.60, 0.90)
+JOINT_LIM = (None, BOOM_LIM, STICK_LIM, WRIST_LIM, None)   # slew and rotator turn freely
+
+BLEND_TOL = 0.14              # how near a via-point counts as "on the way"
 
 # --------------------------------------------------------------------------
 # Setup
@@ -263,6 +281,15 @@ def wrap(a):
     return (a + math.pi) % (2 * math.pi) - math.pi
 
 
+def clamp_arm(q):
+    """Hold a set of joint angles inside the arm's hard stops."""
+    out = list(q)
+    for i, lim in enumerate(JOINT_LIM):
+        if lim is not None:
+            out[i] = max(lim[0], min(lim[1], out[i]))
+    return tuple(out)
+
+
 # ---- the map: a grid of cells the machine is allowed to occupy ----
 # OBSTACLES comes from site_map.py, which the world generator writes, so it
 # always matches the collision bodies that are actually in the world. The pads
@@ -340,24 +367,37 @@ def plan(start, goal):
     return None
 
 
-def goto(tx, ty, tol=0.18, timeout=60.0):
-    """Drive to a point: turn towards it, then run at it, correcting as we go."""
+def goto(tx, ty, tol=0.18, timeout=60.0, stop=True):
+    """Drive to a point: turn towards it, then run at it, correcting as we go.
+
+    With stop=False it does not brake on arrival, so a route can be followed as
+    one continuous run instead of stopping at every corner.
+    """
     deadline = robot.getTime() + timeout
     while True:
         x, y, _, yaw = base_pose()
         dist = math.hypot(tx - x, ty - y)
         if dist < tol or robot.getTime() > deadline:
-            halt()
+            if stop:
+                halt()
             return dist < tol
         err = wrap(math.atan2(ty - y, tx - x) - yaw)
-        if abs(err) > 0.35:
-            turn = TURN_SPEED * (1 if err > 0 else -1) * 0.5
+        if abs(err) > 0.7:
+            # too far off to drive out of - swing round on the spot first
+            turn = TURN_SPEED * (1 if err > 0 else -1) * 0.6
             wheels(-turn, turn)
         else:
-            v = DRIVE_SPEED * min(1.0, max(0.25, dist))
-            corr = max(-0.35, min(0.35, err)) * 0.5
+            v = DRIVE_SPEED * min(1.0, max(0.3, dist))
+            corr = max(-0.5, min(0.5, err)) * 0.6
             wheels(v * (1 - corr), v * (1 + corr))
         step()
+
+
+def follow(path):
+    """Drive a whole route without braking at the corners."""
+    for i, (wx, wy) in enumerate(path):
+        last = i == len(path) - 1
+        goto(wx, wy, tol=0.16 if last else 0.34, stop=last)
 
 
 def face(heading, tol=0.05, timeout=25.0):
@@ -429,25 +469,24 @@ def dock_at(tx, ty, label):
         return False
     print("    driving to %s: %d waypoints, %.1f m away"
           % (label, len(path), math.hypot(spot[0] - x, spot[1] - y)))
-    for wx, wy in path[1:]:
-        goto(wx, wy, tol=0.22)
+    follow(path[1:])
 
-    # settle onto the exact working distance
-    for _ in range(4):
-        x, y, _, _ = base_pose()
-        face(math.atan2(ty - y, tx - x))
+    # Turn to face the work, then correct the distance only if it is outside
+    # the usable band. The arm solves for wherever the machine actually ended
+    # up, so there is nothing to gain from shuffling into an exact spot.
+    x, y, _, _ = base_pose()
+    face(math.atan2(ty - y, tx - x))
+    for _ in range(3):
         x, y, _, _ = base_pose()
         gap = math.hypot(tx - x, ty - y)
-        if abs(gap - STANDOFF) < STANDOFF_TOL:
+        if PARK_MIN <= gap <= PARK_MAX:
             break
         creep(gap - STANDOFF)
     x, y, _, _ = base_pose()
     gap = math.hypot(tx - x, ty - y)
-    if gap < SWEEP_R + 0.05:
-        print("    parked too close to %s (%.2f m) - backing off" % (label, gap))
-        creep(gap - STANDOFF)
-        x, y, _, _ = base_pose()
-        gap = math.hypot(tx - x, ty - y)
+    if gap < PARK_MIN or gap > PARK_MAX:
+        print("    could not park within reach of %s (%.2f m) - skipping" % (label, gap))
+        return False
     print("    parked %.2f m from %s" % (gap, label))
     return True
 
@@ -534,23 +573,38 @@ def set_jaws(opening):
         m.setPosition(-opening)
 
 
-def drive(q, jaws, tol=0.015, timeout=14.0, wait_jaws=True):
+def drive(q, jaws, tol=0.02, timeout=14.0, wait_jaws=False):
     """Command the arm to joint angles q and wait until it gets there."""
-    for m, target in zip(arm_motors, q):
-        m.setPosition(target)
-    set_jaws(jaws)
+    flow([(q, jaws)], timeout=timeout, wait_jaws=wait_jaws, tol=tol)
 
+
+def flow(waypoints, timeout=20.0, wait_jaws=False, tol=0.02):
+    """Run the arm through a list of (angles, jaw opening) without stopping.
+
+    All but the last are via-points: as soon as the arm is roughly on one it is
+    already heading for the next, so a pick-up is one continuous movement rather
+    than a series of moves that each stop dead before the next begins.
+    """
     deadline = robot.getTime() + timeout
-    while True:
-        step()
-        arm_err = max(abs(s.getValue() - t) for s, t in zip(arm_sensors, q))
-        if arm_err < tol and (not wait_jaws or abs(tine_s.getValue() + jaws) < 0.08):
-            return
-        if robot.getTime() > deadline:
-            return
+    for i, (q, jaws) in enumerate(waypoints):
+        last = i == len(waypoints) - 1
+        want = tol if last else BLEND_TOL
+        q = clamp_arm(q)
+        for m, target in zip(arm_motors, q):
+            m.setPosition(target)
+        set_jaws(jaws)
+        while True:
+            step()
+            if max(abs(s.getValue() - t) for s, t in zip(arm_sensors, q)) < want:
+                break
+            if robot.getTime() > deadline:
+                return
+        if last and wait_jaws:
+            while abs(tine_s.getValue() + jaws) > 0.08 and robot.getTime() < deadline:
+                step()
 
 
-def squeeze(timeout=2.5):
+def squeeze(timeout=1.4):
     """Close the tines onto whatever is between them.
 
     They are commanded shut, but an object stops them well before that. Waiting
@@ -566,14 +620,14 @@ def squeeze(timeout=2.5):
         now = tine_s.getValue()
         still = still + 1 if abs(now - last) < 0.002 else 0
         last = now
-        if still > 6:
+        if still > 3:
             return
     return
 
 
 def travel_pose():
     """Fold the arm in before moving off."""
-    drive(ik_local(0.95, 0.0, 0.55), JAW_TRAVEL, wait_jaws=False)
+    drive(ik_local(1.05, 0.0, 0.55), JAW_TRAVEL)
 
 
 # --------------------------------------------------------------------------
@@ -588,20 +642,20 @@ def pick_up(colour):
         raise Dropped
 
     sx, sy, sz = node.getPosition()          # it may have settled since
-    drive(ik(sx, sy, sz + APPROACH_DZ + CUBE), JAW_OPEN)
-    drive(ik(sx, sy, sz + APPROACH_DZ), JAW_OPEN)
-    drive(ik(sx, sy, sz), JAW_OPEN)
+    # one continuous swing: out, over, and down onto the object
+    flow([(ik(sx, sy, sz + APPROACH_DZ + CUBE), JAW_OPEN),
+          (ik(sx, sy, sz + APPROACH_DZ), JAW_OPEN),
+          (ik(sx, sy, sz), JAW_OPEN)])
     squeeze()
-    settle(0.3)
 
     # lift straight up first, so a bad grip shows itself before we drive off
-    drive(ik(sx, sy, sz + APPROACH_DZ), JAW_GRIP, wait_jaws=False)
+    drive(ik(sx, sy, sz + APPROACH_DZ), JAW_GRIP)
     if not holding(colour):
         print("    lost the %s on the lift - trying again" % colour)
         drive(ik(sx, sy, sz + APPROACH_DZ + CUBE), JAW_OPEN)
         raise Dropped
     held = colour
-    drive(ik_local(STANDOFF, 0.0, TRANSIT_Z), JAW_GRIP, wait_jaws=False)
+    drive(ik_local(STANDOFF, 0.0, TRANSIT_Z), JAW_GRIP)
 
 
 def put_down(colour, dest_xy, level, where):
@@ -616,13 +670,14 @@ def put_down(colour, dest_xy, level, where):
         raise Dropped
 
     dst_centre = CUBE * level + CUBE / 2
-    drive(ik(dx, dy, TRANSIT_Z), JAW_GRIP, wait_jaws=False)
-    drive(ik(dx, dy, dst_centre + APPROACH_DZ), JAW_GRIP, wait_jaws=False)
     seat = dst_centre + RELEASE_GAP - SEAT_RISE
-    drive(ik(dx, dy, seat), JAW_GRIP, wait_jaws=False)
+    # one continuous swing again: across, over the stack, and down onto it
+    flow([(ik(dx, dy, TRANSIT_Z), JAW_GRIP),
+          (ik(dx, dy, dst_centre + APPROACH_DZ), JAW_GRIP),
+          (ik(dx, dy, seat), JAW_GRIP)])
     held = None
-    drive(ik(dx, dy, seat), JAW_OPEN)
-    settle(0.5)
+    drive(ik(dx, dy, seat), JAW_OPEN, wait_jaws=True)
+    settle(0.15)
     drive(ik(dx, dy, dst_centre + APPROACH_DZ), JAW_OPEN)
 
 
@@ -658,9 +713,10 @@ def manual_loop():
     print("   A / D      : stick in / out")
     print("   T / G      : rotate the grapple")
     print("   Z / X      : close / open the tines")
+    print("   the boom, stick and wrist stop before they reach the machine")
     print("-" * 62)
 
-    q = [s.getValue() for s in arm_sensors]
+    q = list(clamp_arm([s.getValue() for s in arm_sensors]))
     jaw = JAW_OPEN
     RATE = timestep / 1000.0
 
@@ -670,10 +726,12 @@ def manual_loop():
             v += DRIVE_SPEED
         if DOWN in KEYS:
             v -= DRIVE_SPEED
+        # wheels(left, right): to turn right the left track must run faster,
+        # so RIGHT adds to the left side. This was the wrong way round before.
         if LEFT in KEYS:
-            t -= TURN_SPEED * 0.30
-        if RIGHT in KEYS:
             t += TURN_SPEED * 0.30
+        if RIGHT in KEYS:
+            t -= TURN_SPEED * 0.30
         wheels(v - t, v + t)
 
         for lo, hi, idx, rate in ((ord("E"), ord("Q"), 0, 0.7),
@@ -686,10 +744,13 @@ def manual_loop():
                 q[idx] += rate * RATE
         # keep the grapple hanging plumb whatever the boom and stick do
         q[3] = -(q[1] + q[2])
+        # ...then hold the whole lot inside the arm's hard stops, so the
+        # operator cannot fold the boom down through the machine either
+        q = list(clamp_arm(q))
         if ord("Z") in KEYS:
-            jaw = max(JAW_GRIP, jaw - 1.2 * RATE)
+            jaw = max(JAW_GRIP, jaw - 1.6 * RATE)
         if ord("X") in KEYS:
-            jaw = min(JAW_OPEN, jaw + 1.2 * RATE)
+            jaw = min(JAW_OPEN, jaw + 1.6 * RATE)
 
         for m, target in zip(arm_motors, q):
             m.setPosition(target)

@@ -4956,7 +4956,7 @@ DEF EXCAVATOR Robot {
       device [
         RotationalMotor {
           name "slew_motor"
-          maxVelocity 0.7
+          maxVelocity 1.1
           maxTorque 4000
         }
         PositionSensor {
@@ -7874,12 +7874,16 @@ DEF EXCAVATOR Robot {
             jointParameters HingeJointParameters {
               axis 0 1 0
               anchor 0.3 0 0.16
+              minStop -1.45
+              maxStop 0
             }
             device [
               RotationalMotor {
                 name "boom_motor"
-                maxVelocity 0.6
+                maxVelocity 1
                 maxTorque 3000
+                minPosition -1.4
+                maxPosition -0.1
               }
               PositionSensor {
                 name "boom_sensor"
@@ -8783,12 +8787,16 @@ DEF EXCAVATOR Robot {
                   jointParameters HingeJointParameters {
                     axis 0 1 0
                     anchor 0.62 0 0
+                    minStop 0
+                    maxStop 2.25
                   }
                   device [
                     RotationalMotor {
                       name "stick_motor"
-                      maxVelocity 0.7
+                      maxVelocity 1.1
                       maxTorque 1800
+                      minPosition 0.2
+                      maxPosition 2.2
                     }
                     PositionSensor {
                       name "stick_sensor"
@@ -9438,12 +9446,16 @@ DEF EXCAVATOR Robot {
                         jointParameters HingeJointParameters {
                           axis 0 1 0
                           anchor 0.52 0 0
+                          minStop -1.65
+                          maxStop 0.95
                         }
                         device [
                           RotationalMotor {
                             name "wrist_motor"
-                            maxVelocity 1.0
+                            maxVelocity 1.6
                             maxTorque 600
+                            minPosition -1.6
+                            maxPosition 0.9
                           }
                           PositionSensor {
                             name "wrist_sensor"
@@ -9664,7 +9676,7 @@ DEF EXCAVATOR Robot {
                               device [
                                 RotationalMotor {
                                   name "rotator_motor"
-                                  maxVelocity 1.2
+                                  maxVelocity 1.8
                                   maxTorque 300
                                 }
                                 PositionSensor {
@@ -10187,12 +10199,16 @@ DEF EXCAVATOR Robot {
                                     jointParameters HingeJointParameters {
                                       axis -0.000000 1.000000 0
                                       anchor 0.1050 0.0000 -0.08
+                                      minStop -0.67
+                                      maxStop 0
                                     }
                                     device [
                                       RotationalMotor {
                                         name "tine_0_motor"
-                                        maxVelocity 1.2
+                                        maxVelocity 2
                                         maxTorque 8
+                                        minPosition -0.62
+                                        maxPosition -0.06
                                       }
                                       PositionSensor {
                                         name "tine_0_sensor"
@@ -10415,12 +10431,16 @@ DEF EXCAVATOR Robot {
                                     jointParameters HingeJointParameters {
                                       axis -0.951057 0.309017 0
                                       anchor 0.0324 0.0999 -0.08
+                                      minStop -0.67
+                                      maxStop 0
                                     }
                                     device [
                                       RotationalMotor {
                                         name "tine_1_motor"
-                                        maxVelocity 1.2
+                                        maxVelocity 2
                                         maxTorque 8
+                                        minPosition -0.62
+                                        maxPosition -0.06
                                       }
                                       PositionSensor {
                                         name "tine_1_sensor"
@@ -10643,12 +10663,16 @@ DEF EXCAVATOR Robot {
                                     jointParameters HingeJointParameters {
                                       axis -0.587785 -0.809017 0
                                       anchor -0.0849 0.0617 -0.08
+                                      minStop -0.67
+                                      maxStop 0
                                     }
                                     device [
                                       RotationalMotor {
                                         name "tine_2_motor"
-                                        maxVelocity 1.2
+                                        maxVelocity 2
                                         maxTorque 8
+                                        minPosition -0.62
+                                        maxPosition -0.06
                                       }
                                       PositionSensor {
                                         name "tine_2_sensor"
@@ -10871,12 +10895,16 @@ DEF EXCAVATOR Robot {
                                     jointParameters HingeJointParameters {
                                       axis 0.587785 -0.809017 0
                                       anchor -0.0849 -0.0617 -0.08
+                                      minStop -0.67
+                                      maxStop 0
                                     }
                                     device [
                                       RotationalMotor {
                                         name "tine_3_motor"
-                                        maxVelocity 1.2
+                                        maxVelocity 2
                                         maxTorque 8
+                                        minPosition -0.62
+                                        maxPosition -0.06
                                       }
                                       PositionSensor {
                                         name "tine_3_sensor"
@@ -11099,12 +11127,16 @@ DEF EXCAVATOR Robot {
                                     jointParameters HingeJointParameters {
                                       axis 0.951057 0.309017 0
                                       anchor 0.0324 -0.0999 -0.08
+                                      minStop -0.67
+                                      maxStop 0
                                     }
                                     device [
                                       RotationalMotor {
                                         name "tine_4_motor"
-                                        maxVelocity 1.2
+                                        maxVelocity 2
                                         maxTorque 8
+                                        minPosition -0.62
+                                        maxPosition -0.06
                                       }
                                       PositionSensor {
                                         name "tine_4_sensor"

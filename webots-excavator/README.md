@@ -39,6 +39,10 @@ Click the 3D view, press **M**, and the machine is yours:
 | `T` / `G` | rotate the grapple |
 | `Z` / `X` | close / open the tines |
 
+The boom, stick and wrist stop before they reach the machine — the same hard
+stops the autonomous routine runs under, so you cannot fold the arm through the
+cab. Steering used to be reversed (right turned left); it is not now.
+
 Press **M** again to hand it back. The autonomous routine picks up from the
 start of a cycle, wherever you happened to leave the machine — the arm works
 out its targets from the machine's actual position, so it does not need to be
@@ -92,7 +96,31 @@ Webots skips collision between two solids joined directly by a joint, so the
 boom does not fight the house it is pinned to; but tine against tine, and the
 grapple against the boom and the tracks, are all live. `tools/verify.py` checks
 the clearance at every pose the controller actually commands — the tightest is
-0.27 m.
+0.27 m. The pairs it *cannot* police are dealt with by hard stops, below.
+
+**The arm has hard stops.** There is a limit to what `selfCollision` can do:
+Webots never collides two solids joined *directly* by a joint, so
+boom-against-house and stick-against-boom are invisible to it however it is
+configured — which is why the boom could still fold down through the machine.
+Real excavators stop that with limits in the rams, and so does this one now:
+
+| joint | travel |
+|---|---|
+| boom | +6° to +80° above horizontal |
+| stick | nearly straight out, to folded right back |
+| wrist | −1.60 to +0.90 rad |
+| tines | shut (0.06) to wide open (0.62) |
+| slew, rotator | free, full circle |
+
+They are `minPosition`/`maxPosition` on the motors with `minStop`/`maxStop`
+behind them, so they bind on the operator in manual mode exactly as they bind on
+the autonomous routine — and the controller clamps its own commands to the same
+numbers, so the two can't disagree. The autonomous routine has 12–27° of
+headroom against every one of them. `tools/limits.py` prints that, and
+`tools/verify.py` fails if the world and the controller ever drift apart.
+
+Everything else — grapple against the tracks, tines against the boom, tine
+against tine — is a normal collision pair and the engine handles it.
 
 **Every prop on the site is solid.** The scenery used to be one `Solid` with no
 `boundingObject` at all, so the machine drove straight through the shipping
@@ -126,19 +154,22 @@ Two details make it work:
   to 16 x 16 m. 34% of the grid is drivable once the pads are stamped out too,
   99% of it in one connected piece, and all 28 pad-to-pad routes exist.
 * **Parking is a separate step from routing.** The planner gets the machine to a
-  standoff point; then it faces the target and creeps until it is 1.10 m away,
-  to within 0.06 m. That distance is not arbitrary — see below.
+  standoff point, then it faces the target. It only corrects the distance if it
+  is outside the usable band of 1.04–1.18 m — the arm solves for wherever the
+  machine actually ended up, so there is nothing to gain from shuffling into an
+  exact spot, and shuffling is what made it look hesitant.
 
 If a route genuinely cannot be found, the machine says so on the console and
 moves on to the next object rather than guessing.
 
-### Why the working distance is 1.10 m
+### Why the working distance is 1.04–1.18 m
 
 A finished stack of three stands 0.48 m tall. The counterweight sweeps a circle
 0.87 m in radius at a height of 0.29 m — lower than the top of the stack. So the
 only thing keeping the machine from knocking its own tower over when it slews is
-parking far enough back. At 1.10 m the stack's nearest corner is 0.987 m out,
-clearing the sweep by 0.117 m.
+parking far enough back. It aims for 1.10 m and accepts anything from 1.04 m —
+where the stack's nearest corner is still 0.93 m out, clearing the sweep by
+0.06 m — to 1.18 m, where the arm is at 94% of its reach.
 
 ### Why two towers of three, and not one tower of six
 
@@ -281,9 +312,16 @@ The controller asks the simulator where each object *actually* is before
 reaching for it, rather than assuming it is where it was left, so one that
 settles a little off-centre still gets picked up.
 
-Each move is: plan a route → drive → park at 1.10 m → line up high → descend →
-close → lift and check → drive to the build site → park → descend → release →
-back off.
+Each move is: plan a route → drive → park → line up high → descend → close →
+lift and check → drive to the build site → park → descend → release → back off.
+
+**The arm does not stop between those steps.** Each swing is a list of
+via-points fed to `flow()`, which moves on to the next as soon as the arm is
+roughly on the current one, so a pick-up is one continuous movement instead of a
+series that each brake to a halt. Routes are followed the same way — `follow()`
+does not brake at the corners. The only real wait left is `squeeze()`, which
+watches the tine sensor until the tines stop moving, because that is what
+"gripped" actually looks like.
 
 ## Rebuilding the world
 
@@ -293,7 +331,7 @@ save it, running the generator again overwrites your changes. Change
 
 ```
 python3 tools/gen_world.py      # writes both worlds and site_map.py
-python3 tools/verify.py         # 71 checks; run this before opening Webots
+python3 tools/verify.py         # 109 checks; run this before opening Webots
 ```
 
 `gen_world.py` needs nothing but Python. The other tools need `numpy` and
@@ -305,9 +343,12 @@ python3 tools/verify.py         # 71 checks; run this before opening Webots
 | `verify.py` | devices, DEFs, IK/FK, reach, self-collision clearance, routes |
 | `navtest.py` | prints an ASCII map of the drivable yard and checks every route |
 | `render.py` | draws a world to a PNG without opening Webots |
+| `limits.py` | works out the arm's hard stops and what collision has to catch |
+| `pack.py` | lays the props round the perimeter with nothing overlapping |
+| `tines.py` | the grapple's tip radius against opening angle |
 | `zfight.py` | finds surfaces that would flicker |
 
-`verify.py` is the one that matters. It reads the controller's constants and the
+`verify.py` is the one that matters (109 checks). It reads the controller's constants and the
 generated world and checks they agree — every device the controller opens
 exists, every arm target is inside the reach envelope, every pad has somewhere
 to park, and the grapple clears the machine at every commanded pose. It exits

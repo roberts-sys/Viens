@@ -643,12 +643,16 @@ HingeJoint {
   jointParameters HingeJointParameters {
     axis %.6f %.6f 0
     anchor %.4f %.4f -0.08
+    minStop -0.67
+    maxStop 0
   }
   device [
     RotationalMotor {
       name "tine_%d_motor"
-      maxVelocity 1.2
+      maxVelocity 2
       maxTorque 8
+      minPosition -0.62
+      maxPosition -0.06
     }
     PositionSensor {
       name "tine_%d_sensor"
@@ -708,7 +712,7 @@ HingeJoint {
   device [
     RotationalMotor {
       name "rotator_motor"
-      maxVelocity 1.2
+      maxVelocity 1.8
       maxTorque 300
     }
     PositionSensor {
@@ -759,12 +763,16 @@ HingeJoint {
   jointParameters HingeJointParameters {
     axis 0 1 0
     anchor 0.52 0 0
+    minStop -1.65
+    maxStop 0.95
   }
   device [
     RotationalMotor {
       name "wrist_motor"
-      maxVelocity 1.0
+      maxVelocity 1.6
       maxTorque 600
+      minPosition -1.6
+      maxPosition 0.9
     }
     PositionSensor {
       name "wrist_sensor"
@@ -801,12 +809,16 @@ HingeJoint {
   jointParameters HingeJointParameters {
     axis 0 1 0
     anchor 0.62 0 0
+    minStop 0
+    maxStop 2.25
   }
   device [
     RotationalMotor {
       name "stick_motor"
-      maxVelocity 0.7
+      maxVelocity 1.1
       maxTorque 1800
+      minPosition 0.2
+      maxPosition 2.2
     }
     PositionSensor {
       name "stick_sensor"
@@ -843,12 +855,16 @@ HingeJoint {
   jointParameters HingeJointParameters {
     axis 0 1 0
     anchor 0.3 0 0.16
+    minStop -1.45
+    maxStop 0
   }
   device [
     RotationalMotor {
       name "boom_motor"
-      maxVelocity 0.6
+      maxVelocity 1
       maxTorque 3000
+      minPosition -1.4
+      maxPosition -0.1
     }
     PositionSensor {
       name "boom_sensor"
@@ -958,7 +974,7 @@ HingeJoint {
   device [
     RotationalMotor {
       name "slew_motor"
-      maxVelocity 0.7
+      maxVelocity 1.1
       maxTorque 4000
     }
     PositionSensor {
