@@ -14,6 +14,33 @@ WorldInfo {
   }
   contactProperties [
     ContactProperties {
+      material1 "grip"
+      material2 "load"
+      coulombFriction [
+        2.2
+      ]
+      bounce 0
+      softCFM 0.0002
+    }
+    ContactProperties {
+      material1 "load"
+      material2 "load"
+      coulombFriction [
+        0.9
+      ]
+      bounce 0
+      softCFM 0.0001
+    }
+    ContactProperties {
+      material1 "load"
+      material2 "default"
+      coulombFriction [
+        1.1
+      ]
+      bounce 0
+      softCFM 0.0001
+    }
+    ContactProperties {
       coulombFriction [
         1.2
       ]
@@ -68,7 +95,7 @@ Solid {
 Solid {
   children [
     Pose {
-      translation 1.50000 0.20000 0.00060
+      translation 1.80000 0.20000 0.00060
       children [
         Shape {
           appearance PBRAppearance {
@@ -77,13 +104,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 5.20000 4.00000 0.00080
+            size 7.00000 5.40000 0.00080
           }
         }
       ]
     }
     Pose {
-      translation -2.40000 -1.70000 0.00180
+      translation -3.00000 -2.20000 0.00180
       rotation 0.000000 0.000000 1.000000 0.400000
       children [
         Shape {
@@ -93,13 +120,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 5.40000 2.60000 0.00080
+            size 7.20000 3.40000 0.00080
           }
         }
       ]
     }
     Pose {
-      translation 3.60000 -2.80000 0.00300
+      translation 4.60000 -3.60000 0.00300
       rotation 0.000000 0.000000 1.000000 -0.300000
       children [
         Shape {
@@ -109,13 +136,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 3.40000 1.00000 0.00080
+            size 4.60000 1.30000 0.00080
           }
         }
       ]
     }
     Pose {
-      translation -3.40000 3.80000 0.00420
+      translation -4.20000 4.80000 0.00420
       rotation 0.000000 0.000000 1.000000 0.250000
       children [
         Shape {
@@ -125,13 +152,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 4.60000 1.00000 0.00080
+            size 6.20000 1.30000 0.00080
           }
         }
       ]
     }
     Pose {
-      translation 2.90000 -1.40000 0.00540
+      translation 3.40000 -1.80000 0.00540
       children [
         Shape {
           appearance PBRAppearance {
@@ -146,7 +173,7 @@ Solid {
       ]
     }
     Pose {
-      translation -1.90000 2.40000 0.00540
+      translation -2.40000 3.00000 0.00540
       children [
         Shape {
           appearance PBRAppearance {
@@ -161,7 +188,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.20000 1.10000 0.00540
+      translation 5.20000 1.40000 0.00540
       children [
         Shape {
           appearance PBRAppearance {
@@ -176,58 +203,7 @@ Solid {
       ]
     }
     Pose {
-      translation 3.60000 2.80000 0.39000
-      children [
-        Shape {
-          appearance PBRAppearance {
-            baseColor 0.40000 0.31000 0.22000
-            roughness 0.80
-            metalness 0.20
-          }
-          geometry Cone {
-            bottomRadius 1.25000
-            height 0.78000
-            subdivision 20
-          }
-        }
-      ]
-    }
-    Pose {
-      translation 3.40000 -4.60000 0.27500
-      children [
-        Shape {
-          appearance PBRAppearance {
-            baseColor 0.43000 0.34000 0.25000
-            roughness 0.80
-            metalness 0.20
-          }
-          geometry Cone {
-            bottomRadius 0.95000
-            height 0.55000
-            subdivision 20
-          }
-        }
-      ]
-    }
-    Pose {
-      translation -4.60000 2.20000 0.44000
-      children [
-        Shape {
-          appearance PBRAppearance {
-            baseColor 0.38000 0.30000 0.21000
-            roughness 0.80
-            metalness 0.20
-          }
-          geometry Cone {
-            bottomRadius 1.45000
-            height 0.88000
-            subdivision 20
-          }
-        }
-      ]
-    }
-    Pose {
-      translation -1.50000 4.60000 0.31000
+      translation 1.61000 6.70000 0.31000
       children [
         Shape {
           appearance PBRAppearance {
@@ -244,7 +220,24 @@ Solid {
       ]
     }
     Pose {
-      translation 5.00000 -0.60000 0.25000
+      translation -6.80000 1.74000 0.27500
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.43000 0.34000 0.25000
+            roughness 0.80
+            metalness 0.20
+          }
+          geometry Cone {
+            bottomRadius 0.95000
+            height 0.55000
+            subdivision 20
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -6.90000 -0.36000 0.25000
       children [
         Shape {
           appearance PBRAppearance {
@@ -261,7 +254,41 @@ Solid {
       ]
     }
     Pose {
-      translation 2.90000 1.90000 0.00000
+      translation -1.81000 -6.50000 0.39000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.40000 0.31000 0.22000
+            roughness 0.80
+            metalness 0.20
+          }
+          geometry Cone {
+            bottomRadius 1.25000
+            height 0.78000
+            subdivision 20
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6.30000 -2.02000 0.44000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.38000 0.30000 0.21000
+            roughness 0.80
+            metalness 0.20
+          }
+          geometry Cone {
+            bottomRadius 1.45000
+            height 0.88000
+            subdivision 20
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 4.30000 2.40000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -333,7 +360,7 @@ Solid {
       ]
     }
     Pose {
-      translation 3.20000 0.80000 0.00000
+      translation 4.20000 -1.40000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -405,7 +432,7 @@ Solid {
       ]
     }
     Pose {
-      translation 3.20000 -0.70000 0.00000
+      translation -4.30000 2.20000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -477,7 +504,7 @@ Solid {
       ]
     }
     Pose {
-      translation 2.90000 -1.80000 0.00000
+      translation -4.20000 -2.00000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -549,7 +576,7 @@ Solid {
       ]
     }
     Pose {
-      translation 2.00000 2.80000 0.00000
+      translation 2.30000 4.40000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -621,7 +648,7 @@ Solid {
       ]
     }
     Pose {
-      translation 1.90000 -2.90000 0.00000
+      translation -2.40000 4.30000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -693,7 +720,7 @@ Solid {
       ]
     }
     Pose {
-      translation 3.90000 1.50000 0.00000
+      translation 2.10000 -4.40000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -765,7 +792,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.00000 -1.20000 0.00000
+      translation -2.20000 -4.35000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -837,7 +864,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.90000 4.50000 0.00000
+      translation -0.64000 7.54000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -918,7 +945,7 @@ Solid {
       ]
     }
     Pose {
-      translation 2.70000 4.50000 0.00000
+      translation -2.64000 7.54000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -999,7 +1026,88 @@ Solid {
       ]
     }
     Pose {
-      translation -0.90000 4.50000 0.00000
+      translation -7.54000 -2.33000 0.00000
+      rotation 0.000000 0.000000 1.000000 -1.570800
+      children [
+        Pose {
+          translation 0.00000 0.00000 0.08000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.66000 0.65000 0.62000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.60000 0.42000 0.16000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70000 0.69000 0.66000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.60000 0.24000 0.24000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.45000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.62000 0.61000 0.58000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.62000 0.30000 0.06000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.45000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.95000 0.50000 0.05000
+                roughness 0.90
+                metalness 0.20
+              }
+              geometry Box {
+                size 0.30000 0.26000 0.10000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation -0.45000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.95000 0.50000 0.05000
+                roughness 0.90
+                metalness 0.20
+              }
+              geometry Box {
+                size 0.30000 0.26000 0.10000
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Pose {
+      translation 0.46000 -7.54000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -1080,251 +1188,170 @@ Solid {
       ]
     }
     Pose {
-      translation 4.50000 4.50000 0.00000
+      translation 7.54000 0.51000 0.00000
+      rotation 0.000000 0.000000 1.000000 -1.570800
+      children [
+        Pose {
+          translation 0.00000 0.00000 0.08000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.66000 0.65000 0.62000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.60000 0.42000 0.16000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70000 0.69000 0.66000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.60000 0.24000 0.24000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.45000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.62000 0.61000 0.58000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.62000 0.30000 0.06000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.45000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.95000 0.50000 0.05000
+                roughness 0.90
+                metalness 0.20
+              }
+              geometry Box {
+                size 0.30000 0.26000 0.10000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation -0.45000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.95000 0.50000 0.05000
+                roughness 0.90
+                metalness 0.20
+              }
+              geometry Box {
+                size 0.30000 0.26000 0.10000
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Pose {
+      translation 7.54000 2.41000 0.00000
+      rotation 0.000000 0.000000 1.000000 -1.570800
+      children [
+        Pose {
+          translation 0.00000 0.00000 0.08000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.66000 0.65000 0.62000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.60000 0.42000 0.16000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.70000 0.69000 0.66000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.60000 0.24000 0.24000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.45000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.62000 0.61000 0.58000
+                roughness 0.95
+                metalness 0.20
+              }
+              geometry Box {
+                size 1.62000 0.30000 0.06000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.45000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.95000 0.50000 0.05000
+                roughness 0.90
+                metalness 0.20
+              }
+              geometry Box {
+                size 0.30000 0.26000 0.10000
+              }
+            }
+          ]
+        }
+        Pose {
+          translation -0.45000 0.00000 0.30000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.95000 0.50000 0.05000
+                roughness 0.90
+                metalness 0.20
+              }
+              geometry Box {
+                size 0.30000 0.26000 0.10000
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Pose {
+      translation -4.83000 -7.13000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
-      children [
-        Pose {
-          translation 0.00000 0.00000 0.08000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.66000 0.65000 0.62000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.60000 0.42000 0.16000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.00000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.70000 0.69000 0.66000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.60000 0.24000 0.24000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.00000 0.00000 0.45000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.62000 0.61000 0.58000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.62000 0.30000 0.06000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.45000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.95000 0.50000 0.05000
-                roughness 0.90
-                metalness 0.20
-              }
-              geometry Box {
-                size 0.30000 0.26000 0.10000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation -0.45000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.95000 0.50000 0.05000
-                roughness 0.90
-                metalness 0.20
-              }
-              geometry Box {
-                size 0.30000 0.26000 0.10000
-              }
-            }
-          ]
-        }
-      ]
-    }
-    Pose {
-      translation -3.80000 -4.30000 0.00000
-      rotation 0.000000 0.000000 1.000000 0.350000
-      children [
-        Pose {
-          translation 0.00000 0.00000 0.08000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.66000 0.65000 0.62000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.60000 0.42000 0.16000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.00000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.70000 0.69000 0.66000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.60000 0.24000 0.24000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.00000 0.00000 0.45000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.62000 0.61000 0.58000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.62000 0.30000 0.06000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.45000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.95000 0.50000 0.05000
-                roughness 0.90
-                metalness 0.20
-              }
-              geometry Box {
-                size 0.30000 0.26000 0.10000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation -0.45000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.95000 0.50000 0.05000
-                roughness 0.90
-                metalness 0.20
-              }
-              geometry Box {
-                size 0.30000 0.26000 0.10000
-              }
-            }
-          ]
-        }
-      ]
-    }
-    Pose {
-      translation -2.00000 -4.80000 0.00000
-      rotation 0.000000 0.000000 1.000000 0.100000
-      children [
-        Pose {
-          translation 0.00000 0.00000 0.08000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.66000 0.65000 0.62000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.60000 0.42000 0.16000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.00000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.70000 0.69000 0.66000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.60000 0.24000 0.24000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.00000 0.00000 0.45000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.62000 0.61000 0.58000
-                roughness 0.95
-                metalness 0.20
-              }
-              geometry Box {
-                size 1.62000 0.30000 0.06000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0.45000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.95000 0.50000 0.05000
-                roughness 0.90
-                metalness 0.20
-              }
-              geometry Box {
-                size 0.30000 0.26000 0.10000
-              }
-            }
-          ]
-        }
-        Pose {
-          translation -0.45000 0.00000 0.30000
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.95000 0.50000 0.05000
-                roughness 0.90
-                metalness 0.20
-              }
-              geometry Box {
-                size 0.30000 0.26000 0.10000
-              }
-            }
-          ]
-        }
-      ]
-    }
-    Pose {
-      translation -4.80000 -2.40000 0.00000
-      rotation 0.000000 0.000000 1.000000 0.150000
       children [
         Pose {
           translation 0.00000 0.00000 0.62000
@@ -1554,7 +1581,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.92440 -0.43110 0.00720
+      translation 4.80000 1.80000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1569,7 +1596,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.92440 -0.43110 0.00900
+      translation 4.80000 1.80000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -1584,7 +1611,7 @@ Solid {
       ]
     }
     Pose {
-      translation 1.00450 -0.17710 0.00720
+      translation -0.20000 4.55000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1599,7 +1626,7 @@ Solid {
       ]
     }
     Pose {
-      translation 1.00450 -0.17710 0.00900
+      translation -0.20000 4.55000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -1614,7 +1641,7 @@ Solid {
       ]
     }
     Pose {
-      translation 1.01610 0.08890 0.00720
+      translation -3.95000 3.30000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1629,7 +1656,7 @@ Solid {
       ]
     }
     Pose {
-      translation 1.01610 0.08890 0.00900
+      translation -3.95000 3.30000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -1644,7 +1671,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.95850 0.34880 0.00720
+      translation -4.70000 -1.70000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1659,7 +1686,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.95850 0.34880 0.00900
+      translation -4.70000 -1.70000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -1674,7 +1701,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.83560 0.58510 0.00720
+      translation -0.20000 -3.95000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1689,7 +1716,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.83560 0.58510 0.00900
+      translation -0.20000 -3.95000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -1704,7 +1731,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.65570 0.78130 0.00720
+      translation 3.80000 -3.20000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1719,7 +1746,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.65570 0.78130 0.00900
+      translation 3.80000 -3.20000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -1734,7 +1761,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.59740 -0.61860 0.00720
+      translation -2.20000 -0.70000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1749,7 +1776,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.59740 -0.61860 0.00900
+      translation -2.20000 -0.70000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -1764,7 +1791,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.20800 -0.83450 0.00720
+      translation 2.30000 -0.70000 0.00720
       children [
         Shape {
           appearance PBRAppearance {
@@ -1779,7 +1806,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.20800 -0.83450 0.00900
+      translation 2.30000 -0.70000 0.00900
       children [
         Shape {
           appearance PBRAppearance {
@@ -2511,8 +2538,8 @@ Solid {
       ]
     }
     Pose {
-      translation -4.40000 3.40000 0.00000
-      rotation 0.000000 0.000000 1.000000 -0.350000
+      translation 4.72000 6.58000 0.00000
+      rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
           translation 0.00000 0.00000 0.63000
@@ -2545,7 +2572,7 @@ Solid {
           ]
         }
         Pose {
-          translation 1.62000 0.20000 0.75000
+          translation 1.63000 0.20000 0.75000
           children [
             Shape {
               appearance PBRAppearance {
@@ -2560,7 +2587,7 @@ Solid {
           ]
         }
         Pose {
-          translation 1.62000 -0.70000 0.55000
+          translation 1.62200 -0.70000 0.55000
           children [
             Shape {
               appearance PBRAppearance {
@@ -2569,7 +2596,7 @@ Solid {
                 metalness 0.20
               }
               geometry Box {
-                size 0.06000 0.70000 1.05000
+                size 0.05000 0.70000 1.05000
               }
             }
           ]
@@ -2625,8 +2652,8 @@ Solid {
       ]
     }
     Pose {
-      translation -2.60000 4.40000 0.00000
-      rotation 0.000000 0.000000 1.000000 0.400000
+      translation 7.50000 6.15000 0.00000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Pose {
           translation 0.00000 0.00000 0.51000
@@ -2691,8 +2718,8 @@ Solid {
       ]
     }
     Pose {
-      translation 1.10000 -5.00000 0.00000
-      rotation 0.000000 0.000000 1.000000 -0.200000
+      translation -7.28000 -4.22000 0.00000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Pose {
           translation 0.00000 0.00000 0.45000
@@ -2744,8 +2771,8 @@ Solid {
       ]
     }
     Pose {
-      translation 3.40000 3.40000 0.00000
-      rotation 0.000000 0.000000 1.000000 0.500000
+      translation 3.69000 -7.35000 0.00000
+      rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
           translation 0.00000 0.00000 0.06000
@@ -2796,8 +2823,8 @@ Solid {
       ]
     }
     Pose {
-      translation 4.40000 2.90000 0.00000
-      rotation 0.000000 0.000000 1.000000 0.150000
+      translation 7.35000 3.99000 0.00000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Pose {
           translation 0.00000 0.00000 0.06000
@@ -2819,7 +2846,7 @@ Solid {
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.58000 0.30000 0.21000
+                baseColor 0.60000 0.31000 0.22000
                 roughness 1.00
                 metalness 0.20
               }
@@ -2832,8 +2859,8 @@ Solid {
       ]
     }
     Pose {
-      translation -3.20000 -5.00000 0.07000
-      rotation 0.000000 0.000000 1.000000 0.900000
+      translation 7.30000 -5.08000 0.07000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Shape {
           appearance PBRAppearance {
@@ -2848,8 +2875,8 @@ Solid {
       ]
     }
     Pose {
-      translation -3.15000 -5.00000 0.23000
-      rotation 0.000000 0.000000 1.000000 0.900000
+      translation 7.35000 -5.08000 0.23000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Shape {
           appearance PBRAppearance {
@@ -2864,8 +2891,8 @@ Solid {
       ]
     }
     Pose {
-      translation -3.10000 -5.00000 0.39000
-      rotation 0.000000 0.000000 1.000000 0.900000
+      translation 7.40000 -5.08000 0.39000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Shape {
           appearance PBRAppearance {
@@ -2880,7 +2907,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.50000 -2.85000 0.22000
+      translation 2.23000 -7.01000 0.22000
       rotation 0.000000 1.000000 0.000000 1.570800
       children [
         Shape {
@@ -2898,7 +2925,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.50000 -2.85000 0.22000
+      translation 2.23000 -7.01000 0.22000
       rotation 0.000000 1.000000 0.000000 1.570800
       children [
         Shape {
@@ -2916,7 +2943,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.50000 -3.35000 0.22000
+      translation 2.23000 -7.51000 0.22000
       rotation 0.000000 1.000000 0.000000 1.570800
       children [
         Shape {
@@ -2934,7 +2961,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.50000 -3.35000 0.22000
+      translation 2.23000 -7.51000 0.22000
       rotation 0.000000 1.000000 0.000000 1.570800
       children [
         Shape {
@@ -2952,7 +2979,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.50000 -3.10000 0.60000
+      translation 2.23000 -7.26000 0.60000
       rotation 0.000000 1.000000 0.000000 1.570800
       children [
         Shape {
@@ -2970,7 +2997,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.50000 -3.10000 0.60000
+      translation 2.23000 -7.26000 0.60000
       rotation 0.000000 1.000000 0.000000 1.570800
       children [
         Shape {
@@ -2988,8 +3015,8 @@ Solid {
       ]
     }
     Pose {
-      translation -4.60000 -4.60000 0.05000
-      rotation 0.000000 0.000000 1.000000 0.900000
+      translation -7.50000 4.70000 0.05000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Shape {
           appearance PBRAppearance {
@@ -3004,7 +3031,7 @@ Solid {
       ]
     }
     Pose {
-      translation -0.90000 -4.70000 0.00000
+      translation -7.45000 -5.70000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -3078,7 +3105,7 @@ Solid {
       ]
     }
     Pose {
-      translation -0.40000 -4.75000 0.00000
+      translation -6.95000 -5.75000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -3152,7 +3179,7 @@ Solid {
       ]
     }
     Pose {
-      translation -0.65000 -5.15000 0.00000
+      translation -7.20000 -6.15000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -3226,8 +3253,8 @@ Solid {
       ]
     }
     Pose {
-      translation 2.60000 -4.70000 0.00000
-      rotation 0.000000 0.000000 1.000000 2.200000
+      translation 4.88000 -7.49000 0.00000
+      rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
           translation 0.00000 0.00000 0.42000
@@ -3302,7 +3329,7 @@ Solid {
       ]
     }
     Pose {
-      translation 5.20000 3.40000 0.00000
+      translation 5.98000 -7.33000 0.00000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -3371,7 +3398,7 @@ Solid {
       ]
     }
     Pose {
-      translation 2.90000 3.90000
+      translation 0.30000 4.50000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -3424,7 +3451,7 @@ Solid {
       ]
     }
     Pose {
-      translation -2.20000 -4.60000
+      translation 0.20000 -4.50000
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
@@ -3477,8 +3504,8 @@ Solid {
       ]
     }
     Pose {
-      translation 4.60000 2.20000 0.00000
-      rotation 0.000000 0.000000 1.000000 0.300000
+      translation 7.45000 5.20000 0.00000
+      rotation 0.000000 0.000000 1.000000 -1.570800
       children [
         Pose {
           translation 0.00000 0.00000 0.42000
@@ -3537,7 +3564,7 @@ Solid {
       ]
     }
     Pose {
-      translation -1.15000 4.90000 0.06500
+      translation -4.96000 7.35000 0.06500
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Shape {
@@ -3553,7 +3580,7 @@ Solid {
       ]
     }
     Pose {
-      translation -0.71000 4.90000 0.06500
+      translation -4.52000 7.35000 0.06500
       rotation 0.000000 0.000000 1.000000 0.100000
       children [
         Shape {
@@ -3569,7 +3596,7 @@ Solid {
       ]
     }
     Pose {
-      translation -0.27000 4.90000 0.06500
+      translation -4.08000 7.35000 0.06500
       rotation 0.000000 0.000000 1.000000 0.200000
       children [
         Shape {
@@ -3585,7 +3612,7 @@ Solid {
       ]
     }
     Pose {
-      translation -1.15000 5.18000 0.19500
+      translation -4.96000 7.63000 0.19500
       rotation 0.000000 0.000000 1.000000 0.300000
       children [
         Shape {
@@ -3601,7 +3628,7 @@ Solid {
       ]
     }
     Pose {
-      translation -0.71000 5.18000 0.19500
+      translation -4.52000 7.63000 0.19500
       rotation 0.000000 0.000000 1.000000 0.400000
       children [
         Shape {
@@ -3617,8 +3644,8 @@ Solid {
       ]
     }
     Pose {
-      translation 3.90000 -3.90000 0.00000
-      rotation 0.000000 0.000000 1.000000 -0.500000
+      translation -5.99000 7.41000 0.00000
+      rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
           translation 0.00000 0.00000 0.08000
@@ -5457,7 +5484,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.00000 6.20000 0.63000
+      translation 0.00000 8.00000 0.63000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5467,13 +5494,13 @@ Solid {
             transparency 0.50
           }
           geometry Box {
-            size 12.40000 0.03000 1.15000
+            size 16.00000 0.03000 1.15000
           }
         }
       ]
     }
     Pose {
-      translation 0.00000 6.20000 1.20000
+      translation 0.00000 8.00000 1.20000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5482,13 +5509,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 12.40000 0.05000 0.06000
+            size 16.00000 0.05000 0.06000
           }
         }
       ]
     }
     Pose {
-      translation 6.20000 0.00000 0.63000
+      translation 8.00000 0.00000 0.63000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5498,13 +5525,13 @@ Solid {
             transparency 0.50
           }
           geometry Box {
-            size 0.03000 12.40000 1.15000
+            size 0.03000 16.00000 1.15000
           }
         }
       ]
     }
     Pose {
-      translation 6.20000 0.00000 1.20000
+      translation 8.00000 0.00000 1.20000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5513,13 +5540,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 0.05000 12.40000 0.06000
+            size 0.05000 16.00000 0.06000
           }
         }
       ]
     }
     Pose {
-      translation -4.20000 6.20000 0.65000
+      translation -5.71429 8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5536,7 +5563,7 @@ Solid {
       ]
     }
     Pose {
-      translation 6.20000 -4.20000 0.65000
+      translation 8.00000 -5.71429 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5553,7 +5580,7 @@ Solid {
       ]
     }
     Pose {
-      translation -1.40000 6.20000 0.65000
+      translation -3.42857 8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5570,7 +5597,7 @@ Solid {
       ]
     }
     Pose {
-      translation 6.20000 -1.40000 0.65000
+      translation 8.00000 -3.42857 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5587,7 +5614,7 @@ Solid {
       ]
     }
     Pose {
-      translation 1.40000 6.20000 0.65000
+      translation -1.14286 8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5604,7 +5631,7 @@ Solid {
       ]
     }
     Pose {
-      translation 6.20000 1.40000 0.65000
+      translation 8.00000 -1.14286 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5621,7 +5648,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.20000 6.20000 0.65000
+      translation 1.14286 8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5638,7 +5665,7 @@ Solid {
       ]
     }
     Pose {
-      translation 6.20000 4.20000 0.65000
+      translation 8.00000 1.14286 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5655,7 +5682,75 @@ Solid {
       ]
     }
     Pose {
-      translation 6.20000 6.20000 0.65000
+      translation 3.42857 8.00000 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 8.00000 3.42857 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 5.71429 8.00000 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 8.00000 5.71429 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 8.00000 8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5672,7 +5767,7 @@ Solid {
       ]
     }
     Pose {
-      translation 6.20000 -6.20000 0.65000
+      translation 8.00000 -8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5689,7 +5784,7 @@ Solid {
       ]
     }
     Pose {
-      translation 0.00000 -6.20000 0.63000
+      translation 0.00000 -8.00000 0.63000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5699,13 +5794,13 @@ Solid {
             transparency 0.50
           }
           geometry Box {
-            size 12.40000 0.03000 1.15000
+            size 16.00000 0.03000 1.15000
           }
         }
       ]
     }
     Pose {
-      translation 0.00000 -6.20000 1.20000
+      translation 0.00000 -8.00000 1.20000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5714,13 +5809,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 12.40000 0.05000 0.06000
+            size 16.00000 0.05000 0.06000
           }
         }
       ]
     }
     Pose {
-      translation -6.20000 0.00000 0.63000
+      translation -8.00000 0.00000 0.63000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5730,13 +5825,13 @@ Solid {
             transparency 0.50
           }
           geometry Box {
-            size 0.03000 12.40000 1.15000
+            size 0.03000 16.00000 1.15000
           }
         }
       ]
     }
     Pose {
-      translation -6.20000 0.00000 1.20000
+      translation -8.00000 0.00000 1.20000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5745,13 +5840,13 @@ Solid {
             metalness 0.20
           }
           geometry Box {
-            size 0.05000 12.40000 0.06000
+            size 0.05000 16.00000 0.06000
           }
         }
       ]
     }
     Pose {
-      translation -4.20000 -6.20000 0.65000
+      translation -5.71429 -8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5768,7 +5863,7 @@ Solid {
       ]
     }
     Pose {
-      translation -6.20000 -4.20000 0.65000
+      translation -8.00000 -5.71429 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5785,7 +5880,7 @@ Solid {
       ]
     }
     Pose {
-      translation -1.40000 -6.20000 0.65000
+      translation -3.42857 -8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5802,7 +5897,7 @@ Solid {
       ]
     }
     Pose {
-      translation -6.20000 -1.40000 0.65000
+      translation -8.00000 -3.42857 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5819,7 +5914,7 @@ Solid {
       ]
     }
     Pose {
-      translation 1.40000 -6.20000 0.65000
+      translation -1.14286 -8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5836,7 +5931,7 @@ Solid {
       ]
     }
     Pose {
-      translation -6.20000 1.40000 0.65000
+      translation -8.00000 -1.14286 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5853,7 +5948,7 @@ Solid {
       ]
     }
     Pose {
-      translation 4.20000 -6.20000 0.65000
+      translation 1.14286 -8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5870,7 +5965,7 @@ Solid {
       ]
     }
     Pose {
-      translation -6.20000 4.20000 0.65000
+      translation -8.00000 1.14286 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5887,7 +5982,75 @@ Solid {
       ]
     }
     Pose {
-      translation -6.20000 6.20000 0.65000
+      translation 3.42857 -8.00000 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -8.00000 3.42857 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 5.71429 -8.00000 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -8.00000 5.71429 0.65000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.45000 0.46000 0.48000
+            roughness 0.80
+            metalness 0.50
+          }
+          geometry Cylinder {
+            height 1.30000
+            radius 0.04000
+            subdivision 8
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -8.00000 8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5904,7 +6067,7 @@ Solid {
       ]
     }
     Pose {
-      translation -6.20000 -6.20000 0.65000
+      translation -8.00000 -8.00000 0.65000
       children [
         Shape {
           appearance PBRAppearance {
@@ -5922,6 +6085,376 @@ Solid {
     }
   ]
   name "site_scenery"
+}
+Solid {
+  name "site_collision"
+  boundingObject Group {
+    children [
+      Pose {
+        translation -0.64000 7.54000 0.25500
+        children [
+          Box {
+            size 1.62000 0.42000 0.51000
+          }
+        ]
+      }
+      Pose {
+        translation -2.64000 7.54000 0.25500
+        children [
+          Box {
+            size 1.62000 0.42000 0.51000
+          }
+        ]
+      }
+      Pose {
+        translation -7.54000 -2.33000 0.25500
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 1.62000 0.42000 0.51000
+          }
+        ]
+      }
+      Pose {
+        translation 0.46000 -7.54000 0.25500
+        children [
+          Box {
+            size 1.62000 0.42000 0.51000
+          }
+        ]
+      }
+      Pose {
+        translation 7.54000 0.51000 0.25500
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 1.62000 0.42000 0.51000
+          }
+        ]
+      }
+      Pose {
+        translation 7.54000 2.41000 0.25500
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 1.62000 0.42000 0.51000
+          }
+        ]
+      }
+      Pose {
+        translation 4.88000 -7.49000 0.27500
+        children [
+          Box {
+            size 0.96000 0.52000 0.55000
+          }
+        ]
+      }
+      Pose {
+        translation 3.69000 -7.35000 0.34000
+        children [
+          Box {
+            size 1.00000 0.80000 0.68000
+          }
+        ]
+      }
+      Pose {
+        translation 7.35000 3.99000 0.27000
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 1.00000 0.80000 0.54000
+          }
+        ]
+      }
+      Pose {
+        translation 7.45000 5.20000 0.42000
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 0.86000 0.60000 0.84000
+          }
+        ]
+      }
+      Pose {
+        translation 4.30000 2.40000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation 4.20000 -1.40000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -4.30000 2.20000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -4.20000 -2.00000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation 2.30000 4.40000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -2.40000 4.30000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation 2.10000 -4.40000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -2.20000 -4.35000 0.17000
+        children [
+          Cylinder {
+            height 0.3400
+            radius 0.1100
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -4.83000 -7.13000 0.62000
+        children [
+          Box {
+            size 3.14000 1.24000 1.24000
+          }
+        ]
+      }
+      Pose {
+        translation -7.20000 -5.85000 0.30000
+        children [
+          Cylinder {
+            height 0.6000
+            radius 0.5500
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -7.28000 -4.22000 0.48500
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 1.55000 0.95000 0.97000
+          }
+        ]
+      }
+      Pose {
+        translation 5.98000 -7.33000 2.10000
+        children [
+          Cylinder {
+            height 4.2000
+            radius 0.4200
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -5.99000 7.41000 0.46000
+        children [
+          Box {
+            size 0.82000 0.68000 0.92000
+          }
+        ]
+      }
+      Pose {
+        translation 4.72000 6.58000 0.67500
+        children [
+          Box {
+            size 3.35000 2.35000 1.35000
+          }
+        ]
+      }
+      Pose {
+        translation 1.61000 6.70000 0.31000
+        children [
+          Cylinder {
+            height 0.6200
+            radius 1.0500
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -6.80000 1.74000 0.27500
+        children [
+          Cylinder {
+            height 0.5500
+            radius 0.9500
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -6.90000 -0.36000 0.25000
+        children [
+          Cylinder {
+            height 0.5000
+            radius 0.8500
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation -1.81000 -6.50000 0.39000
+        children [
+          Cylinder {
+            height 0.7800
+            radius 1.2500
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation 6.30000 -2.02000 0.44000
+        children [
+          Cylinder {
+            height 0.8800
+            radius 1.4500
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation 2.23000 -7.26000 0.42000
+        children [
+          Box {
+            size 1.52000 0.98000 0.84000
+          }
+        ]
+      }
+      Pose {
+        translation -7.50000 4.70000 0.05000
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 3.40000 0.50000 0.10000
+          }
+        ]
+      }
+      Pose {
+        translation -4.52000 7.45000 0.13000
+        children [
+          Box {
+            size 1.35000 0.60000 0.26000
+          }
+        ]
+      }
+      Pose {
+        translation 0.30000 4.50000 0.87500
+        children [
+          Cylinder {
+            height 1.7500
+            radius 0.0900
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation 0.20000 -4.50000 0.87500
+        children [
+          Cylinder {
+            height 1.7500
+            radius 0.0900
+            subdivision 12
+          }
+        ]
+      }
+      Pose {
+        translation 7.30000 -5.08000 0.23000
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 2.65000 0.90000 0.46000
+          }
+        ]
+      }
+      Pose {
+        translation 7.50000 6.15000 0.54000
+        rotation 0.000000 0.000000 1.000000 -1.570800
+        children [
+          Box {
+            size 0.50000 0.50000 1.08000
+          }
+        ]
+      }
+      Pose {
+        translation 0.00000 8.00000 0.60000
+        children [
+          Box {
+            size 16.20000 0.08000 1.20000
+          }
+        ]
+      }
+      Pose {
+        translation 8.00000 0.00000 0.60000
+        children [
+          Box {
+            size 0.08000 16.20000 1.20000
+          }
+        ]
+      }
+      Pose {
+        translation 0.00000 -8.00000 0.60000
+        children [
+          Box {
+            size 16.20000 0.08000 1.20000
+          }
+        ]
+      }
+      Pose {
+        translation -8.00000 0.00000 0.60000
+        children [
+          Box {
+            size 0.08000 16.20000 1.20000
+          }
+        ]
+      }
+    ]
+  }
 }
 DEF EXCAVATOR Robot {
   translation 0 0 0
@@ -8862,7 +9395,7 @@ DEF EXCAVATOR Robot {
         translation 0 0 0.34
         children [
           Pose {
-            translation -0.06000 0.00000 0.05000
+            translation -0.02000 0.00000 0.05000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8871,13 +9404,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.30
                 }
                 geometry Box {
-                  size 1.16000 0.78000 0.10000
+                  size 1.06000 0.74000 0.10000
                 }
               }
             ]
           }
           Pose {
-            translation -0.06000 0.00000 0.00500
+            translation -0.02000 0.00000 0.00500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8886,13 +9419,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 1.10000 0.72000 0.03000
+                  size 1.00000 0.68000 0.03000
                 }
               }
             ]
           }
           Pose {
-            translation -0.44000 0.02000 0.10200
+            translation -0.40000 0.02000 0.10200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8901,13 +9434,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.60000 0.00800
+                  size 0.02000 0.56000 0.00800
                 }
               }
             ]
           }
           Pose {
-            translation -0.31000 0.02000 0.10200
+            translation -0.27000 0.02000 0.10200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8916,13 +9449,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.60000 0.00800
+                  size 0.02000 0.56000 0.00800
                 }
               }
             ]
           }
           Pose {
-            translation -0.18000 0.02000 0.10200
+            translation -0.14000 0.02000 0.10200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8931,13 +9464,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.60000 0.00800
+                  size 0.02000 0.56000 0.00800
                 }
               }
             ]
           }
           Pose {
-            translation -0.05000 0.02000 0.10200
+            translation -0.01000 0.02000 0.10200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8946,13 +9479,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.60000 0.00800
+                  size 0.02000 0.56000 0.00800
                 }
               }
             ]
           }
           Pose {
-            translation 0.08000 0.02000 0.10200
+            translation 0.12000 0.02000 0.10200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8961,13 +9494,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.60000 0.00800
+                  size 0.02000 0.56000 0.00800
                 }
               }
             ]
           }
           Pose {
-            translation 0.21000 0.02000 0.10200
+            translation 0.25000 0.02000 0.10200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8976,13 +9509,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.60000 0.00800
+                  size 0.02000 0.56000 0.00800
                 }
               }
             ]
           }
           Pose {
-            translation -0.32000 -0.04000 0.27000
+            translation -0.30000 -0.04000 0.27000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -8991,13 +9524,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.30
                 }
                 geometry Box {
-                  size 0.52000 0.66000 0.34000
+                  size 0.50000 0.64000 0.34000
                 }
               }
             ]
           }
           Pose {
-            translation -0.58000 -0.04000 0.16000
+            translation -0.55200 -0.04000 0.16000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9012,7 +9545,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58000 -0.04000 0.19500
+            translation -0.55200 -0.04000 0.19500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9027,7 +9560,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58000 -0.04000 0.23000
+            translation -0.55200 -0.04000 0.23000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9042,7 +9575,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58000 -0.04000 0.26500
+            translation -0.55200 -0.04000 0.26500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9057,7 +9590,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58000 -0.04000 0.30000
+            translation -0.55200 -0.04000 0.30000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9072,7 +9605,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58000 -0.04000 0.33500
+            translation -0.55200 -0.04000 0.33500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9087,7 +9620,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58000 -0.04000 0.37000
+            translation -0.55200 -0.04000 0.37000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9111,13 +9644,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.34000 0.52000 0.01200
+                  size 0.34000 0.50000 0.01200
                 }
               }
             ]
           }
           Pose {
-            translation -0.45000 -0.24000 0.45200
+            translation -0.44000 -0.24000 0.45200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9132,7 +9665,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.45000 0.08000 0.45200
+            translation -0.44000 0.08000 0.45200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9162,7 +9695,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.44000 -0.36300 0.27000
+            translation -0.42000 -0.34300 0.27000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9228,7 +9761,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.08000 -0.28000 0.28000
+            translation -0.08000 -0.26000 0.28000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9245,7 +9778,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.08000 -0.28000 0.44000
+            translation -0.08000 -0.26000 0.44000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9262,7 +9795,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.18000 -0.28000 0.21000
+            translation 0.18000 -0.27000 0.21000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9277,7 +9810,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.18000 -0.28000 0.33400
+            translation 0.18000 -0.27000 0.33400
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9294,7 +9827,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.02000 -0.30000 0.16000
+            translation -0.02000 -0.29000 0.16000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9309,7 +9842,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.66000 0.00000 0.21000
+            translation -0.54000 0.00000 0.19000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9318,13 +9851,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.30
                 }
                 geometry Box {
-                  size 0.22000 0.75500 0.38000
+                  size 0.20000 0.70000 0.32000
                 }
               }
             ]
           }
           Pose {
-            translation -0.76000 0.00000 0.20000
+            translation -0.63000 0.00000 0.19000
             rotation 1.000000 0.000000 0.000000 1.570800
             children [
               Shape {
@@ -9334,15 +9867,30 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Cylinder {
-                  height 0.78000
-                  radius 0.19000
+                  height 0.70000
+                  radius 0.15000
                   subdivision 20
                 }
               }
             ]
           }
           Pose {
-            translation -0.77500 -0.32000 0.03000
+            translation -0.70200 0.00000 0.05500
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.84000 0.61000 0.06000
+                  roughness 0.75
+                  metalness 0.20
+                }
+                geometry Box {
+                  size 0.03000 0.62000 0.09000
+                }
+              }
+            ]
+          }
+          Pose {
+            translation -0.72000 -0.28000 0.05500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9351,13 +9899,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.09000 0.05000
+                  size 0.01800 0.09000 0.07500
                 }
               }
             ]
           }
           Pose {
-            translation -0.77500 -0.19000 0.03000
+            translation -0.72000 -0.16700 0.05500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9366,13 +9914,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.09000 0.05000
+                  size 0.01800 0.09000 0.07500
                 }
               }
             ]
           }
           Pose {
-            translation -0.77500 -0.06000 0.03000
+            translation -0.72000 -0.05400 0.05500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9381,13 +9929,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.09000 0.05000
+                  size 0.01800 0.09000 0.07500
                 }
               }
             ]
           }
           Pose {
-            translation -0.77500 0.07000 0.03000
+            translation -0.72000 0.05900 0.05500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9396,13 +9944,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.09000 0.05000
+                  size 0.01800 0.09000 0.07500
                 }
               }
             ]
           }
           Pose {
-            translation -0.77500 0.20000 0.03000
+            translation -0.72000 0.17200 0.05500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9411,13 +9959,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.09000 0.05000
+                  size 0.01800 0.09000 0.07500
                 }
               }
             ]
           }
           Pose {
-            translation -0.77500 0.33000 0.03000
+            translation -0.72000 0.28500 0.05500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9426,13 +9974,13 @@ DEF EXCAVATOR Robot {
                   metalness 0.20
                 }
                 geometry Box {
-                  size 0.02000 0.09000 0.05000
+                  size 0.01800 0.09000 0.07500
                 }
               }
             ]
           }
           Pose {
-            translation -0.80000 0.00000 0.10000
+            translation -0.74000 0.00000 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -9447,7 +9995,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.36000 0.40000 0.23000
+            translation 0.36000 0.38000 0.23000
             rotation 1.000000 0.000000 0.000000 0.000000
             children [
               Shape {
@@ -9465,7 +10013,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.23000 0.42000 0.36000
+            translation 0.23000 0.40000 0.36000
             rotation -0.152057 -0.988372 0.000000 1.570796
             children [
               Shape {
@@ -9483,7 +10031,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.62000 0.36000 0.20000
+            translation -0.50000 0.34000 0.20000
             rotation 1.000000 0.000000 0.000000 0.000000
             children [
               Shape {
@@ -10428,7 +10976,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.60000 0.37500 0.10000
+            translation -0.49000 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10445,7 +10993,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.60000 -0.37500 0.10000
+            translation -0.49000 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10462,7 +11010,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.49500 0.37500 0.10000
+            translation -0.39900 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10479,7 +11027,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.49500 -0.37500 0.10000
+            translation -0.39900 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10496,7 +11044,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.39000 0.37500 0.10000
+            translation -0.30800 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10513,7 +11061,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.39000 -0.37500 0.10000
+            translation -0.30800 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10530,7 +11078,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.28500 0.37500 0.10000
+            translation -0.21700 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10547,7 +11095,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.28500 -0.37500 0.10000
+            translation -0.21700 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10564,7 +11112,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.18000 0.37500 0.10000
+            translation -0.12600 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10581,7 +11129,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.18000 -0.37500 0.10000
+            translation -0.12600 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10598,7 +11146,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.07500 0.37500 0.10000
+            translation -0.03500 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10615,7 +11163,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.07500 -0.37500 0.10000
+            translation -0.03500 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10632,7 +11180,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.03000 0.37500 0.10000
+            translation 0.05600 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10649,7 +11197,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.03000 -0.37500 0.10000
+            translation 0.05600 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10666,7 +11214,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.13500 0.37500 0.10000
+            translation 0.14700 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10683,7 +11231,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.13500 -0.37500 0.10000
+            translation 0.14700 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10700,7 +11248,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.24000 0.37500 0.10000
+            translation 0.23800 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10717,7 +11265,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.24000 -0.37500 0.10000
+            translation 0.23800 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10734,7 +11282,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.34500 0.37500 0.10000
+            translation 0.32900 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10751,7 +11299,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.34500 -0.37500 0.10000
+            translation 0.32900 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10768,7 +11316,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.45000 0.37500 0.10000
+            translation 0.42000 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10785,7 +11333,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.45000 -0.37500 0.10000
+            translation 0.42000 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10802,7 +11350,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.55500 0.37500 0.10000
+            translation 0.51100 0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10819,7 +11367,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.55500 -0.37500 0.10000
+            translation 0.51100 -0.35500 0.10000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -10836,7 +11384,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.31000 0.08000
+            translation -0.73598 -0.28000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10854,7 +11402,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.31000 0.32000
+            translation -0.70883 -0.28000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10872,7 +11420,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.22100 0.08000
+            translation -0.73598 -0.20000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10890,7 +11438,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.22100 0.32000
+            translation -0.70883 -0.20000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10908,7 +11456,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.13200 0.08000
+            translation -0.73598 -0.12000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10926,7 +11474,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.13200 0.32000
+            translation -0.70883 -0.12000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10944,7 +11492,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.04300 0.08000
+            translation -0.73598 -0.04000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10962,7 +11510,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 -0.04300 0.32000
+            translation -0.70883 -0.04000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10980,7 +11528,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.04600 0.08000
+            translation -0.73598 0.04000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -10998,7 +11546,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.04600 0.32000
+            translation -0.70883 0.04000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11016,7 +11564,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.13500 0.08000
+            translation -0.73598 0.12000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11034,7 +11582,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.13500 0.32000
+            translation -0.70883 0.12000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11052,7 +11600,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.22400 0.08000
+            translation -0.73598 0.20000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11070,7 +11618,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.22400 0.32000
+            translation -0.70883 0.20000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11088,7 +11636,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.31300 0.08000
+            translation -0.73598 0.28000 0.08000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11106,7 +11654,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.78200 0.31300 0.32000
+            translation -0.70883 0.28000 0.32000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11124,7 +11672,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58200 0.20000 0.17000
+            translation -0.55400 0.20000 0.17000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11139,7 +11687,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58200 0.20000 0.20600
+            translation -0.55400 0.20000 0.20600
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11154,7 +11702,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58200 0.20000 0.24200
+            translation -0.55400 0.20000 0.24200
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11169,7 +11717,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58200 0.20000 0.27800
+            translation -0.55400 0.20000 0.27800
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11184,7 +11732,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58200 0.20000 0.31400
+            translation -0.55400 0.20000 0.31400
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11199,7 +11747,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.58200 0.20000 0.35000
+            translation -0.55400 0.20000 0.35000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11322,7 +11870,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.36000 0.42000 0.13000
+            translation 0.36000 0.40000 0.13000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11339,7 +11887,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.20000 0.42000 0.13000
+            translation 0.20000 0.40000 0.13000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11356,7 +11904,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.04000 0.42000 0.13000
+            translation 0.04000 0.40000 0.13000
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11407,7 +11955,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.50000 -0.26000 0.15500
+            translation -0.47000 -0.25000 0.15500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11422,7 +11970,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.50000 -0.26000 0.21600
+            translation -0.47000 -0.25000 0.21600
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11473,7 +12021,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation 0.04000 -0.30000 0.24500
+            translation 0.04000 -0.28000 0.24500
             children [
               Shape {
                 appearance PBRAppearance {
@@ -11490,7 +12038,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.77500 -0.24000 0.30000
+            translation -0.73600 -0.24000 0.30000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11508,7 +12056,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.77500 -0.08000 0.30000
+            translation -0.73600 -0.08000 0.30000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11526,7 +12074,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.77500 0.08000 0.30000
+            translation -0.73600 0.08000 0.30000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -11544,7 +12092,7 @@ DEF EXCAVATOR Robot {
             ]
           }
           Pose {
-            translation -0.77500 0.24000 0.30000
+            translation -0.73600 0.24000 0.30000
             rotation 0.000000 1.000000 0.000000 1.570800
             children [
               Shape {
@@ -14071,8 +14619,8 @@ DEF EXCAVATOR Robot {
                                     device [
                                       RotationalMotor {
                                         name "tine_0_motor"
-                                        maxVelocity 1.6
-                                        maxTorque 120
+                                        maxVelocity 1.2
+                                        maxTorque 8
                                       }
                                       PositionSensor {
                                         name "tine_0_sensor"
@@ -14255,11 +14803,33 @@ DEF EXCAVATOR Robot {
                                         }
                                       ]
                                       name "tine_0"
-                                      boundingObject Pose {
-                                        translation 0 0 -0.045
+                                      contactMaterial "grip"
+                                      boundingObject Group {
                                         children [
-                                          Box {
-                                            size 0.05 0.055 0.05
+                                          Pose {
+                                            translation 0 0 -0.075
+                                            children [
+                                              Box {
+                                                size 0.05 0.055 0.15
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.020 0 -0.198
+                                            rotation 0 1 0 0.24
+                                            children [
+                                              Box {
+                                                size 0.045 0.050 0.135
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.046 0 -0.262
+                                            children [
+                                              Box {
+                                                size 0.045 0.055 0.045
+                                              }
+                                            ]
                                           }
                                         ]
                                       }
@@ -14277,8 +14847,8 @@ DEF EXCAVATOR Robot {
                                     device [
                                       RotationalMotor {
                                         name "tine_1_motor"
-                                        maxVelocity 1.6
-                                        maxTorque 120
+                                        maxVelocity 1.2
+                                        maxTorque 8
                                       }
                                       PositionSensor {
                                         name "tine_1_sensor"
@@ -14461,11 +15031,33 @@ DEF EXCAVATOR Robot {
                                         }
                                       ]
                                       name "tine_1"
-                                      boundingObject Pose {
-                                        translation 0 0 -0.045
+                                      contactMaterial "grip"
+                                      boundingObject Group {
                                         children [
-                                          Box {
-                                            size 0.05 0.055 0.05
+                                          Pose {
+                                            translation 0 0 -0.075
+                                            children [
+                                              Box {
+                                                size 0.05 0.055 0.15
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.020 0 -0.198
+                                            rotation 0 1 0 0.24
+                                            children [
+                                              Box {
+                                                size 0.045 0.050 0.135
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.046 0 -0.262
+                                            children [
+                                              Box {
+                                                size 0.045 0.055 0.045
+                                              }
+                                            ]
                                           }
                                         ]
                                       }
@@ -14483,8 +15075,8 @@ DEF EXCAVATOR Robot {
                                     device [
                                       RotationalMotor {
                                         name "tine_2_motor"
-                                        maxVelocity 1.6
-                                        maxTorque 120
+                                        maxVelocity 1.2
+                                        maxTorque 8
                                       }
                                       PositionSensor {
                                         name "tine_2_sensor"
@@ -14667,11 +15259,33 @@ DEF EXCAVATOR Robot {
                                         }
                                       ]
                                       name "tine_2"
-                                      boundingObject Pose {
-                                        translation 0 0 -0.045
+                                      contactMaterial "grip"
+                                      boundingObject Group {
                                         children [
-                                          Box {
-                                            size 0.05 0.055 0.05
+                                          Pose {
+                                            translation 0 0 -0.075
+                                            children [
+                                              Box {
+                                                size 0.05 0.055 0.15
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.020 0 -0.198
+                                            rotation 0 1 0 0.24
+                                            children [
+                                              Box {
+                                                size 0.045 0.050 0.135
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.046 0 -0.262
+                                            children [
+                                              Box {
+                                                size 0.045 0.055 0.045
+                                              }
+                                            ]
                                           }
                                         ]
                                       }
@@ -14689,8 +15303,8 @@ DEF EXCAVATOR Robot {
                                     device [
                                       RotationalMotor {
                                         name "tine_3_motor"
-                                        maxVelocity 1.6
-                                        maxTorque 120
+                                        maxVelocity 1.2
+                                        maxTorque 8
                                       }
                                       PositionSensor {
                                         name "tine_3_sensor"
@@ -14873,11 +15487,33 @@ DEF EXCAVATOR Robot {
                                         }
                                       ]
                                       name "tine_3"
-                                      boundingObject Pose {
-                                        translation 0 0 -0.045
+                                      contactMaterial "grip"
+                                      boundingObject Group {
                                         children [
-                                          Box {
-                                            size 0.05 0.055 0.05
+                                          Pose {
+                                            translation 0 0 -0.075
+                                            children [
+                                              Box {
+                                                size 0.05 0.055 0.15
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.020 0 -0.198
+                                            rotation 0 1 0 0.24
+                                            children [
+                                              Box {
+                                                size 0.045 0.050 0.135
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.046 0 -0.262
+                                            children [
+                                              Box {
+                                                size 0.045 0.055 0.045
+                                              }
+                                            ]
                                           }
                                         ]
                                       }
@@ -14895,8 +15531,8 @@ DEF EXCAVATOR Robot {
                                     device [
                                       RotationalMotor {
                                         name "tine_4_motor"
-                                        maxVelocity 1.6
-                                        maxTorque 120
+                                        maxVelocity 1.2
+                                        maxTorque 8
                                       }
                                       PositionSensor {
                                         name "tine_4_sensor"
@@ -15079,11 +15715,33 @@ DEF EXCAVATOR Robot {
                                         }
                                       ]
                                       name "tine_4"
-                                      boundingObject Pose {
-                                        translation 0 0 -0.045
+                                      contactMaterial "grip"
+                                      boundingObject Group {
                                         children [
-                                          Box {
-                                            size 0.05 0.055 0.05
+                                          Pose {
+                                            translation 0 0 -0.075
+                                            children [
+                                              Box {
+                                                size 0.05 0.055 0.15
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.020 0 -0.198
+                                            rotation 0 1 0 0.24
+                                            children [
+                                              Box {
+                                                size 0.045 0.050 0.135
+                                              }
+                                            ]
+                                          }
+                                          Pose {
+                                            translation -0.046 0 -0.262
+                                            children [
+                                              Box {
+                                                size 0.045 0.055 0.045
+                                              }
+                                            ]
                                           }
                                         ]
                                       }
@@ -15179,7 +15837,7 @@ DEF EXCAVATOR Robot {
           translation -0.1 0 0.2
           children [
             Box {
-              size 1.3 0.78 0.5
+              size 1.24 0.76 0.5
             }
           ]
         }
@@ -15231,10 +15889,11 @@ DEF EXCAVATOR Robot {
     ]
   }
   controller "excavator_controller"
+  selfCollision TRUE
   supervisor TRUE
 }
 DEF CUBE_BLUE Solid {
-  translation 0.9244 -0.4311 0.08100
+  translation 4.8000 1.8000 0.08100
   children [
     Shape {
       appearance PBRAppearance {
@@ -15248,16 +15907,17 @@ DEF CUBE_BLUE Solid {
     }
   ]
   name "cube_blue"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF CUBE_YELLOW Solid {
-  translation 1.0045 -0.1771 0.08100
+  translation -0.2000 4.5500 0.08100
   children [
     Shape {
       appearance PBRAppearance {
@@ -15271,16 +15931,17 @@ DEF CUBE_YELLOW Solid {
     }
   ]
   name "cube_yellow"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF CUBE_BROWN Solid {
-  translation 1.0161 0.0889 0.08100
+  translation -3.9500 3.3000 0.08100
   children [
     Shape {
       appearance PBRAppearance {
@@ -15294,16 +15955,17 @@ DEF CUBE_BROWN Solid {
     }
   ]
   name "cube_brown"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF CUBE_RED Solid {
-  translation 0.9585 0.3488 0.08100
+  translation -4.7000 -1.7000 0.08100
   children [
     Shape {
       appearance PBRAppearance {
@@ -15317,16 +15979,17 @@ DEF CUBE_RED Solid {
     }
   ]
   name "cube_red"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF CUBE_GREEN Solid {
-  translation 0.8356 0.5851 0.08100
+  translation -0.2000 -3.9500 0.08100
   children [
     Shape {
       appearance PBRAppearance {
@@ -15340,16 +16003,17 @@ DEF CUBE_GREEN Solid {
     }
   ]
   name "cube_green"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF CUBE_WHITE Solid {
-  translation 0.6557 0.7813 0.08100
+  translation 3.8000 -3.2000 0.08100
   children [
     Shape {
       appearance PBRAppearance {
@@ -15363,12 +16027,13 @@ DEF CUBE_WHITE Solid {
     }
   ]
   name "cube_white"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF ROCK_BLUE Solid {
@@ -15472,12 +16137,13 @@ DEF ROCK_BLUE Solid {
     }
   ]
   name "rock_blue"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF ROCK_YELLOW Solid {
@@ -15581,12 +16247,13 @@ DEF ROCK_YELLOW Solid {
     }
   ]
   name "rock_yellow"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF ROCK_BROWN Solid {
@@ -15690,12 +16357,13 @@ DEF ROCK_BROWN Solid {
     }
   ]
   name "rock_brown"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF ROCK_RED Solid {
@@ -15799,12 +16467,13 @@ DEF ROCK_RED Solid {
     }
   ]
   name "rock_red"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF ROCK_GREEN Solid {
@@ -15908,12 +16577,13 @@ DEF ROCK_GREEN Solid {
     }
   ]
   name "rock_green"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }
 DEF ROCK_WHITE Solid {
@@ -16017,11 +16687,12 @@ DEF ROCK_WHITE Solid {
     }
   ]
   name "rock_white"
+  contactMaterial "load"
   boundingObject Box {
     size 0.16000 0.16000 0.16000
   }
   physics Physics {
     density -1
-    mass 0.8
+    mass 2.0
   }
 }

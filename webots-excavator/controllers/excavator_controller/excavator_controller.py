@@ -3,20 +3,23 @@
 The arm has five axes: slew, boom, stick, wrist and a rotator that spins the
 five-tine grapple about the vertical.
 
-Repeats forever:
-  1. stacks the six objects into two towers of three, one at a time,
-  2. takes both towers apart again, returning each object to its home pad,
-  3. rebuilds them in a different order (different objects end up on top),
-  4. takes those apart too.
+For each object in turn the machine plans a route across the yard, parks at
+arm's length from it, closes the grapple round it, drives to a build site and
+sets it down. Six objects go up as two towers of three, then come down again
+onto their home pads, then go up in a different order.
 
-Press C or R in the 3D view to switch between the cubes and the rocks.
+Press M in the 3D view to take over and drive it yourself, C or R to switch
+between the cubes and the rocks.
 
-The arm is driven by inverse kinematics: the code says "put the grab point at
-this (x, y, z) in the world" and solves for the four joint angles that do it.
+Nothing is teleported. The grapple holds an object because its five tines close
+to a circle 0.12 m across, which is narrower than the 0.16 m object inside
+them - the object physically cannot fall out, exactly as with a real grapple.
 """
 
 from controller import Supervisor
 import math
+
+from site_map import OBSTACLES, FENCE
 
 # --------------------------------------------------------------------------
 # Machine geometry. These must match construction_site.wbt.
@@ -25,34 +28,49 @@ BOOM_PIVOT_R = 0.30   # boom pivot: how far forward of the slew axis
 BOOM_PIVOT_Z = 0.50   # boom pivot: height above the ground
 BOOM_LEN = 0.62       # boom pivot  -> stick pivot
 STICK_LEN = 0.52      # stick pivot -> grapple pivot
-TIP_OFFSET = 0.26     # wrist pivot -> the grab point between the tines
-GRAB_DROP = 0.19      # grapple head origin -> that same grab point
+TIP_OFFSET = 0.385    # wrist pivot -> the centre of a held object
+GRAB_DROP = 0.315     # grapple head origin -> that same point
 
-CUBE = 0.16           # cube edge length
+CUBE = 0.16           # object edge length
 
 # --------------------------------------------------------------------------
-# Motion settings
+# The grapple
+#
+# Tine tip radius against opening angle (see tools/tines.py):
+#     0.62 -> 0.224   wide enough to drop over the corners of a 0.16 cube
+#     0.24 -> 0.113   just touching the corners
+#     0.12 -> 0.079   inside the cube's width
+#     0.06 -> 0.061   commanded shut; 0.123 across, so the cube is caged
+# The tines stall against the object somewhere around 0.12-0.24 and hold it
+# there with motor torque. The tips never drop below z = 0.022, so they cannot
+# dig into the ground, and never come closer than 0.022 to each other, so they
+# cannot jam against one another either.
 # --------------------------------------------------------------------------
-JAW_OPEN = 0.62       # radians, tines splayed wide
-JAW_CLOSED = 0.10     # radians, tines closed around a cube
+JAW_OPEN = 0.62
+JAW_GRIP = 0.06       # commanded shut; contact stops them well before this
+JAW_TRAVEL = 0.25     # tines tucked in, but not clamped, while driving empty
 TINES = 5
 
-TRANSIT_Z = 0.78      # height the grab point travels at while carrying
-APPROACH_DZ = 0.25    # how far above a cube to line up before dropping onto it
-RELEASE_GAP = 0.008   # let go a few mm high so the cube settles itself
+TRANSIT_Z = 0.72      # height a carried object travels at
+APPROACH_DZ = 0.25    # how far above an object to line up before dropping on it
+RELEASE_GAP = 0.01    # let go a centimetre high so it settles itself
+SEAT_RISE = 0.022     # a caged object rests on the tine tips, which is this far
+                      # above the nominal grab point - allowed for when placing
+HELD_TOL = 0.09       # how far an object may sit from the grab point and still
+                      # count as held
 
 # --------------------------------------------------------------------------
-# Where things live. (x, y) in world metres; the machine sits at the origin.
+# Where things live. (x, y) in world metres.
 # --------------------------------------------------------------------------
 HOMES = {
-    "white":  (0.6557,  0.7813),
-    "green":  (0.8356,  0.5851),
-    "red":    (0.9585,  0.3488),
-    "brown":  (1.0161,  0.0889),
-    "yellow": (1.0045, -0.1771),
-    "blue":   (0.9244, -0.4311),
+    "blue":   (4.80, 1.80),
+    "yellow": (-0.20, 4.55),
+    "brown":  (-3.95, 3.30),
+    "red":    (-4.70, -1.70),
+    "green":  (-0.20, -3.95),
+    "white":  (3.80, -3.20),
 }
-TOWERS = ((0.5974, -0.6186), (0.2080, -0.8345))
+TOWERS = ((-2.20, -0.70), (2.30, -0.70))
 
 # Six objects go up as two stacks of three. A single stack of six would be
 # 0.96 m tall: past the arm's reach for the approach above it, and inside the
@@ -68,31 +86,19 @@ LAYOUTS = [
 # --------------------------------------------------------------------------
 # Driving
 # --------------------------------------------------------------------------
-WORK = (0.0, 0.0, 0.0)        # where the arm can reach every pad: x, y, heading
-ROAD = (-1.9, 0.0)            # first clear point behind the machine
-PATROL = ((-2.7, 0.6), (0.0, 2.6), (-1.8, -2.2))
-
 WHEEL_R = 0.13                # wheel radius, for turning m/s into rad/s
-DRIVE_SPEED = 0.45            # m/s
+DRIVE_SPEED = 0.55            # m/s
 TURN_SPEED = 0.9              # rad/s
-MACHINE_R = 0.75              # footprint radius used for planning
+MACHINE_R = 0.78              # footprint radius used for planning
+SWEEP_R = 0.87                # what the counterweight sweeps when it slews
 CELL = 0.15
-LIMIT = 5.7
+LIMIT = FENCE - 0.5
 
-# Everything the machine must not drive into. Kept in step with the world file;
-# the six home pads and two tower pads are added below.
-OBSTACLES = [
-    (2.9, 1.9, 0.16), (3.2, 0.8, 0.16), (3.2, -0.7, 0.16), (2.9, -1.8, 0.16),
-    (2.0, 2.8, 0.16), (1.9, -2.9, 0.16), (3.9, 1.5, 0.16), (4.0, -1.2, 0.16),
-    (0.9, 4.5, 0.85), (2.7, 4.5, 0.85), (-0.9, 4.5, 0.85), (4.5, 4.5, 0.85),
-    (-3.8, -4.3, 0.85), (-2.0, -4.8, 0.85),
-    (-4.8, -2.4, 1.70), (-4.4, 3.4, 2.00), (-2.6, 4.4, 0.40), (1.1, -5.0, 0.90),
-    (3.4, 3.4, 0.65), (4.4, 2.9, 0.65), (4.5, -3.1, 0.90), (-3.2, -5.0, 1.50),
-    (-0.65, -4.85, 0.55), (2.6, -4.7, 0.50),
-    (3.6, 2.8, 1.30), (3.4, -4.6, 1.00), (-4.6, 2.2, 1.50), (-1.5, 4.6, 1.10),
-    (5.0, -0.6, 0.90), (4.6, 2.2, 0.55), (-0.7, 5.0, 0.80), (3.9, -3.9, 0.50),
-    (5.2, 3.4, 0.50), (2.9, 3.9, 0.25), (-2.2, -4.6, 0.25), (-4.6, -4.6, 1.75),
-]
+STANDOFF = 1.10               # distance from the slew axis to the object worked on
+                              # (a 3-high stack stands 0.48 m; the counterweight
+                              #  sweeps at 0.87 m, so anything closer would clip it)
+STANDOFF_TOL = 0.06           # how exactly that distance is held
+PAD_R = 0.12                  # an object or a stack, as an obstacle
 
 # --------------------------------------------------------------------------
 # Setup
@@ -145,7 +151,7 @@ keyboard.enable(timestep)
 base = robot.getSelf()
 
 active = "cube"   # which set the machine is working with right now
-held = None       # colour of the object currently in the grapple, or None
+held = None       # colour of the object in the grapple, or None
 manual = False    # True while the operator is driving
 
 
@@ -157,13 +163,22 @@ class ModeChange(Exception):
     """Raised when the operator switches sets, or enters/leaves manual mode."""
 
 
+class Dropped(Exception):
+    """Raised when the grapple comes up empty, so the move can be retried."""
+
+
 def objs():
     """The set currently in play."""
     return SETS[active]
 
 
 def park_set(name, at_home):
-    """Put a set on its home pads, or away off-site."""
+    """Put a set on its home pads, or away off-site.
+
+    This is the only place anything is ever moved by hand, and it is a reset -
+    it runs at startup and when the operator swaps cubes for rocks, never while
+    the machine is working.
+    """
     for i, colour in enumerate(COLOURS):
         node = SETS[name][colour]
         if node is None:
@@ -221,8 +236,9 @@ def base_pose():
 def to_base(wx, wy, wz):
     """A world point expressed in the machine's own frame.
 
-    Once the machine can drive, the pads no longer sit at fixed places relative
-    to it, so every arm target goes through here first.
+    The machine drives, so the pads do not sit at fixed places relative to it.
+    Every arm target goes through here first, which is why the arm still works
+    wherever the machine happens to be parked.
     """
     bx, by, bz, yaw = base_pose()
     dx, dy = wx - bx, wy - by
@@ -239,6 +255,7 @@ def wheels(left, right):
 
 
 def halt():
+    """Stop. The wheel motors hold zero speed, which is also the parking brake."""
     wheels(0.0, 0.0)
 
 
@@ -247,7 +264,10 @@ def wrap(a):
 
 
 # ---- the map: a grid of cells the machine is allowed to occupy ----
-PADS = [(x, y, 0.18) for x, y in HOMES.values()] + [(x, y, 0.20) for x, y in TOWERS]
+# OBSTACLES comes from site_map.py, which the world generator writes, so it
+# always matches the collision bodies that are actually in the world. The pads
+# are added here because an object standing on one must not be driven over.
+PADS = [(x, y, PAD_R) for x, y in HOMES.values()] + [(x, y, PAD_R) for x, y in TOWERS]
 N = int(2 * LIMIT / CELL) + 1
 
 
@@ -279,11 +299,18 @@ def build_grid():
 GRID = build_grid()
 
 
+def free_cell(x, y):
+    c = cell_of(x, y)
+    return 0 <= c[0] < N and 0 <= c[1] < N and not GRID[c[0]][c[1]]
+
+
 def plan(start, goal):
     """A* across the free cells. Returns a list of world points, or None."""
     import heapq
     s, g = cell_of(*start), cell_of(*goal)
-    if GRID[s[0]][s[1]] or GRID[g[0]][g[1]]:
+    if not (0 <= s[0] < N and 0 <= s[1] < N and 0 <= g[0] < N and 0 <= g[1] < N):
+        return None
+    if GRID[g[0]][g[1]]:
         return None
     openq = [(0.0, s)]
     came, cost = {s: None}, {s: 0.0}
@@ -313,7 +340,7 @@ def plan(start, goal):
     return None
 
 
-def goto(tx, ty, tol=0.18, timeout=45.0):
+def goto(tx, ty, tol=0.18, timeout=60.0):
     """Drive to a point: turn towards it, then run at it, correcting as we go."""
     deadline = robot.getTime() + timeout
     while True:
@@ -333,7 +360,7 @@ def goto(tx, ty, tol=0.18, timeout=45.0):
         step()
 
 
-def face(heading, tol=0.06, timeout=20.0):
+def face(heading, tol=0.05, timeout=25.0):
     deadline = robot.getTime() + timeout
     while True:
         _, _, _, yaw = base_pose()
@@ -346,8 +373,8 @@ def face(heading, tol=0.06, timeout=20.0):
         step()
 
 
-def creep(distance, timeout=25.0):
-    """Straight forward (or back, if negative) - used to dock at the work spot."""
+def creep(distance, timeout=30.0):
+    """Straight forward (or back, if negative)."""
     x0, y0, _, _ = base_pose()
     deadline = robot.getTime() + timeout
     sign = 1.0 if distance > 0 else -1.0
@@ -356,59 +383,99 @@ def creep(distance, timeout=25.0):
         if math.hypot(x - x0, y - y0) >= abs(distance) or robot.getTime() > deadline:
             halt()
             return
-        wheels(sign * DRIVE_SPEED * 0.6, sign * DRIVE_SPEED * 0.6)
+        wheels(sign * DRIVE_SPEED * 0.5, sign * DRIVE_SPEED * 0.5)
         step()
 
 
-def drive_route(goal, label):
-    """Plan a route to a point and follow it, reporting what it found."""
+def standoff_spot(tx, ty):
+    """Somewhere to park at arm's length from (tx, ty).
+
+    Tries every bearing round the target, nearest to where the machine already
+    is first, and takes the first one that is clear of the props, clear of the
+    other pads, and that a route can actually be found to.
+    """
     x, y, _, _ = base_pose()
-    path = plan((x, y), goal)
-    if path is None:
-        print("    no clear route to %s - staying put" % label)
+    here = math.atan2(y - ty, x - tx)
+    others = [(px, py, pr) for px, py, pr in PADS
+              if math.hypot(px - tx, py - ty) > 0.05]
+    order = sorted((k * math.pi / 12 for k in range(24)),
+                   key=lambda b: abs(wrap(b - here)))
+    for b in order:
+        sx, sy = tx + STANDOFF * math.cos(b), ty + STANDOFF * math.sin(b)
+        if not free_cell(sx, sy):
+            continue
+        if any(math.hypot(sx - px, sy - py) < pr + MACHINE_R for px, py, pr in others):
+            continue
+        if plan((x, y), (sx, sy)) is not None:
+            return sx, sy
+    return None
+
+
+def dock_at(tx, ty, label):
+    """Park within reach of (tx, ty), facing it, at exactly the working distance.
+
+    The last step matters: the counterweight sweeps a circle 0.87 m across when
+    the machine slews, so parking any closer than that would knock a finished
+    stack over.
+    """
+    spot = standoff_spot(tx, ty)
+    if spot is None:
+        print("    nowhere clear to park by %s - skipping" % label)
         return False
-    print("    driving to %s: %d waypoints" % (label, len(path)))
+    x, y, _, _ = base_pose()
+    path = plan((x, y), spot)
+    if path is None:
+        print("    no clear route to %s - skipping" % label)
+        return False
+    print("    driving to %s: %d waypoints, %.1f m away"
+          % (label, len(path), math.hypot(spot[0] - x, spot[1] - y)))
     for wx, wy in path[1:]:
         goto(wx, wy, tol=0.22)
+
+    # settle onto the exact working distance
+    for _ in range(4):
+        x, y, _, _ = base_pose()
+        face(math.atan2(ty - y, tx - x))
+        x, y, _, _ = base_pose()
+        gap = math.hypot(tx - x, ty - y)
+        if abs(gap - STANDOFF) < STANDOFF_TOL:
+            break
+        creep(gap - STANDOFF)
+    x, y, _, _ = base_pose()
+    gap = math.hypot(tx - x, ty - y)
+    if gap < SWEEP_R + 0.05:
+        print("    parked too close to %s (%.2f m) - backing off" % (label, gap))
+        creep(gap - STANDOFF)
+        x, y, _, _ = base_pose()
+        gap = math.hypot(tx - x, ty - y)
+    print("    parked %.2f m from %s" % (gap, label))
     return True
 
 
-def travel_pose():
-    """Fold the arm in before moving off."""
-    drive(ik_local(0.62, 0.0, 0.62), JAW_CLOSED)
-
-
+# --------------------------------------------------------------------------
+# The grapple
+# --------------------------------------------------------------------------
 def grab_point():
-    """World position of the point between the jaws."""
+    """World position of the point the tines close around."""
     p = grapple_node.getPosition()
     m = grapple_node.getOrientation()      # row-major 3x3
-    # the grab point sits TIP_OFFSET down the grapple's own -z axis
     return (p[0] - m[2] * GRAB_DROP,
             p[1] - m[5] * GRAB_DROP,
             p[2] - m[8] * GRAB_DROP)
 
 
-def carry():
-    """Keep the held cube locked under the grapple.
-
-    Called every simulation step. Rather than relying on friction between the
-    jaws (which is fragile), the cube is pinned to the grapple's grab point and
-    its velocity is cleared, so it can never be dropped or shaken loose.
-    """
-    if held is None:
-        return
+def holding(colour):
+    """Is that object still inside the tines?"""
+    node = objs()[colour]
+    if node is None:
+        return False
     gx, gy, gz = grab_point()
-    node = objs()[held]
-    node.getField("translation").setSFVec3f([gx, gy, gz - CUBE / 2])
-    # the cube turns with the grapple head: slew plus whatever the rotator adds
-    node.getField("rotation").setSFRotation(
-        [0, 0, 1, slew_s.getValue() + rotator_s.getValue()])
-    node.resetPhysics()
+    x, y, z = node.getPosition()
+    return math.hypot(math.hypot(x - gx, y - gy), z - gz) < HELD_TOL
 
 
 def step(n=1):
     for _ in range(n):
-        carry()
         if robot.step(timestep) == -1:
             raise Quit
         poll_keyboard()
@@ -437,7 +504,7 @@ def ik_local(x, y, z):
     d = min(d, BOOM_LEN + STICK_LEN - 1e-3)
     d = max(d, abs(BOOM_LEN - STICK_LEN) + 1e-3)
 
-    # Elbow-up solution: boom raised, stick angled down — an excavator's
+    # Elbow-up solution: boom raised, stick angled down - an excavator's
     # natural working posture.
     cos_a = (d * d + BOOM_LEN ** 2 - STICK_LEN ** 2) / (2 * BOOM_LEN * d)
     a1 = math.atan2(dz, dr) + math.acos(max(-1.0, min(1.0, cos_a)))
@@ -467,7 +534,7 @@ def set_jaws(opening):
         m.setPosition(-opening)
 
 
-def drive(q, jaws, tol=0.012, timeout=12.0):
+def drive(q, jaws, tol=0.015, timeout=14.0, wait_jaws=True):
     """Command the arm to joint angles q and wait until it gets there."""
     for m, target in zip(arm_motors, q):
         m.setPosition(target)
@@ -477,43 +544,104 @@ def drive(q, jaws, tol=0.012, timeout=12.0):
     while True:
         step()
         arm_err = max(abs(s.getValue() - t) for s, t in zip(arm_sensors, q))
-        jaw_err = abs(tine_s.getValue() + jaws)
-        if arm_err < tol and jaw_err < 0.06:
+        if arm_err < tol and (not wait_jaws or abs(tine_s.getValue() + jaws) < 0.08):
             return
         if robot.getTime() > deadline:
             return
 
 
-def transfer(colour, dest_xy, level):
-    """Move one cube to dest_xy at the given stack level (0 = on the ground)."""
+def squeeze(timeout=2.5):
+    """Close the tines onto whatever is between them.
+
+    They are commanded shut, but an object stops them well before that. Waiting
+    for the commanded angle would always time out, so this waits for them to
+    stop moving instead - which is what "gripped" actually looks like.
+    """
+    set_jaws(JAW_GRIP)
+    deadline = robot.getTime() + timeout
+    last = tine_s.getValue()
+    still = 0
+    while robot.getTime() < deadline:
+        step()
+        now = tine_s.getValue()
+        still = still + 1 if abs(now - last) < 0.002 else 0
+        last = now
+        if still > 6:
+            return
+    return
+
+
+def travel_pose():
+    """Fold the arm in before moving off."""
+    drive(ik_local(0.95, 0.0, 0.55), JAW_TRAVEL, wait_jaws=False)
+
+
+# --------------------------------------------------------------------------
+# One move: fetch an object and put it down somewhere
+# --------------------------------------------------------------------------
+def pick_up(colour):
+    """Park by the object, close the grapple round it and lift it clear."""
     global held
+    node = objs()[colour]
+    sx, sy, sz = node.getPosition()          # ask the simulator, every time
+    if not dock_at(sx, sy, "the %s" % colour):
+        raise Dropped
 
-    # Ask the simulator where the cube actually is, rather than assuming.
-    sx, sy, sz = objs()[colour].getPosition()
-    src_top = sz + CUBE / 2
-    dx, dy = dest_xy
-    dst_top = CUBE * (level + 1)
-
-    # line up above the cube, drop onto it, close the jaws
-    drive(ik(sx, sy, TRANSIT_Z), JAW_OPEN)
-    drive(ik(sx, sy, src_top + APPROACH_DZ), JAW_OPEN)
-    drive(ik(sx, sy, src_top), JAW_OPEN)
-    set_jaws(JAW_CLOSED)
-    settle(0.7)
-    held = colour
+    sx, sy, sz = node.getPosition()          # it may have settled since
+    drive(ik(sx, sy, sz + APPROACH_DZ + CUBE), JAW_OPEN)
+    drive(ik(sx, sy, sz + APPROACH_DZ), JAW_OPEN)
+    drive(ik(sx, sy, sz), JAW_OPEN)
+    squeeze()
     settle(0.3)
 
-    # carry it across at a height that clears the tower
-    drive(ik(sx, sy, TRANSIT_Z), JAW_CLOSED)
-    drive(ik(dx, dy, TRANSIT_Z), JAW_CLOSED)
+    # lift straight up first, so a bad grip shows itself before we drive off
+    drive(ik(sx, sy, sz + APPROACH_DZ), JAW_GRIP, wait_jaws=False)
+    if not holding(colour):
+        print("    lost the %s on the lift - trying again" % colour)
+        drive(ik(sx, sy, sz + APPROACH_DZ + CUBE), JAW_OPEN)
+        raise Dropped
+    held = colour
+    drive(ik_local(STANDOFF, 0.0, TRANSIT_Z), JAW_GRIP, wait_jaws=False)
 
-    # set it down and let go
-    drive(ik(dx, dy, dst_top + APPROACH_DZ), JAW_CLOSED)
-    drive(ik(dx, dy, dst_top + RELEASE_GAP), JAW_CLOSED)
+
+def put_down(colour, dest_xy, level, where):
+    """Park by the destination and set the object down at that stack level."""
+    global held
+    dx, dy = dest_xy
+    if not dock_at(dx, dy, where):
+        raise Dropped
+    if not holding(colour):
+        print("    dropped the %s on the way - going back for it" % colour)
+        held = None
+        raise Dropped
+
+    dst_centre = CUBE * level + CUBE / 2
+    drive(ik(dx, dy, TRANSIT_Z), JAW_GRIP, wait_jaws=False)
+    drive(ik(dx, dy, dst_centre + APPROACH_DZ), JAW_GRIP, wait_jaws=False)
+    seat = dst_centre + RELEASE_GAP - SEAT_RISE
+    drive(ik(dx, dy, seat), JAW_GRIP, wait_jaws=False)
     held = None
-    objs()[colour].resetPhysics()
-    settle(0.4)
-    drive(ik(dx, dy, dst_top + APPROACH_DZ), JAW_OPEN)
+    drive(ik(dx, dy, seat), JAW_OPEN)
+    settle(0.5)
+    drive(ik(dx, dy, dst_centre + APPROACH_DZ), JAW_OPEN)
+
+
+def transfer(colour, dest_xy, level, where, attempts=3):
+    """Fetch one object and stack it at dest_xy, retrying if the grip fails."""
+    global held
+    for attempt in range(attempts):
+        try:
+            pick_up(colour)
+            put_down(colour, dest_xy, level, where)
+            return True
+        except Dropped:
+            held = None
+            if attempt + 1 < attempts:
+                print("    retrying the %s (attempt %d of %d)"
+                      % (colour, attempt + 2, attempts))
+                travel_pose()
+    print("    giving up on the %s for now" % colour)
+    return False
 
 
 # --------------------------------------------------------------------------
@@ -559,7 +687,7 @@ def manual_loop():
         # keep the grapple hanging plumb whatever the boom and stick do
         q[3] = -(q[1] + q[2])
         if ord("Z") in KEYS:
-            jaw = max(JAW_CLOSED, jaw - 1.2 * RATE)
+            jaw = max(JAW_GRIP, jaw - 1.2 * RATE)
         if ord("X") in KEYS:
             jaw = min(JAW_OPEN, jaw + 1.2 * RATE)
 
@@ -569,31 +697,9 @@ def manual_loop():
         step()
 
 
-def dock():
-    """Line up behind the work spot, then creep forward onto it."""
-    goto(ROAD[0], ROAD[1], tol=0.30)
-    face(0.0)
-    x, _, _, _ = base_pose()
-    creep(WORK[0] - x)
-    face(0.0)
-    print("  docked at the work spot")
-
-
-def patrol():
-    """A lap of the site, planned around everything the machine knows about."""
-    print("  --- leaving the work spot for a lap of the site")
-    travel_pose()
-    face(0.0)
-    creep(ROAD[0] + 0.15)
-    for i, pt in enumerate(PATROL):
-        drive_route(pt, "patrol point %d" % (i + 1))
-    drive_route(ROAD, "the work approach")
-    dock()
-
-
 def run():
     """Build and dismantle both stacks, over and over, with whatever is in play."""
-    drive(ik_local(0.95, 0.0, 0.60), JAW_OPEN)
+    travel_pose()
     cycle = 1
     while True:
         for layout in LAYOUTS:
@@ -602,17 +708,16 @@ def run():
                 print("  stack %d:  %s  (bottom -> top)" % (t + 1, " / ".join(stack)))
                 for level, colour in enumerate(stack):
                     print("    placing %-6s at level %d" % (colour, level + 1))
-                    transfer(colour, TOWERS[t], level)
+                    transfer(colour, TOWERS[t], level, "build site %d" % (t + 1))
 
             print("  --- taking both stacks apart")
             for t in reversed(range(len(layout))):
                 for level in reversed(range(len(layout[t]))):
                     colour = layout[t][level]
                     print("    returning %-6s to its home pad" % colour)
-                    transfer(colour, HOMES[colour], 0)
-
-            patrol()
-            drive(ik_local(0.95, 0.0, 0.60), JAW_OPEN)
+                    transfer(colour, HOMES[colour], 0,
+                             "the %s home pad" % colour)
+            travel_pose()
 
         cycle += 1
 
@@ -627,8 +732,11 @@ def main():
     park_set("cube", True)
     park_set("rock", False)
 
+    free = sum(not GRID[i][j] for i in range(N) for j in range(N))
     print("=" * 62)
     print("Excavator ready.")
+    print("  Site map: %d obstacles, %d of %d grid cells drivable (%.0f%%)"
+          % (len(OBSTACLES), free, N * N, 100.0 * free / (N * N)))
     print("  Click the 3D view, then press:")
     print("     M  - take manual control / hand it back")
     print("     C  - work with the CUBES")

@@ -1,37 +1,44 @@
-"""Checks the site is actually drivable before the planner goes in the controller."""
+"""Prints a map of where the machine can drive, and checks it can reach the pads.
+
+    python3 tools/navtest.py
+
+The obstacle list comes from site_map.py, which the world generator writes, so
+this is always testing the site that is actually in the world file - not a copy
+that can drift out of date.
+"""
 
 import heapq
 import math
+import os
+import re
+import sys
+from collections import deque
 
-MACHINE_R = 0.75          # the machine's own footprint radius, plus margin
-CELL = 0.15
-LIMIT = 5.7               # stay inside the fence
+HERE = os.path.dirname(os.path.abspath(__file__))
+CTRL = os.path.join(HERE, "..", "controllers", "excavator_controller")
+sys.path.insert(0, CTRL)
 
-HOMES = {
-    "white":  (0.6557,  0.7813), "green":  (0.8356,  0.5851),
-    "red":    (0.9585,  0.3488), "brown":  (1.0161,  0.0889),
-    "yellow": (1.0045, -0.1771), "blue":   (0.9244, -0.4311),
-}
-TOWERS = ((0.5974, -0.6186), (0.2080, -0.8345))
+from site_map import OBSTACLES, FENCE            # noqa: E402
 
-OBSTACLES = [
-    (2.9, 1.9, 0.16), (3.2, 0.8, 0.16), (3.2, -0.7, 0.16), (2.9, -1.8, 0.16),
-    (2.0, 2.8, 0.16), (1.9, -2.9, 0.16), (3.3, 1.9, 0.16), (3.4, -1.5, 0.16),
-    (0.9, 4.5, 0.85), (2.7, 4.5, 0.85), (-0.9, 4.5, 0.85), (4.5, 4.5, 0.85),
-    (-3.8, -4.3, 0.85), (-2.0, -4.8, 0.85),
-    (-4.8, -2.4, 1.70), (-4.4, 3.4, 2.00), (-2.6, 4.4, 0.40), (1.1, -5.0, 0.90),
-    (3.4, 3.4, 0.65), (4.4, 2.9, 0.65),
-    (4.5, -3.1, 0.90), (-3.2, -5.0, 1.50),
-    (-0.65, -4.85, 0.55), (2.6, -4.7, 0.50),
-    (3.6, 2.8, 1.30), (3.4, -4.6, 1.00), (-4.6, 2.2, 1.50), (-1.5, 4.6, 1.10),
-    (5.0, -0.6, 0.90),
-    (4.6, 2.2, 0.55), (-0.7, 5.0, 0.80), (3.9, -3.9, 0.50), (5.2, 3.4, 0.50),
-    (2.9, 3.9, 0.25), (-2.2, -4.6, 0.25), (-4.6, -4.6, 1.75),
-]
-for x, y in list(HOMES.values()):
-    OBSTACLES.append((x, y, 0.18))
-for x, y in TOWERS:
-    OBSTACLES.append((x, y, 0.20))
+src = open(os.path.join(CTRL, "excavator_controller.py")).read()
+
+
+def const(name):
+    return float(re.search(r"^%s\s*=\s*([-\d.]+)" % name, src, re.M).group(1))
+
+
+MACHINE_R = const("MACHINE_R")
+PAD_R = const("PAD_R")
+STANDOFF = const("STANDOFF")
+CELL = const("CELL")
+LIMIT = FENCE - 0.5
+
+HOMES = eval(re.search(r"^HOMES = (\{.*?^\})", src, re.M | re.S).group(1))
+TOWERS = eval(re.search(r"^TOWERS = (\(.*?\))$", src, re.M).group(1))
+
+PADS = [(x, y, PAD_R) for x, y in HOMES.values()]
+PADS += [(x, y, PAD_R) for x, y in TOWERS]
+BLOCKERS = list(OBSTACLES) + PADS
 
 N = int(2 * LIMIT / CELL) + 1
 
@@ -48,22 +55,28 @@ def blocked(i, j):
     x, y = to_world(i, j)
     if abs(x) > LIMIT or abs(y) > LIMIT:
         return True
-    for ox, oy, orad in OBSTACLES:
-        if (x - ox) ** 2 + (y - oy) ** 2 < (orad + MACHINE_R) ** 2:
-            return True
-    return False
+    return any((x - ox) ** 2 + (y - oy) ** 2 < (orad + MACHINE_R) ** 2
+               for ox, oy, orad in BLOCKERS)
 
 
 GRID = [[blocked(i, j) for j in range(N)] for i in range(N)]
 free = sum(not GRID[i][j] for i in range(N) for j in range(N))
-print("grid %dx%d, free cells %d (%.0f%%)" % (N, N, free, 100 * free / (N * N)))
+print("yard %.0f x %.0f m,  grid %dx%d,  %d cells drivable (%.0f%%)"
+      % (2 * FENCE, 2 * FENCE, N, N, free, 100.0 * free / (N * N)))
 
-print("\nfree space (. = drivable, # = blocked, X = machine home):")
+MARKS = {}
+for name, (x, y) in list(HOMES.items()) + [("1", TOWERS[0]), ("2", TOWERS[1])]:
+    MARKS[to_cell(x, y)] = name[0].upper()
+
+print("\n. drivable   # blocked   X where the machine starts")
+print("letters are the home pads, digits the two build sites\n")
 for j in range(N - 1, -1, -2):
     row = ""
-    for i in range(0, N, 1):
+    for i in range(N):
         x, y = to_world(i, j)
-        if abs(x) < 0.35 and abs(y) < 0.35:
+        if (i, j) in MARKS:
+            row += MARKS[(i, j)]
+        elif abs(x) < 0.4 and abs(y) < 0.4:
             row += "X"
         else:
             row += "#" if GRID[i][j] else "."
@@ -74,16 +87,16 @@ def plan(start, goal):
     s, g = to_cell(*start), to_cell(*goal)
     if GRID[s[0]][s[1]] or GRID[g[0]][g[1]]:
         return None
-    openq = [(0, s)]
+    openq = [(0.0, s)]
     came, cost = {s: None}, {s: 0.0}
     while openq:
         _, cur = heapq.heappop(openq)
         if cur == g:
-            path = []
+            out = []
             while cur:
-                path.append(to_world(*cur))
+                out.append(to_world(*cur))
                 cur = came[cur]
-            return path[::-1]
+            return out[::-1]
         for di in (-1, 0, 1):
             for dj in (-1, 0, 1):
                 if di == dj == 0:
@@ -95,19 +108,13 @@ def plan(start, goal):
                 if nc < cost.get(nb, 1e18):
                     cost[nb] = nc
                     came[nb] = cur
-                    h = math.hypot(nb[0] - g[0], nb[1] - g[1])
-                    heapq.heappush(openq, (nc + h, nb))
+                    heapq.heappush(openq,
+                                   (nc + math.hypot(nb[0] - g[0], nb[1] - g[1]), nb))
     return None
 
 
-# flood fill from the work spot to see what is actually reachable
-from collections import deque
-ROAD = (-1.9, 0.0)
-start = to_cell(*ROAD)
-print("\nwork spot (0,0) blocked:", GRID[to_cell(0,0)[0]][to_cell(0,0)[1]])
-print("road point %s blocked:" % (ROAD,), GRID[start[0]][start[1]])
-seen = {start}
-q = deque([start])
+start = to_cell(0, 0)
+seen, q = {start}, deque([start])
 while q:
     c = q.popleft()
     for di in (-1, 0, 1):
@@ -115,14 +122,49 @@ while q:
             nb = (c[0] + di, c[1] + dj)
             if (0 <= nb[0] < N and 0 <= nb[1] < N and nb not in seen
                     and not GRID[nb[0]][nb[1]]):
-                seen.add(nb); q.append(nb)
-print("reachable from road point: %d cells of %d free" % (len(seen), free))
-xs = [to_world(*c)[0] for c in seen]; ys = [to_world(*c)[1] for c in seen]
-print("reachable extent: x %.1f..%.1f   y %.1f..%.1f" % (min(xs), max(xs), min(ys), max(ys)))
+                seen.add(nb)
+                q.append(nb)
+print("\nreachable from the start: %d of %d free cells (%.0f%%)"
+      % (len(seen), free, 100.0 * len(seen) / free))
 
-print("\nroutes from the road point:")
-for name, pt in (("P1", (-2.7, 0.6)), ("P2", (-1.8, -2.2)), ("P3", (0.0, 2.6)),
-                 ("P4", (-3.6, -1.6)), ("P5", (1.2, 3.2))):
-    p = plan(ROAD, pt)
-    print("   %s %-14s %s" % (name, str(pt),
-                              "path %d steps" % len(p) if p else "NO PATH"))
+
+def parking(tx, ty):
+    """Every bearing round a pad that the machine could park on."""
+    others = [(px, py, pr) for px, py, pr in PADS
+              if math.hypot(px - tx, py - ty) > 0.05]
+    out = []
+    for k in range(24):
+        b = k * math.pi / 12
+        sx, sy = tx + STANDOFF * math.cos(b), ty + STANDOFF * math.sin(b)
+        c = to_cell(sx, sy)
+        if not (0 <= c[0] < N and 0 <= c[1] < N) or GRID[c[0]][c[1]] or c not in seen:
+            continue
+        if any(math.hypot(sx - px, sy - py) < pr + MACHINE_R for px, py, pr in others):
+            continue
+        out.append((sx, sy))
+    return out
+
+
+print("\nparking, at %.2f m from each pad:" % STANDOFF)
+spots = {}
+named = list(HOMES.items()) + [("build site 1", TOWERS[0]), ("build site 2", TOWERS[1])]
+for name, (x, y) in named:
+    good = parking(x, y)
+    if good:
+        spots[name] = good[0]
+    print("   %-13s (%6.2f,%6.2f)   %2d of 24 bearings usable%s"
+          % (name, x, y, len(good), "" if good else "   ** NOWHERE TO PARK **"))
+
+print("\nroutes between every pair of pads:")
+worst, bad = 0.0, 0
+items = list(spots.items())
+for a in range(len(items)):
+    for b in range(a + 1, len(items)):
+        p = plan(items[a][1], items[b][1])
+        if p is None:
+            print("   NO ROUTE  %s -> %s" % (items[a][0], items[b][0]))
+            bad += 1
+        else:
+            worst = max(worst, len(p) * CELL)
+print("   %d pairs checked, %d unroutable, longest route about %.1f m"
+      % (len(items) * (len(items) - 1) // 2, bad, worst))
