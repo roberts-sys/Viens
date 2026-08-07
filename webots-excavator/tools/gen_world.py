@@ -484,6 +484,25 @@ def house():
     return p
 
 
+def camera_pod(t, look_sign, color=(0.12, 0.12, 0.13)):
+    """A small camera housing: box, lens, sun hood and two mounting bolts.
+
+    t is the BACK of the housing, meant to sit flush against the hull - the
+    caller is responsible for choosing a t that actually touches something,
+    which is what stops these floating.  look_sign is +1 if the camera looks
+    along +x, -1 along -x.
+    """
+    hx = t[0] + look_sign * 0.03      # the lens face
+    p = [box((0.06, 0.07, 0.06), t, color=color, rough=0.5, metal=0.3)]
+    p.append(xcyl(0.030, 0.018, (hx, t[1], t[2]), color=CHAR, sub=10, metal=0.6, rough=0.25))
+    p.append(box((0.010, 0.075, 0.012), (hx - look_sign * 0.006, t[1], t[2] + 0.033),
+                 color=(0.30, 0.31, 0.33), metal=0.5))
+    for dy in (-0.026, 0.026):
+        p.append(xcyl(0.012, 0.006, (t[0] - look_sign * 0.020, t[1] + dy, t[2] - 0.027),
+                      color=(0.45, 0.46, 0.48), sub=6, metal=0.8))
+    return p
+
+
 def boom():
     p = []
     p.append(box((0.35, 0.16, 0.13), (0.16, 0, 0.05), (0, 1, 0, -0.303), YEL, rough=0.7, metal=0.3))
@@ -582,46 +601,41 @@ def stick():
     return p
 
 
-def jaw(side):
-    """One grapple jaw. side = +1 or -1 (which side of the grapple it hangs on)."""
-    p = []
-    p.append(box((0.04, 0.22, 0.15), (0, 0, -0.075), color=ORANGE, rough=0.65, metal=0.4))
-    p.append(box((0.04, 0.22, 0.14), (-0.014 * side, 0, -0.21), (0, 1, 0, 0.14 * side),
-                 color=(0.80, 0.33, 0.05), rough=0.65, metal=0.4))
-    for dy in (-0.075, 0, 0.075):
-        p.append(box((0.03, 0.035, 0.06), (-0.032 * side, dy, -0.276),
-                     color=(0.50, 0.51, 0.53), rough=0.4, metal=0.9))
-    for dy in (0.106, -0.106):
-        p.append(box((0.035, 0.012, 0.13), (-0.006 * side, dy, -0.10),
-                     color=(0.72, 0.30, 0.05), rough=0.7))
-    p.append(strut((0, -0.10, -0.15), (0, 0.10, -0.15), 0.012, GREY, 10, metal=0.7))
-    # bolts holding each tooth on, plus hinge pin caps
-    for dy in (-0.075, 0, 0.075):
-        p.append(xcyl(0.012, 0.007, (-0.048 * side, dy, -0.252), CHROME, 6, metal=0.9))
-    for dy in (0.108, -0.108):
-        p.append(ycyl(0.010, 0.020, (0, dy, 0), (0.30, 0.31, 0.33), 8, metal=0.8))
-    p.append(box((0.030, 0.20, 0.012), (-0.004 * side, 0, -0.132),
-                 color=(0.62, 0.24, 0.03), rough=0.7))
-    return p
-
-
 
 def tine(phi):
-    """One grapple tine. Authored pointing along +x, then rotated to azimuth phi."""
+    """One grapple tine. Authored pointing along +x, then rotated to azimuth phi.
+
+    The tooth (the fourth shape below) is load-bearing: its position and
+    rotation match the tine's collision Group in excavator() exactly, and the
+    whole grip depends on exactly where its tip ends up (see tools/tines.py).
+    It is not moved here. Everything else is cosmetic and free to refine - the
+    old single constant-width block is now two tapered segments with a visible
+    knuckle between them, for a slimmer, more articulated look, and the pads
+    nearest the tip are recoloured dark and rough to read as a grippy surface.
+    """
     s = []
-    s.append(box((0.05, 0.055, 0.15), (0, 0, -0.075), color=ORANGE, rough=0.65, metal=0.4))
-    s.append(box((0.014, 0.062, 0.12), (0.031, 0, -0.075),
+    # tapered upper body: wider at the hinge, narrower toward the tooth, both
+    # segments sitting inside the same envelope the single old block used to
+    s.append(box((0.044, 0.050, 0.075), (0, 0, -0.0375), color=ORANGE, rough=0.6, metal=0.45))
+    s.append(box((0.036, 0.042, 0.075), (0, 0, -0.112), color=ORANGE, rough=0.6, metal=0.45))
+    s.append(ycyl(0.052, 0.023, (0, 0, -0.075), color=(0.30, 0.31, 0.33), sub=12, metal=0.85))
+    for dy in (-0.019, 0.019):
+        s.append(ycyl(0.009, 0.028, (0, dy, -0.075), color=(0.45, 0.46, 0.48), sub=8, metal=0.85))
+    s.append(box((0.011, 0.052, 0.11), (0.026, 0, -0.075),
                  color=(0.72, 0.28, 0.04), rough=0.7))
+    # the tooth - LOAD-BEARING, matches the collision Group exactly
     s.append(pose(shape("Box {\n  size 0.045 0.050 0.135\n}",
                         (0.80, 0.33, 0.05), 0.65, 0.4),
                   (-0.020, 0, -0.198), (0, 1, 0, 0.24)))
+    # grip pads at the tip: dark and rough rather than bare metal, so it
+    # reads as a surface built to hold on rather than just clamp
     for dy in (-0.014, 0.014):
         s.append(box((0.030, 0.022, 0.055), (-0.046, dy, -0.262),
-                     color=(0.50, 0.51, 0.53), rough=0.4, metal=0.9))
+                     color=(0.14, 0.14, 0.15), rough=0.95, metal=0.05))
         s.append(xcyl(0.012, 0.006, (-0.030, dy, -0.238), CHROME, 6, metal=0.9))
-    s.append(ycyl(0.062, 0.021, (0, 0, 0), (0.30, 0.31, 0.33), 10, metal=0.8))
-    for dy in (0.032, -0.032):
-        s.append(ycyl(0.010, 0.026, (0, dy, 0), (0.42, 0.43, 0.45), 8, metal=0.8))
+    s.append(ycyl(0.058, 0.019, (0, 0, 0), (0.30, 0.31, 0.33), 10, metal=0.8))
+    for dy in (0.030, -0.030):
+        s.append(ycyl(0.009, 0.024, (0, dy, 0), (0.42, 0.43, 0.45), 8, metal=0.8))
     return [pose(s, (0, 0, 0), (0, 0, 1, phi))]
 
 
@@ -636,12 +650,13 @@ def grapple_visuals():
         a = i * math.pi / 5
         p.append(vcyl(0.018, 0.009, (0.093 * math.cos(a), 0.093 * math.sin(a), -0.008),
                       color=CHROME, sub=6, metal=0.9, rough=0.3))
-    # a ram and a hose per tine, angled out to the tine it drives
+    # a ram and a hose per tine, angled out to the tine it drives - slimmer
+    # than the collar itself, so the rams read as linkages rather than blocks
     for k in range(5):
         a = k * 2 * math.pi / 5
         c, s2 = math.cos(a), math.sin(a)
         p.append(strut((0.035 * c, 0.035 * s2, -0.020),
-                       (0.080 * c, 0.080 * s2, -0.072), 0.020, GREY, 10, metal=0.8))
+                       (0.080 * c, 0.080 * s2, -0.072), 0.016, GREY, 10, metal=0.8))
         p.append(strut((0.075 * c, 0.075 * s2, -0.068),
                        (0.104 * c, 0.104 * s2, -0.100), 0.011, CHROME, 8, metal=1, rough=0.25))
         p.append(strut((0.030 * c, 0.030 * s2, 0.030),
@@ -667,7 +682,7 @@ HingeJoint {
     RotationalMotor {
       name "tine_%d_motor"
       maxVelocity 1.2
-      maxTorque 8
+      maxTorque 10
       minPosition -0.62
       maxPosition -0.06
     }
@@ -913,74 +928,33 @@ HingeJoint {
   }
 }""" % ("\n".join(indent(c, 6) for c in boom()), indent(stick_j, 6))
 
-    cams = """
-Pose {
-  translation 0.36 0.26 0.3
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.12 0.12 0.13
-        roughness 0.5
-        metalness 0.3
-      }
-      geometry Box {
-        size 0.05 0.07 0.05
-      }
-    }
-  ]
-}
-Camera {
-  translation 0.39 0.26 0.3
-  name "camera_front_left"
-  fieldOfView 1.1
+    # Each camera sits in a flush-mounted pod - box, lens, hood, bolts - with
+    # no gap to the hull behind it. They used to float free of the body by
+    # 0.09-0.25 m (nothing connected them to anything), which read as a
+    # random dark cube next to the machine while driving. The pod position
+    # given here is the BACK of the housing, touching the hull; the lens
+    # (and the Camera device itself) pokes 0.03 m further out, in whatever
+    # direction that camera looks.
+    # Every one of these was checked numerically (not by eye) against the
+    # actual nearby hull geometry - see the mount face's worst-case gap in
+    # tools/campod_check.py - so "flush" here means truly touching, not
+    # eyeballed close.
+    cam_rigs = [("camera_front_left", (0.34, 0.26, 0.30), 1, 1.1, None),
+                ("camera_front_right", (0.30, -0.12, 0.17), 1, 1.1, None),
+                ("camera_rear", (-0.70, 0.0, 0.30), -1, 1.2, (0, 0, 1, 3.141593))]
+    cam_blocks = []
+    for name, t, look, fov, rot in cam_rigs:
+        hx = t[0] + look * 0.03
+        cam_blocks += camera_pod(t, look)
+        rot_line = ("\n  rotation %s" % " ".join("%.6f" % x for x in rot)) if rot else ""
+        cam_blocks.append("""Camera {
+  translation %.4f %.4f %.4f%s
+  name "%s"
+  fieldOfView %.1f
   width 160
   height 120
-}
-Pose {
-  translation 0.3 -0.24 0.24
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.12 0.12 0.13
-        roughness 0.5
-        metalness 0.3
-      }
-      geometry Box {
-        size 0.05 0.07 0.05
-      }
-    }
-  ]
-}
-Camera {
-  translation 0.33 -0.24 0.24
-  name "camera_front_right"
-  fieldOfView 1.1
-  width 160
-  height 120
-}
-Pose {
-  translation -0.93 0 0.3
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.12 0.12 0.13
-        roughness 0.5
-        metalness 0.3
-      }
-      geometry Box {
-        size 0.05 0.07 0.05
-      }
-    }
-  ]
-}
-Camera {
-  translation -0.96 0 0.3
-  rotation 0 0 1 3.141593
-  name "camera_rear"
-  fieldOfView 1.2
-  width 160
-  height 120
-}"""
+}""" % (hx, t[1], t[2], rot_line, name, fov))
+    cams = "\n".join(cam_blocks)
 
     house_j = """
 HingeJoint {
@@ -1206,6 +1180,16 @@ def silo2(t):
         p.append(strut((1.0 * math.cos(a), 1.0 * math.sin(a), 0),
                        (0.55 * math.cos(a), 0.55 * math.sin(a), 1.9), 0.07,
                        (0.55, 0.56, 0.58), 8, metal=0.6))
+    # a caged ladder up the side, a platform ring below the dome, and a
+    # fill-pipe elbow at the top - the plainest of the shared structures
+    # before this, so it's the one that gets the detail pass
+    for z in [0.5 + 0.7 * i for i in range(6)]:
+        p.append(strut((0.76, -0.18, z), (0.76, 0.18, z), 0.018, CHAR, 6))
+    for dy in (-0.18, 0.18):
+        p.append(strut((0.76, dy, 0.3), (0.76, dy, 4.4), 0.020, (0.35, 0.36, 0.38), 6))
+    p.append(vcyl(0.10, 0.82, (0, 0, 4.65), color=(0.45, 0.46, 0.48), sub=14, metal=0.6))
+    p.append(xcyl(0.5, 0.05, (0.3, 0, 5.55), color=(0.45, 0.46, 0.48), sub=8, metal=0.5))
+    p.append(vcyl(0.4, 0.05, (0.55, 0, 5.35), color=(0.45, 0.46, 0.48), sub=8, metal=0.5))
     return group(p, t)
 
 # ======================================================================
@@ -1491,6 +1475,11 @@ def scenery(full=True):
     # world - the one that actually renders on weaker graphics cards - is not
     # bare beyond the fence. The four heaviest assemblies (both cranes, the
     # frame building, the dump truck: 99 shapes between them) stay full-only.
+    # worn ground under the structures that get walked/driven round in real
+    # use, so they read as used rather than freshly placed
+    p.append(box((2.6, 2.0, 0.0008), (-9.5, 5.2, 0.0024), color=(0.36, 0.34, 0.30), rough=1))
+    p.append(box((3.0, 2.2, 0.0008), (10.5, 6.0, 0.0024), (0, 0, 1, 0.35),
+                 color=(0.34, 0.30, 0.24), rough=1))
     p.append(pylon((-13.0, -2.0, 0), 9.5))
     p.append(pylon((-14.5, 5.2, 0), 8.6))
     p.append(conveyor((10.5, 6.0, 0), 2.5))
@@ -1812,7 +1801,7 @@ WorldInfo {
       material1 "grip"
       material2 "load"
       coulombFriction [
-        2.2
+        2.8
       ]
       bounce 0
       softCFM 0.0002
@@ -1852,10 +1841,6 @@ Background {
   skyColor [
     0.53 0.68 0.86
   ]
-}
-Fog {
-  color 0.60 0.72 0.85
-  visibilityRange 42
 }
 DirectionalLight {
   direction 0.55 0.4 -0.85

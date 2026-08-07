@@ -84,10 +84,8 @@ for world in ("construction_site.wbt", "construction_site_lite.wbt"):
     check('material1 "grip"' in txt and 'material2 "load"' in txt,
           "%s defines the grip/load friction pair" % world)
     check("site_collision" in txt, "%s has collision bodies for the props" % world)
-    check(re.search(r"^Fog \{", txt, re.M) is not None,
-          "%s has a Fog node for depth atmosphere" % world)
-    check(txt.count("Fog {") == 1, "%s defines Fog only once" % world,
-          "found %d" % txt.count("Fog {"))
+    check("Fog {" not in txt, "%s has no fog" % world,
+          "removed on request - it read as too heavy-handed")
 
     # every device the controller asks for must exist
     wanted = set(re.findall(r'getDevice\("([^"]+)"\)', src))
@@ -282,20 +280,22 @@ check(C["BORDER_WARN_FULL"] < C["BORDER_WARN_AT"],
       "solid at %.2f m, gone by %.2f m" % (C["BORDER_WARN_FULL"], C["BORDER_WARN_AT"]))
 check("setLabel" in src, "the border warning is drawn over the 3D view")
 
-# The beacon must actually alternate, not just sit on one colour, and the
-# world must define the DEF the controller looks it up by (the generic
-# getFromDef loop above already checks BEACON_MAT exists in both worlds).
-BEACON_ON = eval(re.search(r"^BEACON_ON = (\(.*?\))$", src, re.M).group(1))
-BEACON_OFF = eval(re.search(r"^BEACON_OFF = (\(.*?\))$", src, re.M).group(1))
-check(BEACON_ON != BEACON_OFF, "the beacon's two states are actually different colours")
+# The beacon must actually vary, not just sit on one colour, and the world
+# must define the DEF the controller looks it up by (the generic getFromDef
+# loop above already checks BEACON_MAT exists in both worlds).
+BEACON_LOW = eval(re.search(r"^BEACON_LOW = (\(.*?\))", src, re.M).group(1))
+BEACON_HIGH = eval(re.search(r"^BEACON_HIGH = (\(.*?\))", src, re.M).group(1))
+check(BEACON_LOW != BEACON_HIGH, "the beacon's two extremes are actually different colours")
 m = re.search(r"^BEACON_PERIOD = ([\d.]+)", src, re.M)
-check(m is not None and 0.15 < float(m.group(1)) < 2.0,
-      "the beacon blinks at a plausible warning-light rate",
-      "%.2f s per half-cycle" % float(m.group(1)) if m else "not found")
+check(m is not None and 1.0 < float(m.group(1)) < 6.0,
+      "the beacon pulses at a slow, deliberate rate",
+      "%.2f s per full pulse" % float(m.group(1)) if m else "not found")
 check("blink_beacon()" in src and "def blink_beacon" in src,
       "the beacon is driven every step")
-check("if lit != _beacon_lit" in src,
-      "the beacon field is only written when its state actually changes")
+check("math.cos" in src and "glow = " in src,
+      "the beacon fades smoothly rather than snapping between two states")
+check("_beacon_last" in src and "> 0.01" in src,
+      "the beacon field is only written when the colour has moved enough to matter")
 
 # The machine must notice it is wedged against something the static map did
 # not know about, and try a different approach, rather than either freezing

@@ -680,24 +680,29 @@ def border_warning():
                    1.0 - max(0.0, (a - 0.45) / 0.55), "Arial")
 
 
-BEACON_ON = (1.0, 0.35, 0.0)
-BEACON_OFF = (0.15, 0.05, 0.0)
-BEACON_PERIOD = 0.55          # seconds per half-cycle
+BEACON_LOW = (0.15, 0.05, 0.0)     # dim amber, resting
+BEACON_HIGH = (1.0, 0.35, 0.0)     # bright amber, at the peak of a pulse
+BEACON_PERIOD = 2.6                # seconds per full pulse - slow and steady
 
-_beacon_lit = None
+_beacon_last = None
 
 
 def blink_beacon():
-    """Toggle the cab beacon's own glow. Only writes the field when it
-    actually changes state, not every step."""
-    global _beacon_lit
+    """Fade the cab beacon smoothly up and down, rather than a hard blink.
+
+    A raised-cosine envelope (0 -> 1 -> 0, eased at both ends rather than a
+    straight ramp) reads as a slow pulse instead of a flicker. Only writes the
+    field when the colour has actually moved enough to matter, not every step.
+    """
+    global _beacon_last
     if beacon_node is None:
         return
-    lit = int(robot.getTime() / BEACON_PERIOD) % 2 == 0
-    if lit != _beacon_lit:
-        _beacon_lit = lit
-        beacon_node.getField("emissiveColor").setSFColor(
-            list(BEACON_ON if lit else BEACON_OFF))
+    phase = (robot.getTime() % BEACON_PERIOD) / BEACON_PERIOD
+    glow = 0.5 - 0.5 * math.cos(2 * math.pi * phase)
+    col = [lo + (hi - lo) * glow for lo, hi in zip(BEACON_LOW, BEACON_HIGH)]
+    if _beacon_last is None or max(abs(a - b) for a, b in zip(col, _beacon_last)) > 0.01:
+        _beacon_last = col
+        beacon_node.getField("emissiveColor").setSFColor(col)
 
 
 def step(n=1):

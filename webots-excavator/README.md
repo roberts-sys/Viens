@@ -23,7 +23,7 @@ loaded, so the "Skipped PROTO" errors from before cannot happen here.
 
 `construction_site_lite.wbt` is the one to open by default — it has the
 identical machine, the same detailed rocks, the same fence and boundary
-warning, and a lighter background, at 914 shapes against 1134 for
+warning, and a lighter background, at 959 shapes against 1179 for
 `construction_site.wbt`. If your graphics card handles the full version
 without going black, it has a few extra assemblies (both tower cranes, the
 scaffolded frame building, the loaded dump truck, two parked vans) that
@@ -283,8 +283,8 @@ rocks and a slice of background scenery:
 
 | World | Shapes | What's in it |
 |---|---|---|
-| `construction_site_lite.wbt` | 914 | machine, rocks, fence, pylons, trees, conveyor, silo |
-| `construction_site.wbt` | 1134 | all of the above, plus both cranes, the frame building with scaffolding, two vans, and the dump truck |
+| `construction_site_lite.wbt` | 959 | machine, rocks, fence, pylons, trees, conveyor, silo |
+| `construction_site.wbt` | 1179 | all of the above, plus both cranes, the frame building with scaffolding, two vans, and the dump truck |
 
 **Both contain the identical, fully detailed excavator** — only how much
 scenery surrounds it differs. Start with `construction_site_lite.wbt`; it is
@@ -299,7 +299,7 @@ black, so nothing in either world is see-through now.
 
 If a world does come up black, don't guess between the two blindly: the shape
 counts above are exact, so if lite goes black too, the ceiling on your card is
-below 914 and `tools/gen_world.py` can be trimmed further — say which
+below 959 and `tools/gen_world.py` can be trimmed further — say which
 background pieces you can live without (pylons, trees, the conveyor, or the
 silo are the ones to drop first, in that order) and I'll take them out.
 
@@ -321,8 +321,15 @@ fuel tanks with filler caps; a toolbox; a counterweight with hazard striping and
 a tow hook; handrails and steps. A bent boom with gusset plates, pinned ears,
 hydraulic rams, hoses, a work light and a lifting eye. A stick with side
 gussets, a wear plate and linkage bars. A five-tine orange-peel grapple on a
-bolted rotator collar, each tine with its own ram, hose, hinge pin and pair of
-teeth.
+bolted rotator collar, each tine tapered and articulated with a visible
+knuckle joint rather than one constant-width block, dark rough grip pads at
+the tip, its own ram, hose, hinge pin and pair of teeth.
+
+The grip itself was tuned to match: tine motor torque up from 8 to 10, and the
+grip/load friction pair up from 2.2 to 2.8. Neither touches the geometry the
+grab depends on — see "How it picks things up" below — so the whole verified
+sweep (0.123 m closed aperture around a 0.160 m object) is unchanged; it just
+squeezes and holds harder.
 
 The counterweight used to overhang the tracks by 0.37 m, which read as out of
 proportion. It is now shorter and narrower and overhangs by 0.20 m; the deck and
@@ -332,7 +339,18 @@ to 0.87 m.
 **The cameras.** `camera_front_left` on the cab and `camera_front_right` beside
 the boom both look forward over the work area; `camera_rear` sits on the
 counterweight looking back. They are mounted on the upper structure, so they
-swing round with the machine as it slews.
+swing round with the machine as it slews. Each sits in a small pod — housing,
+lens, sun hood, two mounting bolts.
+
+Those pods used to float free of the machine body by anywhere from 0.09 to
+0.25 m — nothing connected them to anything, which read as a random dark cube
+next to the excavator, worst on the rear one. Getting this right by eye failed
+twice in a row (a curved counterweight surface and a bracket narrower than the
+housing both look plausibly flush from *some* angle while still leaving a real
+gap), so `tools/campod_check.py` now checks it properly: it samples the whole
+mount face of each pod on a grid and finds the worst point, against the actual
+nearby hull geometry, rather than trusting one render angle. All three come
+back solidly overlapping the hull, not just close to it.
 
 **The site, in both worlds.** Dirt ground with worn tracks, puddles and open
 trenches; spoil piles; traffic cones; concrete barriers; a shipping container;
@@ -350,27 +368,22 @@ dump truck.
 Every background structure is built from a few large forms rather than
 lattice-work — only the silhouette reads at that distance, and struts cost draw
 calls the graphics card cannot spare. That is what makes the lite-world set
-affordable: `construction_site_lite.wbt` is 914 shapes against 1134 for the
+affordable: `construction_site_lite.wbt` is 959 shapes against 1179 for the
 full world, for four assemblies' difference (99 shapes: the cranes, the frame
 building, the dump truck).
 
-**Atmosphere.** Three touches, none of them costing extra shapes:
+**Atmosphere.** The two directional lights are warmed slightly for a
+late-afternoon rather than midday feel. A `Fog` node was tried here too, for
+depth haze on the distant hills — it read as too heavy-handed, so it's gone
+again; nothing in either world is fogged.
 
-* A `Fog` node fades distant objects toward the sky colour, so the far hills
-  and skyline sit behind a soft haze instead of a hard silhouette. It only
-  starts to bite past about 20–25 m — the machine and everything it works
-  with, all well inside that, render exactly as sharp as before.
-* The two directional lights were warmed slightly, for a late-afternoon rather
-  than midday feel.
-* The cab beacon actually blinks now — roughly twice a second, amber to dim
-  amber — rather than sitting on one fixed glow. It works by DEF'ing just that
-  one light's material (`BEACON_MAT`) so the controller can reach in and
-  change its `emissiveColor` each step; nothing else about the beacon's
-  geometry changed.
-
-If the fog reads as too much or too little for your taste, `visibilityRange`
-in the `Fog {}` block near the top of `tools/gen_world.py` is the one number
-to change — regenerate and it updates both worlds.
+**The cab beacon pulses, slowly.** A smooth fade between dim and bright amber
+(a raised-cosine curve, not a hard on/off blink) over a 2.6 s cycle — steady
+and deliberate rather than flickery. It works by DEF'ing just that one light's
+material (`BEACON_MAT`) so the controller can reach in and change its
+`emissiveColor` each step; nothing else about the beacon's geometry changed.
+`BEACON_PERIOD` at the top of the controller is the one number to change if
+you want it faster or slower again.
 
 ## A note on the primitive axes
 
@@ -452,7 +465,7 @@ save it, running the generator again overwrites your changes. Change
 
 ```
 python3 tools/gen_world.py      # writes both worlds and site_map.py
-python3 tools/verify.py         # 133 checks; run this before opening Webots
+python3 tools/verify.py         # 132 checks; run this before opening Webots
 ```
 
 `gen_world.py` needs nothing but Python. The other tools need `numpy` and
@@ -465,11 +478,12 @@ python3 tools/verify.py         # 133 checks; run this before opening Webots
 | `navtest.py` | prints an ASCII map of the drivable yard and checks every route |
 | `render.py` | draws a world to a PNG without opening Webots |
 | `limits.py` | works out the arm's hard stops and what collision has to catch |
+| `campod_check.py` | checks each camera pod's mount face is genuinely flush against the hull |
 | `pack.py` | lays the props round the perimeter with nothing overlapping |
 | `tines.py` | the grapple's tip radius against opening angle |
 | `zfight.py` | finds surfaces that would flicker |
 
-`verify.py` is the one that matters (133 checks). It reads the controller's constants and the
+`verify.py` is the one that matters (132 checks). It reads the controller's constants and the
 generated world and checks they agree — every device the controller opens
 exists, every arm target is inside the reach envelope, every pad has somewhere
 to park, and the grapple clears the machine at every commanded pose. It exits
