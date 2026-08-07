@@ -1469,6 +1469,25 @@ def scenery(full=True):
         p.append(vcyl(1.30, 0.045, (FENCE * sgn, -FENCE, 0.65), color=(0.45, 0.46, 0.48),
                       sub=8, metal=0.5))
 
+    # ---- distant background structures ----
+    # Cheap ones (silhouette-only, no lattice) go in every world so the lite
+    # world - the one that actually renders on weaker graphics cards - is not
+    # bare beyond the fence. The four heaviest assemblies (both cranes, the
+    # frame building, the dump truck: 99 shapes between them) stay full-only.
+    p.append(pylon((-13.0, -2.0, 0), 9.5))
+    p.append(pylon((-14.5, 5.2, 0), 8.6))
+    p.append(conveyor((10.5, 6.0, 0), 2.5))
+    p.append(silo2((-9.5, 5.2, 0)))
+    for t, h, r, leaf in (((11.6, -2.2), 3.6, 1.5, (0.20, 0.34, 0.15)),
+                          ((12.4, 0.6), 3.1, 1.3, (0.24, 0.38, 0.17)),
+                          ((11.9, 3.4), 3.9, 1.6, (0.19, 0.32, 0.14)),
+                          ((13.1, -5.0), 3.3, 1.4, (0.23, 0.37, 0.16)),
+                          ((2.5, -12.4), 3.7, 1.5, (0.21, 0.35, 0.15)),
+                          ((5.6, -12.9), 3.2, 1.3, (0.24, 0.38, 0.17)),
+                          ((-1.8, -12.6), 4.0, 1.7, (0.19, 0.33, 0.14)),
+                          ((-5.2, -13.2), 3.4, 1.4, (0.22, 0.36, 0.16))):
+        p.append(tree((t[0], t[1], 0), h, r, leaf))
+
     if not full:
         return p
 
@@ -1561,33 +1580,14 @@ def scenery(full=True):
                         ycyl(0.10, 0.16, (0.30, 0, 0.30), (0.30, 0.31, 0.33), 12, metal=0.6)],
                        (x, y, 0), yaw))
 
-    # ---- background structures ----
-    # Everything from here out sits beyond the fence. It is built from a few
-    # large forms rather than lattice-work: only the silhouette reads at that
-    # distance, and struts cost draw calls the graphics card cannot spare.
-    p.append(pylon((-13.0, -2.0, 0), 9.5))
-    p.append(pylon((-14.5, 5.2, 0), 8.6))
-    p.append(conveyor((10.5, 6.0, 0), 2.5))
-    p.append(van((10.8, -7.6, 0), 0.45))
-    p.append(van((13.2, -9.4, 0), -0.30, (0.72, 0.24, 0.18)))
-    for t, h, r, leaf in (((11.6, -2.2), 3.6, 1.5, (0.20, 0.34, 0.15)),
-                          ((12.4, 0.6), 3.1, 1.3, (0.24, 0.38, 0.17)),
-                          ((11.9, 3.4), 3.9, 1.6, (0.19, 0.32, 0.14)),
-                          ((13.1, -5.0), 3.3, 1.4, (0.23, 0.37, 0.16)),
-                          ((2.5, -12.4), 3.7, 1.5, (0.21, 0.35, 0.15)),
-                          ((5.6, -12.9), 3.2, 1.3, (0.24, 0.38, 0.17)),
-                          ((-1.8, -12.6), 4.0, 1.7, (0.19, 0.33, 0.14)),
-                          ((-5.2, -13.2), 3.4, 1.4, (0.22, 0.36, 0.16))):
-        p.append(tree((t[0], t[1], 0), h, r, leaf))
+    # ---- the heaviest background assemblies: full world only ----
     p.append(crane((-13.5, 9.5, 0), -0.5))
     p.append(crane((16.0, 12.5, 0), 2.2))
     p.append(frame_building((-16.5, -11.0, 0), 0.25))
     p.append(scaffold_wall((-16.9, -11.6, 0), 0.25))
-    p.append(silo2((-9.5, 5.2, 0)))
+    p.append(van((10.8, -7.6, 0), 0.45))
+    p.append(van((13.2, -9.4, 0), -0.30, (0.72, 0.24, 0.18)))
     p.append(dump_truck((-8.6, -6.2, 0), 0.55))
-    # ---- perimeter fence ----
-    # One long panel per side rather than a run of small ones: the same look at
-    # a fraction of the draw cost.
     return p
 
 

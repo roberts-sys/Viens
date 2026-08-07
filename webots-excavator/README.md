@@ -18,8 +18,17 @@ loaded, so the "Skipped PROTO" errors from before cannot happen here.
 ## Running it
 
 1. Open Webots.
-2. **File → Open World...** → `worlds/construction_site.wbt`
+2. **File → Open World...** → `worlds/construction_site_lite.wbt`
 3. Press ▶.
+
+`construction_site_lite.wbt` is the one to open by default — it has the
+identical machine, the same detailed rocks, the same fence and boundary
+warning, and a lighter background, at 914 shapes against 1134 for
+`construction_site.wbt`. If your graphics card handles the full version
+without going black, it has a few extra assemblies (both tower cranes, the
+scaffolded frame building, the loaded dump truck, two parked vans) that
+lite leaves out — open that one instead. See "If the viewport is black"
+below.
 
 Three small camera windows appear in the corner of the 3D view — those are the
 excavator's own cameras. The console prints each move as it happens
@@ -243,20 +252,30 @@ rock still reads as granite or sandstone at a glance.
 ## If the viewport is black
 
 There are two worlds in `worlds/`, both running the same excavator and the same
-controller:
+controller, and both now carrying the fence, the boundary warning, the detailed
+rocks and a slice of background scenery:
 
 | World | Shapes | What's in it |
 |---|---|---|
-| `construction_site.wbt` | 1134 | full site — cranes, buildings, scaffolding, silo, dump trucks, pylons, trees, conveyor |
-| `construction_site_lite.wbt` | 811 | same excavator, detailed rocks and skyline, no big background structures |
+| `construction_site_lite.wbt` | 914 | machine, rocks, fence, pylons, trees, conveyor, silo |
+| `construction_site.wbt` | 1134 | all of the above, plus both cranes, the frame building with scaffolding, two vans, and the dump truck |
 
-**Both contain the identical, fully detailed excavator** — only the scenery
-around it differs.
+**Both contain the identical, fully detailed excavator** — only how much
+scenery surrounds it differs. Start with `construction_site_lite.wbt`; it is
+the default in "Running it" above for exactly this reason.
 
 A black viewport is a *rendering* problem, not a problem with the world file —
 it means the graphics card gave up before drawing anything. Shadow casting is
-the usual cause, so `castShadows` is already `FALSE` in both worlds. If the full
-site is still black, open `construction_site_lite.wbt`.
+the usual cause, so `castShadows` is already `FALSE` in both worlds, and every
+surface in both is fully opaque — a wrapped set of transparent fence panels
+used to be the difference between the world that drew and the one that came up
+black, so nothing in either world is see-through now.
+
+If a world does come up black, don't guess between the two blindly: the shape
+counts above are exact, so if lite goes black too, the ceiling on your card is
+below 914 and `tools/gen_world.py` can be trimmed further — say which
+background pieces you can live without (pylons, trees, the conveyor, or the
+silo are the ones to drop first, in that order) and I'll take them out.
 
 Two other things worth trying from the Webots menus: **View → Optional
 Rendering** (turn extras off) and **Tools → Preferences → OpenGL**, where
@@ -289,23 +308,25 @@ the boom both look forward over the work area; `camera_rear` sits on the
 counterweight looking back. They are mounted on the upper structure, so they
 swing round with the machine as it slews.
 
-**The site.** Dirt ground with worn tracks, puddles and open trenches; spoil
-piles; traffic cones; concrete barriers; a ribbed shipping container; a site
-office with a step and window; a portable toilet; a generator; pallets of
-bricks; stacked concrete pipes; timber; oil drums; a rebar bundle; a
-wheelbarrow; a cable drum; sandbags; a cement mixer; a floodlight mast; warning
-signs; and a fenced perimeter. Beyond the fence: two tower cranes, a concrete
-frame building with a scaffolded face, a cement silo, a loaded dump truck,
-skyline blocks and hills. Added since: two lattice power pylons, a stand of
-eight conifers, two parked vans, an inclined conveyor feeding a stockpile, three
-more skyline blocks and three more hills.
+**The site, in both worlds.** Dirt ground with worn tracks, puddles and open
+trenches; spoil piles; traffic cones; concrete barriers; a shipping container;
+a fenced perimeter you cannot leave (below); nine skyline blocks and six
+distant hills; and, beyond the fence, two lattice power pylons, a stand of
+eight conifers, an inclined conveyor feeding a stockpile, and a cement silo.
 
-Those background structures are built from a few large forms rather than
-lattice-work. Only the silhouette reads at that distance, and struts cost draw
-calls the graphics card cannot spare. **The full world grew from 930 shapes to
-1134 with this detail** — if that tips your graphics card over and the viewport
-goes black, `construction_site_lite.wbt` has the identical machine and the
-detailed rocks at 811.
+**In `construction_site.wbt` only, on top of all that:** a site office with a
+step and window, a portable toilet, a generator, pallets of bricks, stacked
+concrete pipes, timber, oil drums, a rebar bundle, a wheelbarrow, a cable drum,
+sandbags, a cement mixer, a floodlight mast, warning signs, two tower cranes, a
+concrete frame building with a scaffolded face, two parked vans and a loaded
+dump truck.
+
+Every background structure is built from a few large forms rather than
+lattice-work — only the silhouette reads at that distance, and struts cost draw
+calls the graphics card cannot spare. That is what makes the lite-world set
+affordable: `construction_site_lite.wbt` is 914 shapes against 1134 for the
+full world, for four assemblies' difference (99 shapes: the cranes, the frame
+building, the dump truck).
 
 ## A note on the primitive axes
 
