@@ -143,6 +143,19 @@ def shape(geom, color, rough=0.8, metal=0.2, transp=None, emis=None):
         indent(geom, 2).lstrip())
 
 
+def def_shape(defname, geom, color, rough=0.8, metal=0.2, transp=None, emis=None):
+    """Like shape(), but the appearance node carries a DEF.
+
+    Used for the one shape the controller needs to reach after the world is
+    built and modify live (the cab beacon, which blinks) - getFromDef() finds
+    it, and emissiveColor is a field of the appearance node itself, so DEF'ing
+    the appearance rather than the Shape saves a hop.
+    """
+    return "Shape {\n  appearance DEF %s %s\n  geometry %s\n}" % (
+        defname, indent(app(color, rough, metal, transp, emis), 2).lstrip(),
+        indent(geom, 2).lstrip())
+
+
 def pose(children, t=(0, 0, 0), rot=None):
     if isinstance(children, str):
         children = [children]
@@ -318,8 +331,12 @@ def cab():
     p.append(box((0.50, 0.46, 0.04), (cx, cy, 0.64), color=YEL_D, rough=0.75))
     p.append(box((0.18, 0.20, 0.015), (cx + 0.06, cy, 0.665), color=GLASS, rough=0.2))
     p.append(vcyl(0.03, 0.03, (cx - 0.16, cy, 0.675), color=DARK))
-    p.append(vcyl(0.07, 0.035, (cx - 0.16, cy, 0.705), color=(0.95, 0.4, 0.05), rough=0.35,
-                  emis=(0.6, 0.16, 0.0)))
+    # the beacon's appearance is DEF'd so the controller can make it blink
+    p.append(pose(
+        def_shape("BEACON_MAT",
+                 "Cylinder {\n  height 0.07000\n  radius 0.03500\n  subdivision 16\n}",
+                 (0.95, 0.4, 0.05), rough=0.35, emis=(0.6, 0.16, 0.0)),
+        (cx - 0.16, cy, 0.705)))
     # roof work lights
     for dy in (-0.14, 0.14):
         p.append(box((0.06, 0.07, 0.06), (cx + 0.20, cy + dy, 0.69), color=DARK))
@@ -1836,15 +1853,19 @@ Background {
     0.53 0.68 0.86
   ]
 }
+Fog {
+  color 0.60 0.72 0.85
+  visibilityRange 42
+}
 DirectionalLight {
   direction 0.55 0.4 -0.85
-  color 1 0.97 0.9
+  color 1 0.92 0.78
   intensity 2.4
   castShadows FALSE
 }
 DirectionalLight {
   direction -0.6 -0.5 -0.55
-  color 0.72 0.8 0.95
+  color 0.70 0.76 0.92
   intensity 0.9
 }
 DirectionalLight {

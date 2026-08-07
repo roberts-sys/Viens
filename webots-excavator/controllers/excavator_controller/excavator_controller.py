@@ -112,6 +112,15 @@ PAD_R = 0.12                  # an object or a stack, as an obstacle
 
 MANUAL_GAIN = 0.65            # manual controls run at this share of full speed
 
+# How the machine notices it is wedged against something the planner did not
+# know about, instead of quietly burning a full timeout doing nothing.
+STUCK_WINDOW = 2.2            # seconds between progress checks
+STUCK_EPS = 0.05              # metres it must cover in that window
+STUCK_TURN_EPS = math.radians(3)   # ...or degrees it must turn, if it is
+                              # swinging round to face a new heading rather
+                              # than driving straight - that is real progress
+                              # too and must not be mistaken for being stuck
+
 # The machine physically cannot leave - the fence is a wall - but drive at it in
 # manual mode and it says so. The warning fades in between these two distances
 # from the fence line. The route planner never comes within LIMIT of it, so the
@@ -173,6 +182,7 @@ for cam_name in ("camera_front_left", "camera_front_right", "camera_rear"):
     robot.getDevice(cam_name).enable(timestep * 4)
 
 grapple_node = robot.getFromDef("GRAPPLE")
+beacon_node = robot.getFromDef("BEACON_MAT")
 
 COLOURS = ("blue", "yellow", "brown", "red", "green", "white")
 SETS = {
@@ -201,6 +211,10 @@ class ModeChange(Exception):
 
 class Dropped(Exception):
     """Raised when the grapple comes up empty, so the move can be retried."""
+
+
+class Stuck(Exception):
+    """Raised when a drive command makes no real progress for too long."""
 
 
 def objs():
@@ -385,20 +399,52 @@ def plan(start, goal):
     return None
 
 
+def progress_guard():
+    """Call once each step of a drive loop; raises Stuck if nothing is moving.
+
+    "Nothing moving" means the machine's position AND its heading have both
+    barely changed over the window - swinging on the spot to face a new
+    direction is real progress and must not trip this, only being wedged with
+    the wheels spinning and going nowhere should.
+    """
+    _, _, _, yaw0 = base_pose()
+    state = {"t": robot.getTime(), "xy": base_pose()[:2], "yaw": yaw0}
+
+    def check():
+        now = robot.getTime()
+        if now - state["t"] < STUCK_WINDOW:
+            return
+        x, y, _, yaw = base_pose()
+        moved = math.hypot(x - state["xy"][0], y - state["xy"][1])
+        turned = abs(wrap(yaw - state["yaw"]))
+        state["t"], state["xy"], state["yaw"] = now, (x, y), yaw
+        if moved < STUCK_EPS and turned < STUCK_TURN_EPS:
+            raise Stuck
+    return check
+
+
 def goto(tx, ty, tol=0.18, timeout=60.0, stop=True):
     """Drive to a point: turn towards it, then run at it, correcting as we go.
 
     With stop=False it does not brake on arrival, so a route can be followed as
-    one continuous run instead of stopping at every corner.
+    one continuous run instead of stopping at every corner. Raises Stuck rather
+    than quietly giving up if the machine is not actually getting anywhere -
+    wedged against a prop the static map did not know was in the way, say -
+    so the caller gets a chance to try a different approach instead of running
+    out the clock doing nothing.
     """
     deadline = robot.getTime() + timeout
+    guard = progress_guard()
     while True:
         x, y, _, yaw = base_pose()
         dist = math.hypot(tx - x, ty - y)
-        if dist < tol or robot.getTime() > deadline:
+        if dist < tol:
             if stop:
                 halt()
-            return dist < tol
+            return
+        if robot.getTime() > deadline:
+            halt()
+            raise Stuck
         err = wrap(math.atan2(ty - y, tx - x) - yaw)
         if abs(err) > 0.7:
             # too far off to drive out of - swing round on the spot first
@@ -409,10 +455,15 @@ def goto(tx, ty, tol=0.18, timeout=60.0, stop=True):
             corr = max(-0.5, min(0.5, err)) * 0.6
             wheels(v * (1 - corr), v * (1 + corr))
         step()
+        guard()
 
 
 def follow(path):
-    """Drive a whole route without braking at the corners."""
+    """Drive a whole route without braking at the corners.
+
+    Lets Stuck propagate rather than pressing on to the next waypoint as if
+    nothing happened - a route is only as good as the leg that just failed.
+    """
     for i, (wx, wy) in enumerate(path):
         last = i == len(path) - 1
         goto(wx, wy, tol=0.16 if last else 0.34, stop=last)
@@ -432,17 +483,22 @@ def face(heading, tol=0.05, timeout=25.0):
 
 
 def creep(distance, timeout=30.0):
-    """Straight forward (or back, if negative)."""
+    """Straight forward (or back, if negative). Raises Stuck, same as goto()."""
     x0, y0, _, _ = base_pose()
     deadline = robot.getTime() + timeout
     sign = 1.0 if distance > 0 else -1.0
+    guard = progress_guard()
     while True:
         x, y, _, _ = base_pose()
-        if math.hypot(x - x0, y - y0) >= abs(distance) or robot.getTime() > deadline:
+        if math.hypot(x - x0, y - y0) >= abs(distance):
             halt()
             return
+        if robot.getTime() > deadline:
+            halt()
+            raise Stuck
         wheels(sign * DRIVE_SPEED * 0.5, sign * DRIVE_SPEED * 0.5)
         step()
+        guard()
 
 
 def standoff_spot(tx, ty):
@@ -469,44 +525,66 @@ def standoff_spot(tx, ty):
     return None
 
 
-def dock_at(tx, ty, label):
+def dock_at(tx, ty, label, attempts=3):
     """Park within reach of (tx, ty), facing it, at exactly the working distance.
 
     The last step matters: the counterweight sweeps a circle 0.87 m across when
     the machine slews, so parking any closer than that would knock a finished
     stack over.
-    """
-    spot = standoff_spot(tx, ty)
-    if spot is None:
-        print("    nowhere clear to park by %s - skipping" % label)
-        return False
-    x, y, _, _ = base_pose()
-    path = plan((x, y), spot)
-    if path is None:
-        print("    no clear route to %s - skipping" % label)
-        return False
-    print("    driving to %s: %d waypoints, %.1f m away"
-          % (label, len(path), math.hypot(spot[0] - x, spot[1] - y)))
-    follow(path[1:])
 
-    # Turn to face the work, then correct the distance only if it is outside
-    # the usable band. The arm solves for wherever the machine actually ended
-    # up, so there is nothing to gain from shuffling into an exact spot.
-    x, y, _, _ = base_pose()
-    face(math.atan2(ty - y, tx - x))
-    for _ in range(3):
+    If the machine gets physically wedged on something the static map did not
+    know was there, goto()/creep() give up in a couple of seconds rather than
+    burning their full timeout doing nothing, and raise Stuck. Caught here:
+    the whole attempt restarts from wherever the machine actually stopped,
+    which usually means standoff_spot() picks a different bearing and plan()
+    finds a different route - a real reroute, not just a second try at the
+    same thing.
+    """
+    for attempt in range(attempts):
+        spot = standoff_spot(tx, ty)
+        if spot is None:
+            print("    nowhere clear to park by %s - skipping" % label)
+            return False
+        x, y, _, _ = base_pose()
+        path = plan((x, y), spot)
+        if path is None:
+            print("    no clear route to %s - skipping" % label)
+            return False
+        print("    driving to %s: %d waypoints, %.1f m away"
+              % (label, len(path), math.hypot(spot[0] - x, spot[1] - y)))
+        try:
+            follow(path[1:])
+
+            # Turn to face the work, then correct the distance only if it is
+            # outside the usable band. The arm solves for wherever the machine
+            # actually ended up, so there is nothing to gain from shuffling
+            # into an exact spot.
+            x, y, _, _ = base_pose()
+            face(math.atan2(ty - y, tx - x))
+            for _ in range(3):
+                x, y, _, _ = base_pose()
+                gap = math.hypot(tx - x, ty - y)
+                if PARK_MIN <= gap <= PARK_MAX:
+                    break
+                creep(gap - STANDOFF)
+        except Stuck:
+            halt()
+            if attempt + 1 < attempts:
+                print("    stuck getting to %s - rerouting (attempt %d of %d)"
+                      % (label, attempt + 2, attempts))
+                continue
+            print("    still stuck approaching %s after %d attempts - skipping"
+                  % (label, attempts))
+            return False
+
         x, y, _, _ = base_pose()
         gap = math.hypot(tx - x, ty - y)
-        if PARK_MIN <= gap <= PARK_MAX:
-            break
-        creep(gap - STANDOFF)
-    x, y, _, _ = base_pose()
-    gap = math.hypot(tx - x, ty - y)
-    if gap < PARK_MIN or gap > PARK_MAX:
-        print("    could not park within reach of %s (%.2f m) - skipping" % (label, gap))
-        return False
-    print("    parked %.2f m from %s" % (gap, label))
-    return True
+        if gap < PARK_MIN or gap > PARK_MAX:
+            print("    could not park within reach of %s (%.2f m) - skipping" % (label, gap))
+            return False
+        print("    parked %.2f m from %s" % (gap, label))
+        return True
+    return False
 
 
 # --------------------------------------------------------------------------
@@ -602,11 +680,32 @@ def border_warning():
                    1.0 - max(0.0, (a - 0.45) / 0.55), "Arial")
 
 
+BEACON_ON = (1.0, 0.35, 0.0)
+BEACON_OFF = (0.15, 0.05, 0.0)
+BEACON_PERIOD = 0.55          # seconds per half-cycle
+
+_beacon_lit = None
+
+
+def blink_beacon():
+    """Toggle the cab beacon's own glow. Only writes the field when it
+    actually changes state, not every step."""
+    global _beacon_lit
+    if beacon_node is None:
+        return
+    lit = int(robot.getTime() / BEACON_PERIOD) % 2 == 0
+    if lit != _beacon_lit:
+        _beacon_lit = lit
+        beacon_node.getField("emissiveColor").setSFColor(
+            list(BEACON_ON if lit else BEACON_OFF))
+
+
 def step(n=1):
     for _ in range(n):
         if robot.step(timestep) == -1:
             raise Quit
         border_warning()
+        blink_beacon()
         poll_keyboard()
 
 

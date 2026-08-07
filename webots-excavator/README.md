@@ -212,6 +212,32 @@ Two details make it work:
 If a route genuinely cannot be found, the machine says so on the console and
 moves on to the next object rather than guessing.
 
+### Rerouting when it gets stuck
+
+The map above is static — built once, when the world loads. It does not know
+about a wheel that has lost traction on a slope, or two parts of the machine
+wedged against something in a way the flat obstacle circles did not predict.
+Without a way to notice that, a stuck machine would either freeze in place or
+sit there spinning its wheels for the full length of whatever timeout happened
+to be running.
+
+Every drive command now carries a **progress guard**: every 2.2 seconds it
+checks whether the machine has actually moved at least 5 cm, or turned at
+least 3° (turning on the spot to face a new heading is real progress and must
+not be mistaken for being stuck). If neither happened, it raises `Stuck`
+immediately rather than waiting out the rest of a 60-second timeout doing
+nothing.
+
+`dock_at()` catches it. Rather than trying the exact same route again — which
+would fail the same way, since the map has not changed — it starts over from
+wherever the machine actually stopped: a fresh `standoff_spot()` call from a
+new position usually picks a different bearing, and a fresh `plan()` usually
+finds a different route. That is a real reroute, not a second attempt at the
+same thing. It gets three tries before giving up on that object for now and
+printing why on the console (`stuck getting to the blue - rerouting (attempt 2
+of 3)`), the same shape of message as everywhere else the machine gives up
+gracefully rather than guessing.
+
 ### Why the working distance is 1.04–1.18 m
 
 A finished stack of three stands 0.48 m tall. The counterweight sweeps a circle
@@ -288,8 +314,8 @@ or garbled viewport outright.
 rollers, tension adjusters, travel motors, and a belt of grousers wrapping right
 around the ends. A bolted slew ring the whole upper structure turns on. A cab
 with ROPS corner posts, glazing on all four sides, a door with a handle, a
-wiper, mirrors, a roof hatch, work lights, a beacon, and a seat with joystick
-consoles visible through the glass. An engine housing with a radiator grille, a
+wiper, mirrors, a roof hatch, work lights, a beacon that blinks, and a seat
+with joystick consoles visible through the glass. An engine housing with a radiator grille, a
 hinged hatch and latches; an exhaust stack with a heat shield; hydraulic and
 fuel tanks with filler caps; a toolbox; a counterweight with hazard striping and
 a tow hook; handrails and steps. A bent boom with gusset plates, pinned ears,
@@ -327,6 +353,24 @@ calls the graphics card cannot spare. That is what makes the lite-world set
 affordable: `construction_site_lite.wbt` is 914 shapes against 1134 for the
 full world, for four assemblies' difference (99 shapes: the cranes, the frame
 building, the dump truck).
+
+**Atmosphere.** Three touches, none of them costing extra shapes:
+
+* A `Fog` node fades distant objects toward the sky colour, so the far hills
+  and skyline sit behind a soft haze instead of a hard silhouette. It only
+  starts to bite past about 20–25 m — the machine and everything it works
+  with, all well inside that, render exactly as sharp as before.
+* The two directional lights were warmed slightly, for a late-afternoon rather
+  than midday feel.
+* The cab beacon actually blinks now — roughly twice a second, amber to dim
+  amber — rather than sitting on one fixed glow. It works by DEF'ing just that
+  one light's material (`BEACON_MAT`) so the controller can reach in and
+  change its `emissiveColor` each step; nothing else about the beacon's
+  geometry changed.
+
+If the fog reads as too much or too little for your taste, `visibilityRange`
+in the `Fog {}` block near the top of `tools/gen_world.py` is the one number
+to change — regenerate and it updates both worlds.
 
 ## A note on the primitive axes
 
@@ -408,7 +452,7 @@ save it, running the generator again overwrites your changes. Change
 
 ```
 python3 tools/gen_world.py      # writes both worlds and site_map.py
-python3 tools/verify.py         # 109 checks; run this before opening Webots
+python3 tools/verify.py         # 133 checks; run this before opening Webots
 ```
 
 `gen_world.py` needs nothing but Python. The other tools need `numpy` and
@@ -425,7 +469,7 @@ python3 tools/verify.py         # 109 checks; run this before opening Webots
 | `tines.py` | the grapple's tip radius against opening angle |
 | `zfight.py` | finds surfaces that would flicker |
 
-`verify.py` is the one that matters (109 checks). It reads the controller's constants and the
+`verify.py` is the one that matters (133 checks). It reads the controller's constants and the
 generated world and checks they agree — every device the controller opens
 exists, every arm target is inside the reach envelope, every pad has somewhere
 to park, and the grapple clears the machine at every commanded pose. It exits

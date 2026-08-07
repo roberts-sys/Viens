@@ -58,15 +58,19 @@ Background {
     0.53 0.68 0.86
   ]
 }
+Fog {
+  color 0.60 0.72 0.85
+  visibilityRange 42
+}
 DirectionalLight {
   direction 0.55 0.4 -0.85
-  color 1 0.97 0.9
+  color 1 0.92 0.78
   intensity 2.4
   castShadows FALSE
 }
 DirectionalLight {
   direction -0.6 -0.5 -0.55
-  color 0.72 0.8 0.95
+  color 0.70 0.76 0.92
   intensity 0.9
 }
 DirectionalLight {
@@ -12072,7 +12076,7 @@ DEF EXCAVATOR Robot {
             translation -0.06000 0.26000 0.70500
             children [
               Shape {
-                appearance PBRAppearance {
+                appearance DEF BEACON_MAT PBRAppearance {
                   baseColor 0.95000 0.40000 0.05000
                   roughness 0.35
                   metalness 0.20

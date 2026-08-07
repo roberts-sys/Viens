@@ -48,7 +48,8 @@ for name in ("BOOM_PIVOT_R", "BOOM_PIVOT_Z", "BOOM_LEN", "STICK_LEN", "TIP_OFFSE
              "RELEASE_GAP", "MACHINE_R", "SWEEP_R", "STANDOFF", "PAD_R", "CELL",
              "HELD_TOL", "TINES", "PARK_MIN", "PARK_MAX", "SEAT_RISE",
              "EDGE_MARGIN", "MANUAL_GAIN", "BORDER_WARN_AT",
-             "BORDER_WARN_FULL", "LIFT_CHECK", "GRIP_LATERAL"):
+             "BORDER_WARN_FULL", "LIFT_CHECK", "GRIP_LATERAL",
+             "STUCK_WINDOW", "STUCK_EPS", "DRIVE_SPEED"):
     m = re.search(r"^%s\s*=\s*([-\d.]+)" % name, src, re.M)
     assert m, "controller has no %s" % name
     C[name] = float(m.group(1))
@@ -83,6 +84,10 @@ for world in ("construction_site.wbt", "construction_site_lite.wbt"):
     check('material1 "grip"' in txt and 'material2 "load"' in txt,
           "%s defines the grip/load friction pair" % world)
     check("site_collision" in txt, "%s has collision bodies for the props" % world)
+    check(re.search(r"^Fog \{", txt, re.M) is not None,
+          "%s has a Fog node for depth atmosphere" % world)
+    check(txt.count("Fog {") == 1, "%s defines Fog only once" % world,
+          "found %d" % txt.count("Fog {"))
 
     # every device the controller asks for must exist
     wanted = set(re.findall(r'getDevice\("([^"]+)"\)', src))
@@ -276,6 +281,52 @@ check(C["BORDER_WARN_FULL"] < C["BORDER_WARN_AT"],
       "the border warning fades in rather than snapping on",
       "solid at %.2f m, gone by %.2f m" % (C["BORDER_WARN_FULL"], C["BORDER_WARN_AT"]))
 check("setLabel" in src, "the border warning is drawn over the 3D view")
+
+# The beacon must actually alternate, not just sit on one colour, and the
+# world must define the DEF the controller looks it up by (the generic
+# getFromDef loop above already checks BEACON_MAT exists in both worlds).
+BEACON_ON = eval(re.search(r"^BEACON_ON = (\(.*?\))$", src, re.M).group(1))
+BEACON_OFF = eval(re.search(r"^BEACON_OFF = (\(.*?\))$", src, re.M).group(1))
+check(BEACON_ON != BEACON_OFF, "the beacon's two states are actually different colours")
+m = re.search(r"^BEACON_PERIOD = ([\d.]+)", src, re.M)
+check(m is not None and 0.15 < float(m.group(1)) < 2.0,
+      "the beacon blinks at a plausible warning-light rate",
+      "%.2f s per half-cycle" % float(m.group(1)) if m else "not found")
+check("blink_beacon()" in src and "def blink_beacon" in src,
+      "the beacon is driven every step")
+check("if lit != _beacon_lit" in src,
+      "the beacon field is only written when its state actually changes")
+
+# The machine must notice it is wedged against something the static map did
+# not know about, and try a different approach, rather than either freezing
+# or silently pretending a failed leg succeeded.
+check("class Stuck" in src, "there is a Stuck exception to signal no progress")
+check("def progress_guard" in src, "a shared progress guard exists")
+check(src.count("guard()") >= 2,
+      "the progress guard runs inside both goto() and creep()",
+      "found %d call sites" % src.count("guard()"))
+check("except Stuck" in src, "something catches Stuck and reacts to it")
+check(re.search(r"def dock_at\([^)]*attempts", src) is not None,
+      "dock_at() takes multiple attempts, so a stuck leg can be rerouted")
+# a reroute is only real if standoff_spot()/plan() run again inside the retry
+# loop, rather than the same route being tried a second time
+dock_body = re.search(r"def dock_at\(.*?\n\n\ndef ", src, re.S)
+check(dock_body is not None and dock_body.group(0).count("standoff_spot(") >= 1
+      and "for attempt in range(attempts)" in dock_body.group(0),
+      "the retry recomputes standoff_spot()/plan() from wherever it stopped,"
+      " not just repeating the same route")
+check(C["STUCK_WINDOW"] < 10.0,
+      "a stuck leg is noticed in well under the old 60 s flat timeout",
+      "%.1f s" % C["STUCK_WINDOW"])
+# goto()'s slowest commanded speed is a floor of 0.3 x DRIVE_SPEED (see the
+# "v = DRIVE_SPEED * min(1.0, max(0.3, dist))" line): even crawling at that
+# floor, genuinely-moving-but-slow driving must clear STUCK_EPS well inside
+# one STUCK_WINDOW, or ordinary slow driving would trip the detector.
+min_speed = C["DRIVE_SPEED"] * 0.3
+check(min_speed * C["STUCK_WINDOW"] > 3 * C["STUCK_EPS"],
+      "the slowest normal driving speed comfortably clears the stuck threshold",
+      "%.2f m/s floor x %.1f s window = %.2f m, vs a %.2f m epsilon"
+      % (min_speed, C["STUCK_WINDOW"], min_speed * C["STUCK_WINDOW"], C["STUCK_EPS"]))
 
 # Proof of grip has to be more than nearness, or an object lying on the ground
 # under a low arm looks held.
