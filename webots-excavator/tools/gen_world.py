@@ -233,21 +233,14 @@ def group(children, t=(0, 0, 0), yaw=0.0):
 # ======================================================================
 #  EXCAVATOR
 # ======================================================================
-def track(side):
-    """One track assembly. side = +1 (left) or -1 (right)."""
+def track_static(side):
+    """One track assembly, minus every part that spins - see the roller
+    builders below. Those used to be baked in here as static shapes, which is
+    why driving the machine looked like sliding: the tread was never going to
+    look like it was rolling if literally nothing on it ever turned."""
     y = 0.30 * side
     p = []
     p.append(box((0.93, 0.16, 0.155), (0, y, 0.1575), color=DARK, rough=0.85, metal=0.4))
-    # idler + sprocket
-    for x, r in ((0.48, 0.13), (-0.48, 0.13)):
-        p.append(ycyl(0.20, r, (x, y, 0.13), color=(0.22, 0.23, 0.25), sub=24, metal=0.5))
-        p.append(ycyl(0.10, 0.05, (x, y, 0.13), color=CHROME, sub=16, metal=0.9, rough=0.3))
-    # sprocket teeth
-    for i in range(10):
-        a = i * math.pi / 5
-        p.append(box((0.035, 0.20, 0.045),
-                     (-0.48 + 0.145 * math.cos(a), y, 0.13 + 0.145 * math.sin(a)),
-                     (0, 1, 0, -a), color=(0.28, 0.29, 0.31), metal=0.6))
     # belts
     p.append(box((0.96, 0.22, 0.05), (0, y, 0.025), color=CHAR, rough=1))
     p.append(box((0.96, 0.22, 0.05), (0, y, 0.235), color=CHAR, rough=1))
@@ -264,18 +257,6 @@ def track(side):
         x = -0.42 + i * 0.14
         p.append(box((0.04, 0.24, 0.03), (x, y, 0.005), color=(0.14, 0.14, 0.15), rough=1))
         p.append(box((0.04, 0.24, 0.03), (x, y, 0.255), color=(0.14, 0.14, 0.15), rough=1))
-    # road wheels + carrier rollers
-    for x in (-0.30, -0.10, 0.10, 0.30):
-        p.append(ycyl(0.16, 0.06, (x, y, 0.06), color=(0.25, 0.26, 0.28), metal=0.5))
-    for x in (-0.2, 0.2):
-        p.append(ycyl(0.10, 0.035, (x, y, 0.245), color=(0.25, 0.26, 0.28), metal=0.5))
-    # hub bolt circles on the idler and the sprocket
-    for hx in (0.48, -0.48):
-        for i in range(6):
-            a = i * math.pi / 3
-            p.append(ycyl(0.022, 0.010, (hx + 0.062 * math.cos(a), y + 0.101 * side,
-                                         0.13 + 0.062 * math.sin(a)),
-                          CHROME, 6, metal=0.9, rough=0.3))
     # bolt heads along the track frame
     for i in range(8):
         p.append(ycyl(0.02, 0.011, (-0.42 + i * 0.12, y + 0.081 * side, 0.215),
@@ -291,10 +272,37 @@ def track(side):
     return p
 
 
+def track_end_roller(side, teeth):
+    """One idler or sprocket, local to its own axle. Sprockets (teeth=True)
+    drive the belt in reality; idlers just turn with it - both are commanded
+    the same here, since nothing actually simulates the belt itself."""
+    p = [ycyl(0.20, 0.13, (0, 0, 0), color=(0.22, 0.23, 0.25), sub=24, metal=0.5),
+         ycyl(0.10, 0.05, (0, 0, 0), color=CHROME, sub=16, metal=0.9, rough=0.3)]
+    if teeth:
+        for i in range(10):
+            a = i * math.pi / 5
+            p.append(box((0.035, 0.20, 0.045),
+                         (0.145 * math.cos(a), 0, 0.145 * math.sin(a)),
+                         (0, 1, 0, -a), color=(0.28, 0.29, 0.31), metal=0.6))
+    for i in range(6):
+        a = i * math.pi / 3
+        p.append(ycyl(0.022, 0.010, (0.062 * math.cos(a), 0.101 * side, 0.062 * math.sin(a)),
+                      CHROME, 6, metal=0.9, rough=0.3))
+    return p
+
+
+def track_road_wheel():
+    return [ycyl(0.16, 0.06, (0, 0, 0), color=(0.25, 0.26, 0.28), metal=0.5)]
+
+
+def track_carrier_roller():
+    return [ycyl(0.10, 0.035, (0, 0, 0), color=(0.25, 0.26, 0.28), metal=0.5)]
+
+
 def undercarriage():
     p = []
     for s in (1, -1):
-        p += track(s)
+        p += track_static(s)
     p.append(box((0.72, 0.46, 0.14), (0, 0, 0.20), color=(0.20, 0.21, 0.23), metal=0.4))
     p.append(box((0.90, 0.14, 0.10), (0, 0.30, 0.24), color=(0.20, 0.21, 0.23), metal=0.4))
     p.append(box((0.90, 0.14, 0.10), (0, -0.30, 0.24), color=(0.20, 0.21, 0.23), metal=0.4))
@@ -1050,9 +1058,58 @@ HingeJoint {
   }
 }""" % (wx, wy, nm, nm, wx, wy, nm)
 
+    # ---- the visible sprockets, idlers, road wheels and carrier rollers ----
+    # The four wheels above are the real physics - hidden inside the track
+    # shells, as the name says. These are purely visual: kinematic joints (no
+    # physics node, so they cost nothing dynamically) that spin the parts you
+    # can actually see, at the angular speed each one's own radius calls for.
+    # Without this the tread never had anything on it that turned, so driving
+    # looked like sliding no matter how correct the underlying physics was.
+    # name, x, z, which builder to call ("end" needs side+teeth, so it is
+    # special-cased below rather than folded into this table)
+    ROLLERS = [("end0", 0.48, 0.13, "end", False), ("end1", -0.48, 0.13, "end", True),
+               ("road0", -0.30, 0.06, "road", None), ("road1", -0.10, 0.06, "road", None),
+               ("road2", 0.10, 0.06, "road", None), ("road3", 0.30, 0.06, "road", None),
+               ("carrier0", -0.20, 0.245, "carrier", None),
+               ("carrier1", 0.20, 0.245, "carrier", None)]
+    track_rollers = ""
+    for side, tag in ((1, "l"), (-1, "r")):
+        y = 0.30 * side
+        for name, x, z, kind, teeth in ROLLERS:
+            if kind == "end":
+                shapes = track_end_roller(side, teeth)
+            elif kind == "road":
+                shapes = track_road_wheel()
+            else:
+                shapes = track_carrier_roller()
+            devname = "track_%s_%s" % (tag, name)
+            track_rollers += """
+HingeJoint {
+  jointParameters HingeJointParameters {
+    axis 0 1 0
+    anchor %.4f %.4f %.4f
+  }
+  device [
+    RotationalMotor {
+      name "%s_motor"
+      maxVelocity 40
+      maxTorque 2
+    }
+  ]
+  endPoint Solid {
+    translation %.4f %.4f %.4f
+    children [
+%s
+    ]
+    name "%s"
+  }
+}""" % (x, y, z, devname, x, y, z,
+        "\n".join(indent(shape, 6) for shape in shapes), devname)
+
     return """DEF EXCAVATOR Robot {
   translation 0 0 0
   children [
+%s
 %s
 %s
 %s
@@ -1097,7 +1154,7 @@ HingeJoint {
   selfCollision TRUE
   supervisor TRUE
 }""" % ("\n".join(indent(c, 4) for c in undercarriage()), indent(wheels, 4),
-        indent(house_j, 4))
+        indent(track_rollers, 4), indent(house_j, 4))
 
 
 
@@ -1494,12 +1551,13 @@ def scenery(full=True):
                  color=(0.34, 0.30, 0.24), rough=1))
     p.append(pylon((-13.0, -2.0, 0), 9.5))
     p.append(pylon((-14.5, 5.2, 0), 8.6))
-    # yaw 2.5 used to send the belt's incline back across the fence corner -
-    # its centreline dipped inside by 0.02 m at one point, which is exactly
-    # the sliver visible in a render. This placement was checked (not just
-    # eyeballed) to clear the fence by >=1.3 m along its whole length,
-    # including the belt's own width, not just its centreline.
-    p.append(conveyor((10.0, 6.3, 0), 0.25))
+    # The whole north-east corner turned out to be too crowded for this: two
+    # placements in a row cleared the fence but then grazed a skyline block,
+    # and the corrected one was still only 9 m from a crane's jib reach.
+    # Searched the full map instead of patching the same corner a third time.
+    # tools/verify.py checks this placement against the fence, every skyline
+    # block and both cranes on every run.
+    p.append(conveyor((-3.0, 10.0, 0), 0.0))
     p.append(silo2((-9.5, 5.2, 0)))
     for t, h, r, leaf in (((11.6, -2.2), 3.6, 1.5, (0.20, 0.34, 0.15)),
                           ((12.4, 0.6), 3.1, 1.3, (0.24, 0.38, 0.17)),

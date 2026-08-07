@@ -177,6 +177,22 @@ for m in wheel_m:
     m.setPosition(float("inf"))
     m.setVelocity(0.0)
 
+# The visible sprockets, idlers, road wheels and carrier rollers - purely
+# cosmetic spinners (see tools/gen_world.py) that make the tracks look like
+# they are rolling, in addition to the hidden wheels above which are the real
+# physics. Each is commanded from its own radius: omega = v / r, so a small
+# road wheel visibly spins faster than a big sprocket for the same track
+# speed, exactly as it would for real.
+TRACK_ROLLERS = [("end0", 0.13), ("end1", 0.13), ("road0", 0.06), ("road1", 0.06),
+                 ("road2", 0.06), ("road3", 0.06), ("carrier0", 0.035), ("carrier1", 0.035)]
+roller_m = {}
+for tag in ("l", "r"):
+    for name, r in TRACK_ROLLERS:
+        m = robot.getDevice("track_%s_%s_motor" % (tag, name))
+        m.setPosition(float("inf"))
+        m.setVelocity(0.0)
+        roller_m[(tag, name)] = (m, r)
+
 # The three cameras. Webots shows each one as a small overlay window.
 for cam_name in ("camera_front_left", "camera_front_right", "camera_rear"):
     robot.getDevice(cam_name).enable(timestep * 4)
@@ -297,11 +313,19 @@ def to_base(wx, wy, wz):
 
 
 def wheels(left, right):
-    """Left and right track speeds in m/s (skid steer)."""
+    """Left and right track speeds in m/s (skid steer).
+
+    Also spins every visible sprocket, idler, road wheel and carrier roller at
+    the angular speed its own radius calls for, so the tracks look like they
+    are rolling rather than sliding - the hidden wheels above are the real
+    physics, these are what you actually see.
+    """
     wheel_m[0].setVelocity(left / WHEEL_R)
     wheel_m[2].setVelocity(left / WHEEL_R)
     wheel_m[1].setVelocity(right / WHEEL_R)
     wheel_m[3].setVelocity(right / WHEEL_R)
+    for (tag, _name), (m, r) in roller_m.items():
+        m.setVelocity((left if tag == "l" else right) / r)
 
 
 def halt():

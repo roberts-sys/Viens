@@ -91,6 +91,9 @@ for world in ("construction_site.wbt", "construction_site_lite.wbt"):
     wanted = set(re.findall(r'getDevice\("([^"]+)"\)', src))
     wanted |= {"tine_%d_motor" % i for i in range(int(C["TINES"]))}
     wanted |= {"wheel_%s_motor" % n for n in ("fl", "fr", "rl", "rr")}
+    wanted |= {"track_%s_%s_motor" % (tag, name) for tag in ("l", "r")
+              for name in ("end0", "end1", "road0", "road1", "road2", "road3",
+                           "carrier0", "carrier1")}
     wanted = {w for w in wanted if "%" not in w}
     have = set(re.findall(r'name "([a-z_0-9]+)"', txt))
     missing = sorted(wanted - have)
@@ -104,6 +107,17 @@ for world in ("construction_site.wbt", "construction_site_lite.wbt"):
     for colour in ("BLUE", "YELLOW", "BROWN", "RED", "GREEN", "WHITE"):
         check("DEF CUBE_%s " % colour in txt and "DEF ROCK_%s " % colour in txt,
               "%s defines the %s cube and rock" % (world, colour.lower()))
+
+    # The visible track rollers are purely cosmetic spinners: they must not
+    # carry a physics node (that would make them dynamic bodies for no
+    # reason - 16 extra rigid bodies per machine, simulated for nothing,
+    # since setVelocity() on an inf-position motor already spins a kinematic
+    # joint without one) and must not add any geometry the shape count
+    # doesn't already know about, since they only rearrange shapes that were
+    # already being drawn as static parts of the track.
+    roller_block = re.search(r'name "track_l_end0"(?:(?!HingeJoint).)*', txt, re.S)
+    check(roller_block is not None and "physics" not in roller_block.group(0),
+          "%s: track rollers are kinematic, not dynamic bodies" % world)
 
 
 # --------------------------------------------------------------------------
@@ -344,20 +358,54 @@ print("\nbackground structures vs the fence")
 # look clear while the actual (wider) footprint is not. Caught this once by
 # eye on the conveyor (its yaw sent the belt back across the north-east
 # corner by 0.02 m); this checks the real footprint, not just where it starts.
+#
+# Clearing the fence is not enough on its own, either: the first fix cleared
+# the fence but grazed a skyline block instead (its footprint was never
+# checked against anything else nearby). This checks the conveyor's whole
+# footprint against the fence, every skyline block, and both cranes, all
+# pulled from gen_world.py's own source rather than copied - so none of them
+# can silently drift out of sync with what actually gets built.
 gw_src = open(os.path.join(HERE, "gen_world.py")).read()
 m = re.search(r'p\.append\(conveyor\(\(([-\d.]+), ([-\d.]+), 0\), ([-\d.]+)\)\)', gw_src)
 check(m is not None, "conveyor placement found in gen_world.py")
 if m:
     cx, cy, cyaw = float(m.group(1)), float(m.group(2)), float(m.group(3))
     HALF_W = 0.6   # belt width plus its side rails
-    worst = 1e9
+    footprint = []
     for i in range(61):
         s = 9.0 * i / 60.0
         bx, by = cx + s * math.cos(cyaw), cy + s * math.sin(cyaw)
         px, py = -math.sin(cyaw), math.cos(cyaw)
-        for w in (-HALF_W, HALF_W):
-            worst = min(worst, max(abs(bx + w * px), abs(by + w * py)) - FENCE)
+        footprint += [(bx + w * px, by + w * py) for w in (-HALF_W, HALF_W)]
+
+    worst = min(max(abs(x), abs(y)) - FENCE for x, y in footprint)
     check(worst > 0.3, "the conveyor's whole footprint clears the fence",
+          "worst clearance %+.3f m" % worst)
+
+    sky_m = re.search(r"for t2, s2, h2, y2 in \((.*?)\):\n\s*p\.append\(skyline",
+                      gw_src, re.S)
+    check(sky_m is not None, "skyline blocks found in gen_world.py")
+    if sky_m:
+        blocks = re.findall(
+            r"\(\(([-\d.]+), ([-\d.]+)\), \(([-\d.]+), ([-\d.]+)\)", sky_m.group(1))
+        worst = 1e9
+        for bx, by, sx, sy in blocks:
+            bx, by, sx, sy = float(bx), float(by), float(sx) + 0.08, float(sy) + 0.08
+            for x, y in footprint:
+                gap = max(abs(x - bx) - sx / 2, abs(y - by) - sy / 2)
+                worst = min(worst, gap)
+        check(worst > 0.3, "the conveyor's footprint clears every skyline block",
+              "worst clearance %+.3f m" % worst)
+
+    cranes = re.findall(r'p\.append\(crane\(\(([-\d.]+), ([-\d.]+), 0\)', gw_src)
+    check(len(cranes) >= 1, "at least one crane found in gen_world.py")
+    CRANE_R = 9.0   # mast to jib tip, generous - see crane()
+    worst = 1e9
+    for cxs, cys in cranes:
+        ccx, ccy = float(cxs), float(cys)
+        for x, y in footprint:
+            worst = min(worst, math.hypot(x - ccx, y - ccy) - CRANE_R)
+    check(worst > 0.3, "the conveyor's footprint clears both cranes",
           "worst clearance %+.3f m" % worst)
 
 

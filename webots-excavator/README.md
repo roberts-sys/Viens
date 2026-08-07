@@ -312,7 +312,9 @@ or garbled viewport outright.
 
 **The machine.** Tracks with idlers, sprockets with teeth, road wheels, carrier
 rollers, tension adjusters, travel motors, and a belt of grousers wrapping right
-around the ends. A bolted slew ring the whole upper structure turns on. A cab
+around the ends. Every one of those wheels actually turns — see "The tracks
+used to slide instead of roll" below. A bolted slew ring the whole upper
+structure turns on. A cab
 with ROPS corner posts, glazing on all four sides, a door with a handle, a
 wiper, mirrors, a roof hatch, work lights, a beacon that blinks, and a seat
 with joystick consoles visible through the glass. An engine housing with a radiator grille, a
@@ -383,16 +385,47 @@ affordable: `construction_site_lite.wbt` is 995 shapes against 1223 for the
 full world, for four assemblies' difference (99 shapes: the cranes, the frame
 building, the dump truck).
 
-### The conveyor used to cut through the fence
+### The conveyor used to cut through the fence, then a building
 
-Its incline was angled back toward the fence's north-east corner rather than
-away from it — the centreline dipped 0.02 m inside, and the belt's own width
-(1 m, plus side rails) made that a visible sliver of the beam poking through
-both panels where they meet. Fixed by moving it to a placement where its
-whole length — not just its centreline — was checked to clear the fence by at
-least 1.3 m: `tools/verify.py` now confirms this on every run, sampling the
-belt's actual footprint rather than trusting a render angle, since that's
-exactly the check that would have caught this before it shipped.
+Its original incline was angled back toward the fence's north-east corner
+rather than away from it — the centreline dipped 0.02 m inside, and the belt's
+own width (1 m, plus side rails) made that a visible sliver of the beam poking
+through both panels where they meet. The first fix moved it to a placement
+checked to clear the fence by 1.4 m along its whole length, not just its
+centreline — but that corner also holds a skyline block, and the corrected
+placement grazed that instead, which is exactly what showed up next.
+
+Two placements into the same corner both failed on something *else* nearby,
+which was the real signal: that corner is too crowded for this assembly.
+Rather than patch it a third time, the search widened to the whole map, with
+every fence edge, skyline block and crane jib reach treated as a keep-out zone
+and the belt's actual swept footprint (not its centreline) checked against all
+of them together. The conveyor now sits at the north side of the yard instead,
+clear of the fence by 1.4 m, the nearest skyline block by 3.36 m and both
+cranes by 1.18 m. `tools/verify.py` checks all three on every run, reading the
+skyline and crane positions directly out of `gen_world.py` rather than
+hard-coding them, so it can't quietly go stale the way the fence-only check
+did.
+
+### The tracks used to slide instead of roll
+
+Driving the machine was always real physics — four driven wheels hidden inside
+each track shell push it around — but nothing on the *visible* track ever
+turned, so from the outside it read as sliding no matter how correct the
+underlying motion was. The idlers, sprockets, road wheels and carrier rollers
+were static shapes with no joints at all.
+
+Each one is now its own `HingeJoint`, still driven by the same left/right
+track speed but spun at the angular speed its own radius calls for
+(`omega = v / r`), so a small road wheel visibly spins faster than a big
+sprocket for the same track speed — exactly as it would for real. They carry
+no `physics` node: a `RotationalMotor` on a `HingeJoint` spins just fine
+kinematically via `setPosition(inf)` + `setVelocity()`, and giving all sixteen
+of them a dynamic body would simulate real rigid-body contact for parts that
+only ever need to look right, for nothing gained. `tools/verify.py` checks
+that they stay that way. Every position and radius carried over unchanged from
+the old static shapes — this only wrapped them in joints, it did not
+redesign the running gear — so the shape count is exactly what it was before.
 
 **Atmosphere.** The two directional lights are warmed slightly for a
 late-afternoon rather than midday feel. A `Fog` node was tried here too, for
