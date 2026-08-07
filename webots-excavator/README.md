@@ -22,8 +22,8 @@ loaded, so the "Skipped PROTO" errors from before cannot happen here.
 3. Press ▶.
 
 `construction_site_lite.wbt` is the one to open by default — it has the
-identical machine, the same detailed rocks, the same fence and boundary
-warning, and a lighter background, at 995 shapes against 1223 for
+identical machine, the same detailed rocks, the same invisible boundary and
+warning, and a lighter background, at 959 shapes against 1187 for
 `construction_site.wbt`. If your graphics card handles the full version
 without going black, it has a few extra assemblies (both tower cranes, the
 scaffolded frame building, the loaded dump truck, two parked vans) that
@@ -58,15 +58,21 @@ dial if you want it quicker or slower again.
 
 ### You cannot leave the site
 
-The fence is a wall, so the machine physically cannot get out. Drive at it and
-**CANNOT LEAVE CONSTRUCTION SITE** fades up over the 3D view, solid by the time
-you are 0.55 m off the fence, and fades away again as you pull back — gone by
-1.40 m. It is drawn with `setLabel`, so it sits over the viewport wherever the
-camera happens to be pointing.
+The site's edge is an invisible wall — there used to be a visible fence marking
+it, but it's gone now, and nothing replaced it in the 3D view. The boundary
+itself did not move: it's still a real `boundingObject` wall (see
+`site_collision()` in `tools/gen_world.py`, which never had any visible
+geometry of its own to begin with — that was always a separate, purely
+cosmetic set of panels), so the machine still physically cannot get out. Drive
+at it and **CANNOT LEAVE CONSTRUCTION SITE** fades up over the 3D view, solid
+by the time you are 0.55 m off the edge, and fades away again as you pull
+back — gone by 1.40 m. It is drawn with `setLabel`, so it sits over the
+viewport wherever the camera happens to be pointing, with nothing in the scene
+to mark where the line actually is except that label.
 
-The route planner keeps 1.60 m clear of the fence, which is further out than the
-warning ever reaches, so the machine driving itself never sets it off. That is
-checked in `verify.py` rather than left to luck.
+The route planner keeps 1.60 m clear of the boundary, which is further out than
+the warning ever reaches, so the machine driving itself never sets it off. That
+is checked in `verify.py` rather than left to luck.
 
 Press **M** again to hand it back. The autonomous routine picks up from the
 start of a cycle, wherever you happened to leave the machine — the arm works
@@ -278,13 +284,13 @@ rock still reads as granite or sandstone at a glance.
 ## If the viewport is black
 
 There are two worlds in `worlds/`, both running the same excavator and the same
-controller, and both now carrying the fence, the boundary warning, the detailed
-rocks and a slice of background scenery:
+controller, and both now carrying the invisible boundary, the warning, the
+detailed rocks and a slice of background scenery:
 
 | World | Shapes | What's in it |
 |---|---|---|
-| `construction_site_lite.wbt` | 995 | machine, rocks, fence, pylons, trees, conveyor, silo |
-| `construction_site.wbt` | 1223 | all of the above, plus both cranes, the frame building with scaffolding, two vans, and the dump truck |
+| `construction_site_lite.wbt` | 959 | machine, rocks, pylons, trees, conveyor, silo |
+| `construction_site.wbt` | 1187 | all of the above, plus both cranes, the frame building with scaffolding, two vans, and the dump truck |
 
 **Both contain the identical, fully detailed excavator** — only how much
 scenery surrounds it differs. Start with `construction_site_lite.wbt`; it is
@@ -295,11 +301,13 @@ it means the graphics card gave up before drawing anything. Shadow casting is
 the usual cause, so `castShadows` is already `FALSE` in both worlds, and every
 surface in both is fully opaque — a wrapped set of transparent fence panels
 used to be the difference between the world that drew and the one that came up
-black, so nothing in either world is see-through now.
+black, so nothing in either world is see-through now. (Those panels are gone
+now anyway, replaced by an invisible boundary — see "You cannot leave the
+site" — but the no-transparency rule stayed for everything else.)
 
 If a world does come up black, don't guess between the two blindly: the shape
 counts above are exact, so if lite goes black too, the ceiling on your card is
-below 995 and `tools/gen_world.py` can be trimmed further — say which
+below 959 and `tools/gen_world.py` can be trimmed further — say which
 background pieces you can live without (pylons, trees, the conveyor, or the
 silo are the ones to drop first, in that order) and I'll take them out.
 
@@ -356,8 +364,8 @@ back solidly overlapping the hull, not just close to it.
 
 **The site, in both worlds.** Dirt ground with worn tracks, puddles and open
 trenches; spoil piles; traffic cones; concrete barriers; a shipping container;
-a fenced perimeter you cannot leave (below); nine skyline blocks and six
-distant hills; and, beyond the fence, two lattice power pylons, a stand of
+an invisible perimeter you cannot leave (below); nine skyline blocks and six
+distant hills; and, beyond the boundary, two lattice power pylons, a stand of
 eight conifers, an inclined conveyor feeding a stockpile, and a cement silo
 with a caged ladder, a platform ring and a fill-pipe elbow.
 
@@ -381,7 +389,7 @@ dump truck.
 Every background structure is built from a few large forms rather than
 lattice-work — only the silhouette reads at that distance, and struts cost draw
 calls the graphics card cannot spare. That is what makes the lite-world set
-affordable: `construction_site_lite.wbt` is 995 shapes against 1223 for the
+affordable: `construction_site_lite.wbt` is 959 shapes against 1187 for the
 full world, for four assemblies' difference (99 shapes: the cranes, the frame
 building, the dump truck).
 
@@ -426,6 +434,22 @@ only ever need to look right, for nothing gained. `tools/verify.py` checks
 that they stay that way. Every position and radius carried over unchanged from
 the old static shapes — this only wrapped them in joints, it did not
 redesign the running gear — so the shape count is exactly what it was before.
+
+### The fence panels are gone; the wall they marked never moved
+
+The perimeter used to be built twice over, for two different reasons: 36
+visible orange panels and posts in `scenery()` so you could *see* the edge,
+and a completely separate, always-invisible `boundingObject` wall in
+`site_collision()` so the machine could not *cross* it. Removing the fence
+meant deleting only the first of those — the panel-and-post loop in
+`scenery()` — and leaving `site_collision()` untouched, since it never drew
+anything to begin with (a `Solid` with a `boundingObject` and no `children` is
+invisible in Webots by construction, not by any special-casing on my part).
+The fading `CANNOT LEAVE CONSTRUCTION SITE` label reads the machine's live
+position against the same `FENCE` constant either way, so it did not need to
+change at all. Net effect: 36 fewer shapes in both worlds (959 and 1187, down
+from 995 and 1223), a site with no visible edge, and a boundary that stops the
+machine at exactly the same line as before.
 
 **Atmosphere.** The two directional lights are warmed slightly for a
 late-afternoon rather than midday feel. A `Fog` node was tried here too, for

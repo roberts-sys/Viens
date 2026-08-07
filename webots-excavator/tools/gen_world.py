@@ -1507,37 +1507,13 @@ def scenery(full=True):
                        ((0, -27), 6.2, 3.0), ((27, 11), 5.6, 2.8), ((-27, -8), 6.0, 2.4)):
         p.append(ucone(h2, r2, (t2[0], t2[1], -0.3), color=(0.46, 0.42, 0.33), sub=14))
 
-    # ---- perimeter fence ----
-    # In every world, not just the full one: the site is meant to be
-    # somewhere the machine cannot leave, and the lite world had no
-    # boundary at all.
-    #
-    # These panels are OPAQUE on purpose. They used to be transparency 0.5,
-    # and four 16 m alpha-blended surfaces ring the whole site, so the camera
-    # looks through at least one of them from almost any angle. That is a lot
-    # of blending to do every frame and it was the difference between the world
-    # that drew and the world that came up black. Nothing else in either world
-    # is see-through now either.
-    span = 2 * FENCE
-    for sgn in (1, -1):
-        p.append(box((span, 0.03, 1.15), (0, FENCE * sgn, 0.63), color=(0.95, 0.45, 0.05),
-                     rough=0.9))
-        p.append(box((span, 0.05, 0.06), (0, FENCE * sgn, 1.20), color=(0.85, 0.40, 0.04),
-                     rough=0.9))
-        p.append(box((0.03, span, 1.15), (FENCE * sgn, 0, 0.63), color=(0.95, 0.45, 0.05),
-                     rough=0.9))
-        p.append(box((0.05, span, 0.06), (FENCE * sgn, 0, 1.20), color=(0.85, 0.40, 0.04),
-                     rough=0.9))
-        for i in range(6):
-            k = -FENCE + FENCE * 2 * (i + 1) / 7.0
-            p.append(vcyl(1.30, 0.04, (k, FENCE * sgn, 0.65), color=(0.45, 0.46, 0.48),
-                          sub=8, metal=0.5))
-            p.append(vcyl(1.30, 0.04, (FENCE * sgn, k, 0.65), color=(0.45, 0.46, 0.48),
-                          sub=8, metal=0.5))
-        p.append(vcyl(1.30, 0.045, (FENCE * sgn, FENCE, 0.65), color=(0.45, 0.46, 0.48),
-                      sub=8, metal=0.5))
-        p.append(vcyl(1.30, 0.045, (FENCE * sgn, -FENCE, 0.65), color=(0.45, 0.46, 0.48),
-                      sub=8, metal=0.5))
+    # No visible perimeter fence: the boundary is an invisible wall instead
+    # (see site_collision() - a boundingObject-only Solid with no children,
+    # so Webots never draws it) plus the fading "CANNOT LEAVE CONSTRUCTION
+    # SITE" label in the controller. Both are keyed off the same FENCE
+    # constant as the panels used to be, so the machine still physically
+    # cannot cross the line and the warning still fades in at the same
+    # distance - only the orange panels and posts themselves are gone.
 
     # ---- distant background structures ----
     # Cheap ones (silhouette-only, no lattice) go in every world so the lite
