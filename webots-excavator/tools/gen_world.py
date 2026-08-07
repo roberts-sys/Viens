@@ -319,7 +319,7 @@ def cab():
     p.append(box((0.18, 0.20, 0.015), (cx + 0.06, cy, 0.665), color=GLASS, rough=0.2))
     p.append(vcyl(0.03, 0.03, (cx - 0.16, cy, 0.675), color=DARK))
     p.append(vcyl(0.07, 0.035, (cx - 0.16, cy, 0.705), color=(0.95, 0.4, 0.05), rough=0.35,
-                  transp=0.15, emis=(0.6, 0.16, 0.0)))
+                  emis=(0.6, 0.16, 0.0)))
     # roof work lights
     for dy in (-0.14, 0.14):
         p.append(box((0.06, 0.07, 0.06), (cx + 0.20, cy + dy, 0.69), color=DARK))
@@ -1174,7 +1174,7 @@ def scaffold_wall(t, yaw=0.0):
         p.append(box((5.2, 0.85, 0.05), (2.6, 0.45, z + 0.04), color=(0.55, 0.42, 0.26), rough=1))
         p.append(box((5.2, 0.05, 0.35), (2.6, 0.0, z + 0.35), color=(0.55, 0.42, 0.26), rough=1))
     p.append(box((5.4, 0.06, 6.0), (2.6, 0.95, 3.1), color=(0.55, 0.58, 0.55),
-                 rough=0.95, transp=0.55))
+                 rough=0.95))
     return group(p, t, yaw)
 
 
@@ -1388,6 +1388,7 @@ def scenery(full=True):
     for t, s in (((3.4, -1.8), 0.7), ((-2.4, 3.0), 0.5), ((5.2, 1.4), 0.6)):
         p.append(box((s * 1.6, s, 0.0008), (t[0], t[1], 0.0054), color=(0.24, 0.24, 0.22),
                      rough=0.1, metal=0.3))
+
     for _, x, y, _, _, dims, _, c in props_of("pile", full):
         p.append(ucone(dims[1], dims[0], (x, y, 0), color=c))
     # ---- cones, barriers ----
@@ -1436,6 +1437,38 @@ def scenery(full=True):
                        ((0, -27), 6.2, 3.0), ((27, 11), 5.6, 2.8), ((-27, -8), 6.0, 2.4)):
         p.append(ucone(h2, r2, (t2[0], t2[1], -0.3), color=(0.46, 0.42, 0.33), sub=14))
 
+    # ---- perimeter fence ----
+    # In every world, not just the full one: the site is meant to be
+    # somewhere the machine cannot leave, and the lite world had no
+    # boundary at all.
+    #
+    # These panels are OPAQUE on purpose. They used to be transparency 0.5,
+    # and four 16 m alpha-blended surfaces ring the whole site, so the camera
+    # looks through at least one of them from almost any angle. That is a lot
+    # of blending to do every frame and it was the difference between the world
+    # that drew and the world that came up black. Nothing else in either world
+    # is see-through now either.
+    span = 2 * FENCE
+    for sgn in (1, -1):
+        p.append(box((span, 0.03, 1.15), (0, FENCE * sgn, 0.63), color=(0.95, 0.45, 0.05),
+                     rough=0.9))
+        p.append(box((span, 0.05, 0.06), (0, FENCE * sgn, 1.20), color=(0.85, 0.40, 0.04),
+                     rough=0.9))
+        p.append(box((0.03, span, 1.15), (FENCE * sgn, 0, 0.63), color=(0.95, 0.45, 0.05),
+                     rough=0.9))
+        p.append(box((0.05, span, 0.06), (FENCE * sgn, 0, 1.20), color=(0.85, 0.40, 0.04),
+                     rough=0.9))
+        for i in range(6):
+            k = -FENCE + FENCE * 2 * (i + 1) / 7.0
+            p.append(vcyl(1.30, 0.04, (k, FENCE * sgn, 0.65), color=(0.45, 0.46, 0.48),
+                          sub=8, metal=0.5))
+            p.append(vcyl(1.30, 0.04, (FENCE * sgn, k, 0.65), color=(0.45, 0.46, 0.48),
+                          sub=8, metal=0.5))
+        p.append(vcyl(1.30, 0.045, (FENCE * sgn, FENCE, 0.65), color=(0.45, 0.46, 0.48),
+                      sub=8, metal=0.5))
+        p.append(vcyl(1.30, 0.045, (FENCE * sgn, -FENCE, 0.65), color=(0.45, 0.46, 0.48),
+                      sub=8, metal=0.5))
+
     if not full:
         return p
 
@@ -1469,7 +1502,7 @@ def scenery(full=True):
                  box((0.9, 0.7, bh), (0, 0, 0.12 + bh / 2), color=(0.60, 0.31, 0.22), rough=1)]
         if bh > 0.45:
             stack.append(box((0.9, 0.7, 0.06), (0, 0, 0.12 + bh + 0.03),
-                             color=(0.55, 0.55, 0.58), transp=0.4))
+                             color=(0.62, 0.62, 0.65)))
         p.append(group(stack, (x, y, 0), yaw))
     for _, x, y, yaw, _, _, _, _ in props_of("timber", full):
         for i in range(3):
@@ -1555,26 +1588,6 @@ def scenery(full=True):
     # ---- perimeter fence ----
     # One long panel per side rather than a run of small ones: the same look at
     # a fraction of the draw cost.
-    span = 2 * FENCE
-    for sgn in (1, -1):
-        p.append(box((span, 0.03, 1.15), (0, FENCE * sgn, 0.63), color=(0.95, 0.45, 0.05),
-                     rough=0.9, transp=0.5))
-        p.append(box((span, 0.05, 0.06), (0, FENCE * sgn, 1.20), color=(0.85, 0.40, 0.04),
-                     rough=0.9))
-        p.append(box((0.03, span, 1.15), (FENCE * sgn, 0, 0.63), color=(0.95, 0.45, 0.05),
-                     rough=0.9, transp=0.5))
-        p.append(box((0.05, span, 0.06), (FENCE * sgn, 0, 1.20), color=(0.85, 0.40, 0.04),
-                     rough=0.9))
-        for i in range(6):
-            k = -FENCE + FENCE * 2 * (i + 1) / 7.0
-            p.append(vcyl(1.30, 0.04, (k, FENCE * sgn, 0.65), color=(0.45, 0.46, 0.48),
-                          sub=8, metal=0.5))
-            p.append(vcyl(1.30, 0.04, (FENCE * sgn, k, 0.65), color=(0.45, 0.46, 0.48),
-                          sub=8, metal=0.5))
-        p.append(vcyl(1.30, 0.045, (FENCE * sgn, FENCE, 0.65), color=(0.45, 0.46, 0.48),
-                      sub=8, metal=0.5))
-        p.append(vcyl(1.30, 0.045, (FENCE * sgn, -FENCE, 0.65), color=(0.45, 0.46, 0.48),
-                      sub=8, metal=0.5))
     return p
 
 
