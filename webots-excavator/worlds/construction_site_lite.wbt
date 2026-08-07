@@ -220,6 +220,70 @@ Solid {
       ]
     }
     Pose {
+      translation -5.95034 2.05015 0.05500
+      rotation 0.000000 0.000000 1.000000 0.630000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.30100 0.23800 0.17500
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.11000 0.08800 0.07150
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -7.08888 2.53089 0.09900
+      rotation 0.000000 0.000000 1.000000 3.457800
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.55540 0.48520 0.41500
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.14000 0.11200 0.09100
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -7.64954 1.42950 0.05500
+      rotation 0.000000 0.000000 1.000000 6.285600
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.30100 0.23800 0.17500
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.11000 0.08800 0.07150
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -6.51080 0.94922 0.09900
+      rotation 0.000000 0.000000 1.000000 9.113400
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.55540 0.48520 0.41500
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.14000 0.11200 0.09100
+          }
+        }
+      ]
+    }
+    Pose {
       translation -1.81000 -6.50000 0.39000
       children [
         Shape {
@@ -237,6 +301,70 @@ Solid {
       ]
     }
     Pose {
+      translation -0.70671 -6.09727 0.07800
+      rotation 0.000000 0.000000 1.000000 0.630000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.28000 0.21700 0.15400
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.11000 0.08800 0.07150
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -2.18328 -5.47804 0.14040
+      rotation 0.000000 0.000000 1.000000 3.457800
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.53200 0.46180 0.39160
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.14000 0.11200 0.09100
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -2.91313 -6.90318 0.07800
+      rotation 0.000000 0.000000 1.000000 6.285600
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.28000 0.21700 0.15400
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.11000 0.08800 0.07150
+          }
+        }
+      ]
+    }
+    Pose {
+      translation -1.43630 -7.52181 0.14040
+      rotation 0.000000 0.000000 1.000000 9.113400
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.53200 0.46180 0.39160
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.14000 0.11200 0.09100
+          }
+        }
+      ]
+    }
+    Pose {
       translation 6.30000 -2.02000 0.44000
       children [
         Shape {
@@ -249,6 +377,70 @@ Solid {
             bottomRadius 1.45000
             height 0.88000
             subdivision 20
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 7.57238 -1.55554 0.08800
+      rotation 0.000000 0.000000 1.000000 0.630000
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.26600 0.21000 0.14700
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.11000 0.08800 0.07150
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 5.87045 -0.84399 0.15840
+      rotation 0.000000 0.000000 1.000000 3.457800
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.51640 0.45400 0.38380
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.14000 0.11200 0.09100
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 5.02781 -2.48497 0.08800
+      rotation 0.000000 0.000000 1.000000 6.285600
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.26600 0.21000 0.14700
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.11000 0.08800 0.07150
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6.73003 -3.19583 0.15840
+      rotation 0.000000 0.000000 1.000000 9.113400
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.51640 0.45400 0.38380
+            roughness 1.00
+            metalness 0.20
+          }
+          geometry Box {
+            size 0.14000 0.11200 0.09100
           }
         }
       ]
@@ -3428,8 +3620,8 @@ Solid {
       ]
     }
     Pose {
-      translation 10.50000 6.00000 0.00000
-      rotation 0.000000 0.000000 1.000000 2.500000
+      translation 10.00000 6.30000 0.00000
+      rotation 0.000000 0.000000 1.000000 0.250000
       children [
         Pose {
           translation 4.50000 0.00000 2.10000
@@ -3897,7 +4089,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.86400
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.54000
           children [
             Shape {
               appearance PBRAppearance {
@@ -3906,7 +4115,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 1.80000
+                height 1.08000
                 radius 0.15000
                 subdivision 8
               }
@@ -3914,24 +4123,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.41200
+          translation 0.00000 0.00000 1.47600
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.20000 0.34000 0.15000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.79200
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.47600
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.14000 0.24000 0.10200
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.50000
-                height 2.80800
+                height 1.51200
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 3.02400
+          translation 0.00000 0.00000 2.34000
           children [
             Shape {
               appearance PBRAppearance {
@@ -3940,8 +4166,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 1.05000
-                height 1.87200
+                bottomRadius 1.17000
+                height 1.65600
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 3.09600
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.34400 0.43600 0.20700
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.78000
+                height 1.44000
                 subdivision 10
               }
             }
@@ -3954,7 +4197,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.74400
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.46500
           children [
             Shape {
               appearance PBRAppearance {
@@ -3963,7 +4223,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 1.55000
+                height 0.93000
                 radius 0.15000
                 subdivision 8
               }
@@ -3971,24 +4231,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.07700
+          translation 0.00000 0.00000 1.27100
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.24000 0.38000 0.17000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.68200
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.27100
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.16400 0.26400 0.11400
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.30000
-                height 2.41800
+                height 1.30200
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.60400
+          translation 0.00000 0.00000 2.01500
           children [
             Shape {
               appearance PBRAppearance {
@@ -3997,8 +4274,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 0.91000
-                height 1.61200
+                bottomRadius 1.01400
+                height 1.42600
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 2.66600
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.37200 0.46400 0.22100
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.67600
+                height 1.24000
                 subdivision 10
               }
             }
@@ -4011,7 +4305,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.93600
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.58500
           children [
             Shape {
               appearance PBRAppearance {
@@ -4020,7 +4331,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 1.95000
+                height 1.17000
                 radius 0.15000
                 subdivision 8
               }
@@ -4028,24 +4339,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.61300
+          translation 0.00000 0.00000 1.59900
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.19000 0.32000 0.14000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.85800
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.59900
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.13400 0.22800 0.09600
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.60000
-                height 3.04200
+                height 1.63800
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 3.27600
+          translation 0.00000 0.00000 2.53500
           children [
             Shape {
               appearance PBRAppearance {
@@ -4054,8 +4382,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 1.12000
-                height 2.02800
+                bottomRadius 1.24800
+                height 1.79400
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 3.35400
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.33700 0.42200 0.20000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.83200
+                height 1.56000
                 subdivision 10
               }
             }
@@ -4068,7 +4413,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.79200
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.49500
           children [
             Shape {
               appearance PBRAppearance {
@@ -4077,7 +4439,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 1.65000
+                height 0.99000
                 radius 0.15000
                 subdivision 8
               }
@@ -4085,24 +4447,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.21100
+          translation 0.00000 0.00000 1.35300
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.23000 0.37000 0.16000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.72600
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.35300
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.15800 0.25800 0.10800
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.40000
-                height 2.57400
+                height 1.38600
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.77200
+          translation 0.00000 0.00000 2.14500
           children [
             Shape {
               appearance PBRAppearance {
@@ -4111,8 +4490,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 0.98000
-                height 1.71600
+                bottomRadius 1.09200
+                height 1.51800
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 2.83800
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.36500 0.45700 0.21400
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.72800
+                height 1.32000
                 subdivision 10
               }
             }
@@ -4125,7 +4521,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.88800
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.55500
           children [
             Shape {
               appearance PBRAppearance {
@@ -4134,7 +4547,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 1.85000
+                height 1.11000
                 radius 0.15000
                 subdivision 8
               }
@@ -4142,24 +4555,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.47900
+          translation 0.00000 0.00000 1.51700
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.21000 0.35000 0.15000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.81400
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.51700
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.14600 0.24600 0.10200
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.50000
-                height 2.88600
+                height 1.55400
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 3.10800
+          translation 0.00000 0.00000 2.40500
           children [
             Shape {
               appearance PBRAppearance {
@@ -4168,8 +4598,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 1.05000
-                height 1.92400
+                bottomRadius 1.17000
+                height 1.70200
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 3.18200
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.35100 0.44300 0.20700
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.78000
+                height 1.48000
                 subdivision 10
               }
             }
@@ -4182,7 +4629,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.76800
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.48000
           children [
             Shape {
               appearance PBRAppearance {
@@ -4191,7 +4655,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 1.60000
+                height 0.96000
                 radius 0.15000
                 subdivision 8
               }
@@ -4199,24 +4663,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.14400
+          translation 0.00000 0.00000 1.31200
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.24000 0.38000 0.17000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.70400
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.31200
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.16400 0.26400 0.11400
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.30000
-                height 2.49600
+                height 1.34400
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.68800
+          translation 0.00000 0.00000 2.08000
           children [
             Shape {
               appearance PBRAppearance {
@@ -4225,8 +4706,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 0.91000
-                height 1.66400
+                bottomRadius 1.01400
+                height 1.47200
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 2.75200
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.37200 0.46400 0.22100
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.67600
+                height 1.28000
                 subdivision 10
               }
             }
@@ -4239,7 +4737,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.96000
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.60000
           children [
             Shape {
               appearance PBRAppearance {
@@ -4248,7 +4763,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 2.00000
+                height 1.20000
                 radius 0.15000
                 subdivision 8
               }
@@ -4256,24 +4771,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.68000
+          translation 0.00000 0.00000 1.64000
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.19000 0.33000 0.14000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.88000
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.64000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.13400 0.23400 0.09600
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.70000
-                height 3.12000
+                height 1.68000
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 3.36000
+          translation 0.00000 0.00000 2.60000
           children [
             Shape {
               appearance PBRAppearance {
@@ -4282,8 +4814,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 1.19000
-                height 2.08000
+                bottomRadius 1.32600
+                height 1.84000
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 3.44000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.33700 0.42900 0.20000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.88400
+                height 1.60000
                 subdivision 10
               }
             }
@@ -4296,7 +4845,24 @@ Solid {
       rotation 0.000000 0.000000 1.000000 0.000000
       children [
         Pose {
-          translation 0.00000 0.00000 0.81600
+          translation 0.00000 0.00000 0.05000
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.22000 0.16000 0.11000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.20000
+                height 0.10000
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 0.51000
           children [
             Shape {
               appearance PBRAppearance {
@@ -4305,7 +4871,7 @@ Solid {
                 metalness 0.20
               }
               geometry Cylinder {
-                height 1.70000
+                height 1.02000
                 radius 0.15000
                 subdivision 8
               }
@@ -4313,24 +4879,41 @@ Solid {
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.27800
+          translation 0.00000 0.00000 1.39400
           children [
             Shape {
               appearance PBRAppearance {
-                baseColor 0.22000 0.36000 0.16000
+                baseColor 0.25000 0.18000 0.12000
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cylinder {
+                height 0.74800
+                radius 0.09500
+                subdivision 8
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 1.39400
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.15200 0.25200 0.10800
                 roughness 1.00
                 metalness 0.20
               }
               geometry Cone {
                 bottomRadius 1.40000
-                height 2.65200
+                height 1.42800
                 subdivision 10
               }
             }
           ]
         }
         Pose {
-          translation 0.00000 0.00000 2.85600
+          translation 0.00000 0.00000 2.21000
           children [
             Shape {
               appearance PBRAppearance {
@@ -4339,8 +4922,25 @@ Solid {
                 metalness 0.20
               }
               geometry Cone {
-                bottomRadius 0.98000
-                height 1.76800
+                bottomRadius 1.09200
+                height 1.56400
+                subdivision 10
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0.00000 0.00000 2.92400
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.35800 0.45000 0.21400
+                roughness 1.00
+                metalness 0.20
+              }
+              geometry Cone {
+                bottomRadius 0.72800
+                height 1.36000
                 subdivision 10
               }
             }

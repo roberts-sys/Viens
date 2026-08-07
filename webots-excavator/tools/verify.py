@@ -337,6 +337,30 @@ check(C["LIFT_CHECK"] > C["GRIP_LATERAL"], "the proof lift is bigger than the sl
 
 
 # --------------------------------------------------------------------------
+print("\nbackground structures vs the fence")
+# --------------------------------------------------------------------------
+# An angled structure placed just beyond the fence can still have its far end
+# swing back across a corner and clip the fence panels - the centreline can
+# look clear while the actual (wider) footprint is not. Caught this once by
+# eye on the conveyor (its yaw sent the belt back across the north-east
+# corner by 0.02 m); this checks the real footprint, not just where it starts.
+gw_src = open(os.path.join(HERE, "gen_world.py")).read()
+m = re.search(r'p\.append\(conveyor\(\(([-\d.]+), ([-\d.]+), 0\), ([-\d.]+)\)\)', gw_src)
+check(m is not None, "conveyor placement found in gen_world.py")
+if m:
+    cx, cy, cyaw = float(m.group(1)), float(m.group(2)), float(m.group(3))
+    HALF_W = 0.6   # belt width plus its side rails
+    worst = 1e9
+    for i in range(61):
+        s = 9.0 * i / 60.0
+        bx, by = cx + s * math.cos(cyaw), cy + s * math.sin(cyaw)
+        px, py = -math.sin(cyaw), math.cos(cyaw)
+        for w in (-HALF_W, HALF_W):
+            worst = min(worst, max(abs(bx + w * px), abs(by + w * py)) - FENCE)
+    check(worst > 0.3, "the conveyor's whole footprint clears the fence",
+          "worst clearance %+.3f m" % worst)
+
+
 print("\nsite: parking and routes")
 # --------------------------------------------------------------------------
 PADS = [(x, y, C["PAD_R"]) for x, y in HOMES.values()]

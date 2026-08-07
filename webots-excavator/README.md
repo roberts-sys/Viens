@@ -23,7 +23,7 @@ loaded, so the "Skipped PROTO" errors from before cannot happen here.
 
 `construction_site_lite.wbt` is the one to open by default — it has the
 identical machine, the same detailed rocks, the same fence and boundary
-warning, and a lighter background, at 959 shapes against 1179 for
+warning, and a lighter background, at 995 shapes against 1223 for
 `construction_site.wbt`. If your graphics card handles the full version
 without going black, it has a few extra assemblies (both tower cranes, the
 scaffolded frame building, the loaded dump truck, two parked vans) that
@@ -283,8 +283,8 @@ rocks and a slice of background scenery:
 
 | World | Shapes | What's in it |
 |---|---|---|
-| `construction_site_lite.wbt` | 959 | machine, rocks, fence, pylons, trees, conveyor, silo |
-| `construction_site.wbt` | 1179 | all of the above, plus both cranes, the frame building with scaffolding, two vans, and the dump truck |
+| `construction_site_lite.wbt` | 995 | machine, rocks, fence, pylons, trees, conveyor, silo |
+| `construction_site.wbt` | 1223 | all of the above, plus both cranes, the frame building with scaffolding, two vans, and the dump truck |
 
 **Both contain the identical, fully detailed excavator** — only how much
 scenery surrounds it differs. Start with `construction_site_lite.wbt`; it is
@@ -299,7 +299,7 @@ black, so nothing in either world is see-through now.
 
 If a world does come up black, don't guess between the two blindly: the shape
 counts above are exact, so if lite goes black too, the ceiling on your card is
-below 959 and `tools/gen_world.py` can be trimmed further — say which
+below 995 and `tools/gen_world.py` can be trimmed further — say which
 background pieces you can live without (pylons, trees, the conveyor, or the
 silo are the ones to drop first, in that order) and I'll take them out.
 
@@ -356,7 +356,18 @@ back solidly overlapping the hull, not just close to it.
 trenches; spoil piles; traffic cones; concrete barriers; a shipping container;
 a fenced perimeter you cannot leave (below); nine skyline blocks and six
 distant hills; and, beyond the fence, two lattice power pylons, a stand of
-eight conifers, an inclined conveyor feeding a stockpile, and a cement silo.
+eight conifers, an inclined conveyor feeding a stockpile, and a cement silo
+with a caged ladder, a platform ring and a fill-pipe elbow.
+
+**Trees and piles both got a detail pass.** A tree used to be a trunk and two
+flat-coloured cones — now it's a root flare, a two-piece tapered trunk, and
+three foliage tiers shaded from a dark undertone up to a sun-catching
+highlight, instead of one uniform green. Every spoil pile — a single smooth
+cone before — now has four angular chunks sitting on its actual surface
+(not just scattered near it: a chunk's position is computed from the cone's
+own radius at that height, or it ends up buried inside the mass instead of
+visible, which is exactly what happened the first time this was written), so
+it reads as loose rock and rubble rather than a poured dirt heap.
 
 **In `construction_site.wbt` only, on top of all that:** a site office with a
 step and window, a portable toilet, a generator, pallets of bricks, stacked
@@ -368,9 +379,20 @@ dump truck.
 Every background structure is built from a few large forms rather than
 lattice-work — only the silhouette reads at that distance, and struts cost draw
 calls the graphics card cannot spare. That is what makes the lite-world set
-affordable: `construction_site_lite.wbt` is 959 shapes against 1179 for the
+affordable: `construction_site_lite.wbt` is 995 shapes against 1223 for the
 full world, for four assemblies' difference (99 shapes: the cranes, the frame
 building, the dump truck).
+
+### The conveyor used to cut through the fence
+
+Its incline was angled back toward the fence's north-east corner rather than
+away from it — the centreline dipped 0.02 m inside, and the belt's own width
+(1 m, plus side rails) made that a visible sliver of the beam poking through
+both panels where they meet. Fixed by moving it to a placement where its
+whole length — not just its centreline — was checked to clear the fence by at
+least 1.3 m: `tools/verify.py` now confirms this on every run, sampling the
+belt's actual footprint rather than trusting a render angle, since that's
+exactly the check that would have caught this before it shipped.
 
 **Atmosphere.** The two directional lights are warmed slightly for a
 late-afternoon rather than midday feel. A `Fog` node was tried here too, for
@@ -465,7 +487,7 @@ save it, running the generator again overwrites your changes. Change
 
 ```
 python3 tools/gen_world.py      # writes both worlds and site_map.py
-python3 tools/verify.py         # 132 checks; run this before opening Webots
+python3 tools/verify.py         # 134 checks; run this before opening Webots
 ```
 
 `gen_world.py` needs nothing but Python. The other tools need `numpy` and
@@ -483,7 +505,7 @@ python3 tools/verify.py         # 132 checks; run this before opening Webots
 | `tines.py` | the grapple's tip radius against opening angle |
 | `zfight.py` | finds surfaces that would flicker |
 
-`verify.py` is the one that matters (132 checks). It reads the controller's constants and the
+`verify.py` is the one that matters (134 checks). It reads the controller's constants and the
 generated world and checks they agree — every device the controller opens
 exists, every arm target is inside the reach envelope, every pad has somewhere
 to park, and the grapple clears the machine at every commanded pose. It exits
