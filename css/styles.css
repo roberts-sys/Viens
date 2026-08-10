@@ -235,12 +235,12 @@ a:hover { color: #0A3A7A; }
   letter-spacing: -0.02em;
   color: #fff;
   margin: 0;
+  text-transform: uppercase;
 }
 
 .zg-hero__title mark {
   background: none;
   color: inherit;
-  border-bottom: 3px solid var(--guild-pink);
 }
 
 .zg-hero__sub {
