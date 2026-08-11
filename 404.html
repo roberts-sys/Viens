@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — Lapa nav atrasta · ZIEDIŅA ĢILDE</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root {
+    --iron: #1A1E24;
+    --concrete: #E8EAED;
+    --guild-pink: #E7B8C4;
+    --body-muted: #9CA3AF;
+    --border-dark: #4B5563;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--iron);
+    color: var(--concrete);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 24px;
+  }
+  .grain {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 3px 3px;
+    opacity: .2;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  .logo { width: 64px; height: 64px; object-fit: contain; filter: invert(1); opacity: .95; margin-bottom: 28px; }
+  .code {
+    font: 600 14px 'IBM Plex Mono', monospace;
+    color: var(--guild-pink);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    margin: 0 0 16px;
+  }
+  h1 {
+    font-size: clamp(34px, 6vw, 56px);
+    font-weight: 800;
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+    color: #fff;
+    margin: 0 0 14px;
+    line-height: 1.1;
+  }
+  p { color: var(--body-muted); font-size: 16px; line-height: 1.6; max-width: 480px; margin: 0 0 34px; }
+  p .en { display: block; margin-top: 6px; font-size: 14px; opacity: .8; }
+  .pill {
+    display: inline-block;
+    font: 600 14px 'IBM Plex Mono', monospace;
+    color: var(--guild-pink);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(231, 184, 196, .4);
+  }
+  .pill:hover { border-bottom-color: var(--guild-pink); }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<img class="logo" src="/assets/logo-transparent.png" alt="ZIEDIŅA ĢILDE">
+<p class="code">Kļūda 404</p>
+<h1>Lapa nav atrasta</h1>
+<p>Šī lapa neeksistē vai ir pārvietota.<span class="en">This page doesn't exist or has been moved.</span></p>
+<a class="pill" href="/">← Atpakaļ uz sākumu / Back home</a>
+</body>
+</html>

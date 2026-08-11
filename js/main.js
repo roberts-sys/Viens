@@ -1,6 +1,14 @@
 (function () {
   'use strict';
 
+  var REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var IS_MOBILE = window.matchMedia('(max-width: 768px)').matches;
+  var VIDEOS_ENABLED = !REDUCED_MOTION && !IS_MOBILE;
+
+  function loadVideoSrc(v) {
+    if (!v.getAttribute('src') && v.dataset.src) v.src = v.dataset.src;
+  }
+
   function initVideoCrossfade() {
     var cell = document.querySelector('[data-video-cell]');
     if (!cell) return;
@@ -8,6 +16,19 @@
     var videoA = cell.querySelector('[data-video="a"]');
     var videoB = cell.querySelector('[data-video="b"]');
     if (!videoA || !videoB) return;
+
+    if (!VIDEOS_ENABLED) return; // mobile or reduced motion: posters only
+
+    var startIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          loadVideoSrc(videoA);
+          safePlay(videoA);
+          startIO.disconnect();
+        }
+      });
+    }, { threshold: 0.25 });
+    startIO.observe(cell);
 
     var hovering = false;
     var active = 0; // 0 = A visible, 1 = B visible
@@ -36,6 +57,7 @@
       hovering = true;
       show(1);
       videoA.pause();
+      loadVideoSrc(videoB);
       safePlay(videoB);
     });
 
@@ -76,6 +98,25 @@
     });
   }
 
+  function initLazyVideos() {
+    var vids = document.querySelectorAll('video[data-src]:not([data-video])');
+    if (!vids.length || !VIDEOS_ENABLED) return;
+
+    vids.forEach(function (v) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            loadVideoSrc(v);
+            var p = v.play();
+            if (p && p.catch) p.catch(function () {});
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(v);
+    });
+  }
+
   function initWorldMapPing() {
     var maps = document.querySelectorAll('.zg-worldmap');
     if (!maps.length) return;
@@ -113,6 +154,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initVideoCrossfade();
+    initLazyVideos();
     initWorldMapPing();
     initNavSheenVisibility();
   });
