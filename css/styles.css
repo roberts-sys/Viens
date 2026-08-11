@@ -185,6 +185,24 @@ a:hover { color: #0A3A7A; }
   background-image: url('../assets/excavator-mountain.webp');
   background-size: cover;
   background-position: center 30%;
+  filter: saturate(.82) contrast(1.06);
+  animation: zg-hero-settle 14s var(--ease-standard) both;
+}
+
+@keyframes zg-hero-settle {
+  from { transform: scale(1.07); }
+  to { transform: scale(1); }
+}
+
+.zg-hero__tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg,
+    rgba(13, 71, 161, .28) 0%,
+    rgba(31, 122, 168, .10) 45%,
+    transparent 70%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
 
 .zg-hero__scrim {
@@ -250,6 +268,27 @@ a:hover { color: #0A3A7A; }
   opacity: .85;
   max-width: 600px;
   margin: 28px 0 0;
+}
+
+.zg-hero__coords {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  opacity: .5;
+  margin: 34px 0 0;
+}
+
+.zg-hero__coords::before,
+.zg-hero__coords::after {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  width: 34px;
+  height: 1px;
+  background: rgba(232, 234, 237, .35);
+  margin: 0 14px;
 }
 
 /* ---------- Tiles ---------- */
@@ -483,11 +522,12 @@ a:hover { color: #0A3A7A; }
 }
 
 .zg-band__heading {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 32px;
   letter-spacing: -.01em;
+  text-transform: uppercase;
   position: relative;
 }
 
@@ -688,11 +728,12 @@ a:hover { color: #0A3A7A; }
 .zg-contact__inner { position: relative; }
 
 .zg-contact__heading {
-  font-size: 38px;
+  font-size: 34px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 16px;
   letter-spacing: -.01em;
+  text-transform: uppercase;
 }
 
 .zg-contact__body {
@@ -987,11 +1028,12 @@ a:hover { color: #0A3A7A; }
 .zg-topichero__eyebrow--pink { color: var(--guild-pink); }
 
 .zg-topichero__title {
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -.02em;
   color: #fff;
+  text-transform: uppercase;
   margin: 0;
   max-width: 760px;
 }
