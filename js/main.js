@@ -117,20 +117,35 @@
     });
   }
 
+  function initFooterFade() {
+    var footers = document.querySelectorAll('.zg-footer, .zg-topic-footer');
+    footers.forEach(function (f) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            f.classList.add('is-inview');
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.4 });
+      io.observe(f);
+    });
+  }
+
   function initWorldMapPing() {
     var maps = document.querySelectorAll('.zg-worldmap');
     if (!maps.length) return;
 
     maps.forEach(function (svg) {
       var dot = svg.querySelector('.zg-dot');
-      var ring = svg.querySelector('.zg-ring');
-      if (!dot || !ring) return;
+      var rings = svg.querySelectorAll('.zg-ring');
+      if (!dot || !rings.length) return;
 
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
             dot.classList.add('play');
-            ring.classList.add('play');
+            rings.forEach(function (r) { r.classList.add('play'); });
             io.disconnect();
           }
         });
@@ -155,6 +170,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     initVideoCrossfade();
     initLazyVideos();
+    initFooterFade();
     initWorldMapPing();
     initNavSheenVisibility();
   });
