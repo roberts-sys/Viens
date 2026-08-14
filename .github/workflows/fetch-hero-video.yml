@@ -14,6 +14,7 @@ jobs:
       - name: Download and compress hero video
         run: |
           if [ -f assets/hero-ambient.mp4 ]; then echo "already present, skipping"; exit 0; fi
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
           curl -sSL --retry 3 -o /tmp/hero-raw.mp4 "https://d8j0ntlcm91z4.cloudfront.net/user_3HbGHDHNx5dRq7Yvt2hxJHkwI86/hf_20260814_083619_0d30166c-8f00-4ad4-a14a-2db23a577019.mp4"
           ffmpeg -y -i /tmp/hero-raw.mp4 -vf "scale=1600:-2" -c:v libx264 -crf 26 -preset slow -an -movflags +faststart assets/hero-ambient.mp4
           ls -la assets/hero-ambient.mp4
