@@ -118,6 +118,7 @@
   }
 
   function initCrosshairScene() {
+    if (window.__ZG_MOTION__) return; // GSAP layer drives this scene
     var scene = document.querySelector('.zg-tiles__inner');
     if (!scene || !('IntersectionObserver' in window)) return;
     var io = new IntersectionObserver(function (entries) {
@@ -132,6 +133,7 @@
   }
 
   function initHeroParallax() {
+    if (window.__ZG_MOTION__) return; // GSAP layer drives the parallax
     var layer = document.querySelector('.zg-hero__parallax');
     var content = document.querySelector('.zg-hero__content');
     var hero = document.querySelector('.zg-hero');
@@ -147,6 +149,21 @@
     window.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
+  }
+
+  function initHeroVideo() {
+    var v = document.querySelector('[data-hero-video]');
+    if (!v || !VIDEOS_ENABLED) return;
+    loadVideoSrc(v);
+    v.addEventListener('canplay', function () {
+      var p = v.play();
+      if (p && p.then) {
+        p.then(function () { v.classList.add('is-playing'); }).catch(function () {});
+      } else {
+        v.classList.add('is-playing');
+      }
+    }, { once: true });
+    v.load();
   }
 
   function initNavReturn() {
@@ -243,6 +260,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     initVideoCrossfade();
     initLazyVideos();
+    initHeroVideo();
     initCrosshairScene();
     initHeroParallax();
     initNavReturn();
