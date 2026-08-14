@@ -1,0 +1,25 @@
+name: fetch-hero-video
+on:
+  push:
+    branches: [claude/ziedina-gilde-id-repo-llyr5u]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/ziedina-gilde-id-repo-llyr5u
+      - name: Download and compress hero video (8-bit yuv420p)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          curl -sSL --retry 3 -o /tmp/hero-raw.mp4 "https://d8j0ntlcm91z4.cloudfront.net/user_3HbGHDHNx5dRq7Yvt2hxJHkwI86/hf_20260814_083619_0d30166c-8f00-4ad4-a14a-2db23a577019.mp4"
+          ffmpeg -y -i /tmp/hero-raw.mp4 -vf "scale=1600:-2,format=yuv420p" -c:v libx264 -profile:v high -crf 26 -preset slow -an -movflags +faststart assets/hero-ambient.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,pix_fmt -of default=noprint_wrappers=1 assets/hero-ambient.mp4
+      - name: Commit result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/hero-ambient.mp4
+          git diff --cached --quiet && echo "nothing to commit" || { git commit -m "Re-encode hero video as 8-bit yuv420p" && git push; }
