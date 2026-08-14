@@ -2,8 +2,7 @@
   'use strict';
 
   var REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var IS_MOBILE = window.matchMedia('(max-width: 768px)').matches;
-  var VIDEOS_ENABLED = !REDUCED_MOTION && !IS_MOBILE;
+  var VIDEOS_ENABLED = !REDUCED_MOTION;
 
   function loadVideoSrc(v) {
     if (!v.getAttribute('src') && v.dataset.src) v.src = v.dataset.src;
@@ -17,7 +16,7 @@
     var videoB = cell.querySelector('[data-video="b"]');
     if (!videoA || !videoB) return;
 
-    if (!VIDEOS_ENABLED) return; // mobile or reduced motion: posters only
+    if (!VIDEOS_ENABLED) return; // reduced motion: posters only
 
     var startIO = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
