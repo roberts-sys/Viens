@@ -643,6 +643,19 @@ textarea:focus-visible {
   z-index: 2;
 }
 
+/* GPU-promote the heavy blended/blurred/masked layers so they rasterize once
+   instead of every scroll frame (fixes shimmer during smooth scrolling) */
+.zg-map__seam,
+.zg-map__seam-grain,
+.zg-contact__seam-grain,
+.zg-contact__grain,
+.zg-map__wave,
+.zg-map__grain,
+.zg-grain {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 .zg-map__seam-grain {
   position: absolute;
   left: 0; right: 0; bottom: -1px;
