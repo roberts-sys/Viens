@@ -99,7 +99,7 @@
   }
 
   function initLazyVideos() {
-    var vids = document.querySelectorAll('video[data-src]:not([data-video])');
+    var vids = document.querySelectorAll('video[data-src]:not([data-video]):not([data-hero-video])');
     if (!vids.length || !VIDEOS_ENABLED) return;
 
     vids.forEach(function (v) {
@@ -154,7 +154,19 @@
   function initHeroVideo() {
     var v = document.querySelector('[data-hero-video]');
     if (!v || !VIDEOS_ENABLED) return;
-    loadVideoSrc(v);
+    if (v.dataset.srcWebm) {
+      // <source> children so browsers without H.264 fall back to WebM
+      var mp4 = document.createElement('source');
+      mp4.src = v.dataset.src;
+      mp4.type = 'video/mp4; codecs="avc1.640028"';
+      var webm = document.createElement('source');
+      webm.src = v.dataset.srcWebm;
+      webm.type = 'video/webm; codecs="vp9"';
+      v.appendChild(mp4);
+      v.appendChild(webm);
+    } else {
+      loadVideoSrc(v);
+    }
     v.addEventListener('canplay', function () {
       var p = v.play();
       if (p && p.then) {
