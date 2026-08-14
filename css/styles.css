@@ -202,6 +202,12 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
+.zg-hero__parallax {
+  position: absolute;
+  inset: -26% 0 0 0;
+  will-change: transform;
+}
+
 .zg-hero__bg {
   position: absolute;
   inset: 0;
@@ -274,8 +280,28 @@ textarea:focus-visible {
   from { opacity: 0; transform: translateY(16px); }
 }
 
-.zg-hero__title { animation: zg-rise .9s var(--ease-standard) .4s both; }
-.zg-hero__sub { animation: zg-rise .9s var(--ease-standard) .58s both; }
+.zg-hero__sub { animation: zg-rise .9s var(--ease-standard) .72s both; }
+
+/* kinetic title: each line slides out of an invisible mask */
+.zg-hero__title .zg-line {
+  display: block;
+  overflow: hidden;
+  padding: .12em 0;
+  margin: -.12em 0;
+}
+
+.zg-hero__title .zg-line__i {
+  display: block;
+  transform: translateY(115%);
+  animation: zg-line-up .85s cubic-bezier(.22, .9, .32, 1) both;
+}
+
+.zg-hero__title .zg-line:nth-child(1) .zg-line__i { animation-delay: .38s; }
+.zg-hero__title .zg-line:nth-child(2) .zg-line__i { animation-delay: .52s; }
+
+@keyframes zg-line-up {
+  to { transform: translateY(0); }
+}
 
 .zg-hero__title {
   font-size: 56px;
@@ -658,6 +684,7 @@ textarea:focus-visible {
   margin: 0 auto;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 .zg-worldmap {
@@ -1395,12 +1422,94 @@ textarea:focus-visible {
   opacity: 0;
   transform: translateY(var(--reveal-rise));
   transition: opacity var(--dur-reveal) var(--ease-standard), transform var(--dur-reveal) var(--ease-standard);
+  transition-delay: var(--reveal-delay, 0ms);
 }
 
 .js [data-reveal].is-inview {
   opacity: 1;
   transform: none;
 }
+
+/* tiles: image settles inside the frame while the tile rises */
+.js .zg-tile.is-inview .zg-tile__img {
+  animation: zg-img-settle 1.4s var(--ease-standard) var(--reveal-delay, 0ms) both;
+}
+
+@keyframes zg-img-settle {
+  from { transform: scale(1.14); }
+}
+
+/* crosshair scene: lines draw toward the center, then the node springs in */
+.js .zg-crosshair { transition: transform 1.2s var(--ease-standard) .1s; }
+.js .zg-crosshair--top { transform: translateX(-50%) scaleY(0); transform-origin: 50% 0; }
+.js .zg-crosshair--bottom { transform: translateX(-50%) scaleY(0); transform-origin: 50% 100%; }
+.js .zg-crosshair--left { transform: translateY(-50%) scaleX(0); transform-origin: 0 50%; }
+.js .zg-crosshair--right { transform: translateY(-50%) scaleX(0); transform-origin: 100% 50%; }
+
+.js .zg-tiles__inner.is-drawn .zg-crosshair--top,
+.js .zg-tiles__inner.is-drawn .zg-crosshair--bottom { transform: translateX(-50%) scaleY(1); }
+.js .zg-tiles__inner.is-drawn .zg-crosshair--left,
+.js .zg-tiles__inner.is-drawn .zg-crosshair--right { transform: translateY(-50%) scaleX(1); }
+
+.js .zg-crosshair__node {
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform .7s cubic-bezier(.34, 1.56, .64, 1) .8s;
+}
+
+.js .zg-tiles__inner.is-drawn .zg-crosshair__node {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* video band: a curtain slides away, wiping the cell open */
+.js [data-video-cell][data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+.js [data-video-cell][data-reveal]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--iron);
+  transition: transform 1.2s var(--ease-standard);
+}
+
+.js [data-video-cell][data-reveal].is-inview::after {
+  transform: translateX(101%);
+}
+
+/* map: one radar sweep across the frame when it reveals */
+.zg-map__scan {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(90deg,
+    transparent 30%,
+    rgba(90, 170, 215, .10) 45%,
+    rgba(140, 205, 240, .22) 50%,
+    rgba(90, 170, 215, .10) 55%,
+    transparent 70%);
+  transform: translateX(-105%);
+  pointer-events: none;
+}
+
+.js .zg-map__frame.is-inview .zg-map__scan {
+  animation: zg-scan 1.7s cubic-bezier(.55, .06, .35, .95) .25s both;
+}
+
+@keyframes zg-scan {
+  to { transform: translateX(105%); }
+}
+
+/* arrows nudge on hover */
+.zg-arrow {
+  display: inline-block;
+  transition: transform var(--dur-hover) var(--ease-standard);
+}
+
+.zg-contact__pill:hover .zg-arrow,
+.zg-form__submit:hover .zg-arrow { transform: translateX(5px); }
 
 /* keep the contact pill's hover transitions alongside its reveal */
 .js a.zg-contact__pill[data-reveal] {

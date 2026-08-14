@@ -117,6 +117,38 @@
     });
   }
 
+  function initCrosshairScene() {
+    var scene = document.querySelector('.zg-tiles__inner');
+    if (!scene || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          scene.classList.add('is-drawn');
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.2 });
+    io.observe(scene);
+  }
+
+  function initHeroParallax() {
+    var layer = document.querySelector('.zg-hero__parallax');
+    var content = document.querySelector('.zg-hero__content');
+    var hero = document.querySelector('.zg-hero');
+    if (!layer || !hero || REDUCED_MOTION) return;
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var y = window.scrollY;
+      if (y > hero.offsetHeight) return;
+      layer.style.transform = 'translateY(' + (y * 0.28).toFixed(1) + 'px)';
+      if (content) content.style.transform = 'translateY(' + (y * 0.14).toFixed(1) + 'px)';
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+  }
+
   function initNavReturn() {
     var nav = document.querySelector('.zg-nav');
     if (!nav) return;
@@ -149,7 +181,7 @@
         var group = el.closest('[data-reveal-group]');
         if (group) {
           var members = Array.prototype.slice.call(group.querySelectorAll('[data-reveal]'));
-          el.style.transitionDelay = (members.indexOf(el) * 90) + 'ms';
+          el.style.setProperty('--reveal-delay', (members.indexOf(el) * 90) + 'ms');
         }
         el.classList.add('is-inview');
         io.unobserve(el);
@@ -211,6 +243,8 @@
   document.addEventListener('DOMContentLoaded', function () {
     initVideoCrossfade();
     initLazyVideos();
+    initCrosshairScene();
+    initHeroParallax();
     initNavReturn();
     initReveals();
     initFooterFade();
