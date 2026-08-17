@@ -1873,3 +1873,13 @@ textarea:focus-visible {
   }
   .gsap .zg-signal__track { stroke-dashoffset: 0; }
 }
+
+/* On topic pages the section sits directly under .zg-topicbody, which already
+   carries 120px of bottom padding — so drop the duplicate top padding and line
+   the diagram up with the 820px text column above it. */
+.zg-topic .zg-signal { padding-top: 0; padding-bottom: 112px; }
+.zg-topic .zg-signal__diagram { max-width: 820px; }
+
+@media (max-width: 768px) {
+  .zg-topic .zg-signal { padding-bottom: 84px; }
+}

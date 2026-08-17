@@ -65,6 +65,98 @@
   </div>
 </div>
 
+<section id="signal" class="zg-signal" data-reveal-group>
+  <p class="zg-signal__eyebrow mono zg-shimmer" data-reveal>Signāla Ceļš</p>
+  <h2 class="zg-signal__heading" data-reveal>
+    <span class="only-desktop">Trīs sensoru plūsmas. Viena vadības sistēma.</span>
+    <span class="only-mobile">Trīs plūsmas. Viena sistēma.</span>
+  </h2>
+
+  <div class="zg-signal__diagram" data-reveal data-signal>
+    <svg class="zg-signal__svg" viewBox="0 0 880 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="LiDAR, ultraskaņas sensori un inerciālie sensori plūst uz mākslīgā intelekta vadības sistēmu, kas vada tehniku">
+
+      <g class="zg-signal__beams" fill="none" stroke-linecap="round">
+        <path class="zg-signal__track" pathLength="100" d="M140,86 Q300,112 440,200"></path>
+        <path class="zg-signal__track" pathLength="100" d="M140,200 L440,200"></path>
+        <path class="zg-signal__track" pathLength="100" d="M140,314 Q300,288 440,200"></path>
+        <path class="zg-signal__track zg-signal__track--out" pathLength="100" d="M440,200 L748,200"></path>
+
+        <path class="zg-signal__pulse" style="--zg-beam-delay:0s"   pathLength="100" d="M140,86 Q300,112 440,200"></path>
+        <path class="zg-signal__pulse" style="--zg-beam-delay:.9s"  pathLength="100" d="M140,200 L440,200"></path>
+        <path class="zg-signal__pulse" style="--zg-beam-delay:1.8s" pathLength="100" d="M140,314 Q300,288 440,200"></path>
+        <path class="zg-signal__pulse zg-signal__pulse--out" style="--zg-beam-delay:2.4s" pathLength="100" d="M440,200 L748,200"></path>
+      </g>
+
+      <g class="zg-signal__nodes">
+        <g class="zg-signal__node">
+          <circle class="zg-signal__disc" cx="140" cy="86" r="38"></circle>
+          <g class="zg-signal__glyph">
+            <circle cx="128" cy="86" r="2.5"></circle>
+            <path d="M134,75 A14,14 0 0 1 134,97"></path>
+            <path d="M140,68 A22,22 0 0 1 140,104"></path>
+            <path d="M146,61 A30,30 0 0 1 146,111"></path>
+          </g>
+          <text class="zg-signal__label mono" x="140" y="146">LiDAR</text>
+        </g>
+
+        <g class="zg-signal__node">
+          <circle class="zg-signal__disc" cx="140" cy="200" r="38"></circle>
+          <g class="zg-signal__glyph">
+            <path d="M128,190 L128,210"></path>
+            <path d="M136,183 L136,217"></path>
+            <path d="M144,188 L144,212"></path>
+            <path d="M152,194 L152,206"></path>
+          </g>
+          <text class="zg-signal__label mono" x="140" y="260">Ultraskaņa</text>
+        </g>
+
+        <g class="zg-signal__node">
+          <circle class="zg-signal__disc" cx="140" cy="314" r="38"></circle>
+          <g class="zg-signal__glyph">
+            <circle cx="140" cy="314" r="13"></circle>
+            <path d="M140,314 L147,306"></path>
+            <path d="M140,299 L140,302"></path>
+            <path d="M155,314 L152,314"></path>
+            <path d="M140,329 L140,326"></path>
+            <path d="M125,314 L128,314"></path>
+          </g>
+          <text class="zg-signal__label mono" x="140" y="366">Inerciālie<tspan x="140" dy="1.25em">sensori</tspan></text>
+        </g>
+
+        <g class="zg-signal__node zg-signal__node--core">
+          <circle class="zg-signal__disc zg-signal__disc--core" cx="440" cy="200" r="54"></circle>
+          <g class="zg-signal__glyph zg-signal__glyph--core">
+            <rect x="422" y="182" width="36" height="36" rx="7"></rect>
+            <rect x="432" y="192" width="16" height="16" rx="4"></rect>
+            <path d="M430,182 L430,174"></path>
+            <path d="M440,182 L440,174"></path>
+            <path d="M450,182 L450,174"></path>
+            <path d="M430,218 L430,226"></path>
+            <path d="M440,218 L440,226"></path>
+            <path d="M450,218 L450,226"></path>
+            <path d="M422,192 L414,192"></path>
+            <path d="M422,208 L414,208"></path>
+            <path d="M458,192 L466,192"></path>
+            <path d="M458,208 L466,208"></path>
+          </g>
+          <text class="zg-signal__label zg-signal__label--core mono" x="440" y="276">MI vadība</text>
+        </g>
+
+        <g class="zg-signal__node">
+          <circle class="zg-signal__disc" cx="748" cy="200" r="40"></circle>
+          <g class="zg-signal__glyph">
+            <rect x="732" y="204" width="34" height="11" rx="5.5"></rect>
+            <path d="M738,204 L741,193 L757,193 L760,204"></path>
+            <path d="M757,196 L770,186"></path>
+            <path d="M770,186 L766,180"></path>
+          </g>
+          <text class="zg-signal__label mono" x="748" y="262">Tehnika</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+</section>
+
 <div class="zg-topic-video">
   <video data-src="assets/autonomous-machinery-video.mp4" data-src-sm="assets/autonomous-machinery-video-sm.mp4" poster="assets/autonomous-machinery-video-poster.webp" preload="none" muted playsinline data-freeze-last-frame></video>
   <div class="zg-topic-video__scrim"></div>
