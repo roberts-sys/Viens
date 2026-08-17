@@ -284,6 +284,97 @@
     });
   }
 
+  // Cursor-tracked spotlight on the tiles. Reading the rect is a forced layout,
+  // so it happens at most once per frame -- high-poll-rate mice fire pointermove
+  // several times between paints.
+  function initTileGlow() {
+    if (REDUCED_MOTION) return;
+    if (!window.matchMedia('(hover: hover)').matches) return;
+    var tiles = document.querySelectorAll('.zg-tile');
+    if (!tiles.length) return;
+
+    tiles.forEach(function (tile) {
+      var glow = document.createElement('div');
+      glow.className = 'zg-tile__glow';
+      // above the image/wash/grain, below the badge and caption
+      tile.insertBefore(glow, tile.querySelector('.zg-tile__badge'));
+
+      var ticking = false;
+      var lastX = 0, lastY = 0;
+
+      tile.addEventListener('pointermove', function (e) {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          ticking = false;
+          var rect = tile.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          tile.style.setProperty('--mx', ((lastX - rect.left) / rect.width * 100).toFixed(1) + '%');
+          tile.style.setProperty('--my', ((lastY - rect.top) / rect.height * 100).toFixed(1) + '%');
+        });
+      }, { passive: true });
+    });
+  }
+
+  // Blur-crossfade the hero accent word through a short list of synonyms.
+  function initHeroMorph() {
+    if (REDUCED_MOTION) return;
+    var el = document.querySelector('.zg-morph[data-words]');
+    if (!el) return;
+    var words = el.dataset.words.split(',').map(function (w) { return w.trim(); }).filter(Boolean);
+    if (words.length < 2) return;
+
+    // The hero title is centre-aligned, so a narrower word would drag the whole
+    // line sideways. Pin the box to the widest word up front.
+    var widest = 0;
+    var original = el.textContent;
+    words.forEach(function (w) {
+      el.textContent = w;
+      widest = Math.max(widest, el.getBoundingClientRect().width);
+    });
+    el.textContent = original;
+    el.style.minWidth = Math.ceil(widest) + 'px';
+
+    var i = 0;
+    var timer = null;
+
+    function step() {
+      i = (i + 1) % words.length;
+      el.classList.add('is-morphing');
+      setTimeout(function () {
+        el.textContent = words[i];
+        el.classList.remove('is-morphing');
+      }, 420);
+    }
+
+    function start() { if (!timer) timer = setInterval(step, 3400); }
+    function stop() { clearInterval(timer); timer = null; }
+
+    start();
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else start();
+    });
+  }
+
+  function initFormSubmitSpinner() {
+    var form = document.querySelector('.zg-contact__form');
+    var btn = form && form.querySelector('.zg-form__submit');
+    if (!form || !btn) return;
+    var loadingLabel = btn.dataset.loadingLabel || 'Loading...';
+
+    form.addEventListener('submit', function () {
+      if (btn.disabled) return;
+      // Deferred: disabling a submit button synchronously inside the submit
+      // handler can cancel the submission in some browsers.
+      setTimeout(function () {
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="zg-form__spinner" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-opacity=".25"></circle><path d="M21 12a9 9 0 0 0-9-9"></path></svg>' + loadingLabel;
+      }, 0);
+    });
+  }
+
   function initNavSheenVisibility() {
     var sheenEls = document.querySelectorAll('.zg-nav--sheen');
     if (!sheenEls.length) return;
@@ -308,5 +399,8 @@
     initFooterFade();
     initWorldMapPing();
     initNavSheenVisibility();
+    initTileGlow();
+    initHeroMorph();
+    initFormSubmitSpinner();
   });
 })();

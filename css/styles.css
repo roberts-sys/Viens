@@ -333,6 +333,20 @@ textarea:focus-visible {
   color: inherit;
 }
 
+/* word-cycling accent, driven by initHeroMorph() in js/main.js */
+.zg-hero__title mark.zg-morph {
+  display: inline-block;
+  filter: blur(0);
+  opacity: 1;
+  transition: filter .42s ease, opacity .42s ease;
+}
+
+/* 6px, not more: .zg-line clips at overflow:hidden and a wider blur shows the cut */
+.zg-hero__title mark.zg-morph.is-morphing {
+  filter: blur(6px);
+  opacity: 0;
+}
+
 .zg-hero__sub {
   font-size: 18px;
   line-height: 1.6;
@@ -515,6 +529,25 @@ textarea:focus-visible {
 
 /* mobile-only legibility scrim + no-hover-wash variant, engaged via media query */
 .zg-tile__mobile-scrim { display: none; }
+
+/* pointer-tracked spotlight glow, added by initTileGlow() in js/main.js (desktop-hover only) */
+@media (hover: hover) {
+  .zg-tile__glow {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity .4s;
+    pointer-events: none;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--glow-color, rgba(255, 255, 255, .35)), transparent 70%);
+    /* screen only ever lightens -- overlay crushes the darker photos */
+    mix-blend-mode: screen;
+  }
+
+  .zg-tile:hover .zg-tile__glow { opacity: 1; }
+
+  .zg-tile--blue { --glow-color: rgba(91, 155, 224, .6); }
+  .zg-tile--pink { --glow-color: rgba(231, 184, 196, .6); }
+}
 
 /* ---------- Video + What We Do band ---------- */
 
@@ -835,6 +868,7 @@ textarea:focus-visible {
 }
 
 .zg-contact__pill {
+  position: relative;
   display: inline-block;
   font: 600 14px 'IBM Plex Mono', monospace;
   color: var(--guild-pink);
@@ -844,6 +878,24 @@ textarea:focus-visible {
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(231, 184, 196, .4);
   opacity: .9;
+}
+
+/* Gradient underline wipes in over the flat rule on hover. The wipe lives on
+   ::after because the reveal rule below wins the transition on the element. */
+.zg-contact__pill::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--blueprint), var(--guild-pink));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .4s var(--ease-standard);
+}
+
+.zg-contact__pill:hover::after,
+.zg-contact__pill:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .zg-contact__details {
@@ -1612,6 +1664,9 @@ textarea:focus-visible {
 }
 
 .zg-form__submit {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
   display: inline-block;
   background: none;
   border: 1px solid rgba(231, 184, 196, .5);
@@ -1623,12 +1678,43 @@ textarea:focus-visible {
   text-transform: uppercase;
   padding: 12px 26px;
   cursor: pointer;
-  transition: background .3s, border-color .3s;
+  transition: background .3s, border-color .3s, color .3s;
 }
 
-.zg-form__submit:hover {
-  background: rgba(231, 184, 196, .08);
-  border-color: var(--guild-pink);
+.zg-form__submit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(120deg, var(--blueprint), var(--guild-pink));
+  opacity: 0;
+  transition: opacity .35s;
+}
+
+.zg-form__submit:hover,
+.zg-form__submit:focus-visible {
+  color: #fff;
+  border-color: transparent;
+}
+
+.zg-form__submit:hover::before,
+.zg-form__submit:focus-visible::before {
+  opacity: 1;
+}
+
+.zg-form__submit:disabled {
+  cursor: not-allowed;
+  opacity: .75;
+}
+
+.zg-form__spinner {
+  animation: zg-spin .7s linear infinite;
+  vertical-align: -3px;
+  margin-right: 7px;
+}
+
+@keyframes zg-spin {
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {
