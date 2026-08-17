@@ -1469,7 +1469,6 @@ textarea:focus-visible {
 }
 
 /* when the GSAP layer runs, it owns scrubbing — disable the CSS fallbacks it replaces */
-html.gsap { scroll-behavior: auto; }
 
 /* crosshair scene: lines draw toward the center, then the node springs in */
 .js:not(.gsap) .zg-crosshair { transition: transform 1.2s var(--ease-standard) .1s; }

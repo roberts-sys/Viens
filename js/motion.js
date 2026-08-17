@@ -11,24 +11,8 @@
   gsap.registerPlugin(ScrollTrigger);
 
   document.addEventListener('DOMContentLoaded', function () {
-    if (typeof Lenis !== 'undefined') {
-      var lenis = new Lenis({ duration: 1.05 });
-      lenis.on('scroll', ScrollTrigger.update);
-      gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
-      gsap.ticker.lagSmoothing(0);
-
-      document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-        a.addEventListener('click', function (e) {
-          var id = a.getAttribute('href');
-          var target = id.length > 1 && document.querySelector(id);
-          if (target) {
-            e.preventDefault();
-            lenis.scrollTo(target, { offset: -10 });
-          }
-        });
-      });
-    }
-
+    // Scrolling is native: momentum/glide reads as lag, and anchor links use
+    // the stylesheet's scroll-behavior. GSAP only drives scroll-linked scenes.
     if (document.querySelector('.zg-hero__parallax')) {
       gsap.to('.zg-hero__parallax', {
         yPercent: 16,
