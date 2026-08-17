@@ -1721,3 +1721,155 @@ textarea:focus-visible {
   .zg-form__row { grid-template-columns: 1fr; gap: 0; }
   .zg-contact__form { margin-top: 28px; }
 }
+
+/* ---------- Signal path (ported from the /app AnimatedBeam + ShimmerText sandbox) ---------- */
+
+.zg-signal {
+  position: relative;
+  padding: 120px 24px 128px;
+  background: var(--iron);
+  overflow: hidden;
+}
+
+.zg-signal__grain { opacity: .5; }
+
+.zg-signal__eyebrow {
+  position: relative;
+  margin: 0 0 14px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--blueprint-light);
+}
+
+.zg-signal__heading {
+  position: relative;
+  margin: 0 auto 64px;
+  max-width: 20ch;
+  text-align: center;
+  font-size: clamp(26px, 4vw, 44px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  color: var(--concrete);
+}
+
+.zg-signal__diagram {
+  position: relative;
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+.zg-signal__svg { width: 100%; height: auto; overflow: visible; }
+
+/* beams */
+
+.zg-signal__track {
+  stroke: var(--border-dark);
+  stroke-width: 1.5;
+  opacity: .55;
+}
+
+.zg-signal__track--out { opacity: .4; }
+
+.zg-signal__pulse {
+  stroke: var(--blueprint-light);
+  stroke-width: 2.25;
+  stroke-dasharray: 13 100;
+  stroke-dashoffset: 113;
+  animation: zg-beam 3.6s linear infinite;
+  animation-delay: var(--zg-beam-delay, 0s);
+}
+
+.zg-signal__pulse--out { stroke: var(--guild-pink); }
+
+@keyframes zg-beam {
+  to { stroke-dashoffset: 0; }
+}
+
+/* nodes */
+
+.zg-signal__disc {
+  fill: #12161b;
+  stroke: var(--border-dark);
+  stroke-width: 1.5;
+}
+
+.zg-signal__disc--core {
+  fill: #131c2a;
+  stroke: var(--blueprint-light);
+  stroke-width: 1.75;
+}
+
+.zg-signal__glyph {
+  fill: none;
+  stroke: var(--body-muted);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.zg-signal__glyph circle[r="2.5"] { fill: var(--body-muted); stroke: none; }
+
+.zg-signal__glyph--core { stroke: var(--blueprint-light); }
+
+.zg-signal__label {
+  fill: var(--body-muted);
+  font-size: 15px;
+  letter-spacing: .06em;
+  text-anchor: middle;
+}
+
+.zg-signal__label--core { fill: var(--concrete); }
+
+/* The ShimmerText gradient-sweep, as plain CSS. */
+
+.zg-shimmer {
+  background: currentColor linear-gradient(
+    to right,
+    currentColor 0%,
+    rgba(255, 255, 255, .92) 40%,
+    rgba(255, 255, 255, .92) 60%,
+    currentColor 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 50% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: zg-shimmer 3.6s linear infinite;
+}
+
+@keyframes zg-shimmer {
+  from { background-position-x: -100%; }
+  to { background-position-x: 250%; }
+}
+
+/* GSAP draws the tracks in on scroll; without it they're simply visible. */
+.gsap .zg-signal__track { stroke-dasharray: 100; stroke-dashoffset: 100; }
+.gsap .zg-signal__track.is-drawn { stroke-dashoffset: 0; }
+
+/* The SVG scales with its container, so every stroke and label shrinks with it.
+   At ~430px wide the 880-unit viewBox renders at roughly 0.45 scale — these bumps
+   keep labels and strokes at a legible rendered size. */
+@media (max-width: 768px) {
+  .zg-signal { padding: 88px 18px 92px; }
+  .zg-signal__heading { margin-bottom: 40px; }
+  .zg-signal__label { font-size: 32px; letter-spacing: .04em; }
+  .zg-signal__track { stroke-width: 2.5; }
+  .zg-signal__pulse { stroke-width: 3.75; }
+  .zg-signal__glyph { stroke-width: 2.75; }
+  .zg-signal__disc { stroke-width: 2.5; }
+  .zg-signal__disc--core { stroke-width: 3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zg-signal__pulse { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; opacity: .5; }
+  .zg-shimmer {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+  .gsap .zg-signal__track { stroke-dashoffset: 0; }
+}

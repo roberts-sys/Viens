@@ -48,6 +48,27 @@
       });
     }
 
+    var signal = document.querySelector('[data-signal]');
+    if (signal) {
+      // Draw the sensor tracks in, then let the CSS beam pulses carry it.
+      gsap.to(signal.querySelectorAll('.zg-signal__track'), {
+        strokeDashoffset: 0,
+        duration: 1.1,
+        stagger: 0.12,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: signal, start: 'top 78%', once: true }
+      });
+      gsap.from(signal.querySelectorAll('.zg-signal__node'), {
+        opacity: 0,
+        scale: 0.86,
+        transformOrigin: '50% 50%',
+        duration: 0.7,
+        stagger: 0.09,
+        ease: 'back.out(1.7)',
+        scrollTrigger: { trigger: signal, start: 'top 78%', once: true }
+      });
+    }
+
     var cell = document.querySelector('[data-video-cell][data-reveal]');
     if (cell) {
       gsap.fromTo(cell, { '--zg-curtain': '0%' }, {
