@@ -154,12 +154,14 @@
     var v = document.querySelector('[data-hero-video]');
     if (!v || !VIDEOS_ENABLED) return;
     if (v.dataset.srcWebm) {
+      // Phones get a 960-wide cut: a third of the bytes and far cheaper to decode
+      var small = window.matchMedia('(max-width: 768px)').matches && v.dataset.srcSm;
       // <source> children so browsers without H.264 fall back to WebM
       var mp4 = document.createElement('source');
-      mp4.src = v.dataset.src;
+      mp4.src = small ? v.dataset.srcSm : v.dataset.src;
       mp4.type = 'video/mp4; codecs="avc1.640028"';
       var webm = document.createElement('source');
-      webm.src = v.dataset.srcWebm;
+      webm.src = small ? v.dataset.srcSmWebm : v.dataset.srcWebm;
       webm.type = 'video/webm; codecs="vp9"';
       v.appendChild(mp4);
       v.appendChild(webm);
@@ -175,6 +177,29 @@
       }
     }, { once: true });
     v.load();
+  }
+
+  // Decoding a video that has scrolled out of view costs frames for nothing.
+  function initVideoVisibility() {
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var v = entry.target;
+        if (entry.isIntersecting) {
+          if (v.dataset.wasPlaying === '1') {
+            var p = v.play();
+            if (p && p.catch) p.catch(function () {});
+          }
+        } else if (!v.paused) {
+          v.dataset.wasPlaying = '1';
+          v.pause();
+        }
+      });
+    }, { threshold: 0.01 });
+    document.querySelectorAll('video').forEach(function (v) {
+      v.addEventListener('play', function () { v.dataset.wasPlaying = '1'; });
+      io.observe(v);
+    });
   }
 
   function initNavReturn() {
@@ -272,6 +297,7 @@
     initVideoCrossfade();
     initLazyVideos();
     initHeroVideo();
+    initVideoVisibility();
     initCrosshairScene();
     initHeroParallax();
     initNavReturn();
