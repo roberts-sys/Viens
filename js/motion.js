@@ -14,13 +14,14 @@
     // Scrolling is native: momentum/glide reads as lag, and anchor links use
     // the stylesheet's scroll-behavior. GSAP only drives scroll-linked scenes.
     if (document.querySelector('.zg-hero__parallax')) {
+      // Restrained parallax: enough depth to feel intentional, not a slideshow.
       gsap.to('.zg-hero__parallax', {
-        yPercent: 16,
+        yPercent: 7,
         ease: 'none',
         scrollTrigger: { trigger: '.zg-hero', start: 'top top', end: 'bottom top', scrub: true }
       });
       gsap.to('.zg-hero__content', {
-        y: 140,
+        y: 60,
         opacity: 0,
         ease: 'none',
         scrollTrigger: { trigger: '.zg-hero', start: 'top top', end: '88% top', scrub: true }

@@ -5,7 +5,10 @@
   var VIDEOS_ENABLED = !REDUCED_MOTION;
 
   function loadVideoSrc(v) {
-    if (!v.getAttribute('src') && v.dataset.src) v.src = v.dataset.src;
+    if (v.getAttribute('src')) return;
+    var small = window.matchMedia('(max-width: 768px)').matches && v.dataset.srcSm;
+    var src = small || v.dataset.src;
+    if (src) v.src = src;
   }
 
   function initVideoCrossfade() {

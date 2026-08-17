@@ -73,7 +73,20 @@ textarea:focus-visible {
   -webkit-backdrop-filter: blur(16px);
 }
 
-.zg-nav--sheen {
+/* The sheen travels on its own composited layer. Animating background-position
+   instead repaints the nav every frame, and because the nav carries a
+   backdrop-filter that repaint is expensive — it cost ~8fps over the hero. */
+.zg-nav--sheen { overflow: hidden; }
+
+.zg-nav--sheen > * { position: relative; z-index: 1; }
+
+.zg-nav--sheen::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 240%;
+  z-index: 0;
+  pointer-events: none;
   background-image: linear-gradient(65deg,
     transparent 32%,
     rgba(255, 210, 160, .02) 43%,
@@ -82,13 +95,12 @@ textarea:focus-visible {
     rgba(255, 218, 170, .05) 53%,
     rgba(255, 210, 160, .02) 57%,
     transparent 68%);
-  background-size: 240% 100%;
   animation: zg-nav-sheen-move 22s cubic-bezier(.35, 0, .25, 1) infinite;
 }
 
 @keyframes zg-nav-sheen-move {
-  0% { background-position: -160% 0; }
-  100% { background-position: 160% 0; }
+  0% { transform: translate3d(-67%, 0, 0); }
+  100% { transform: translate3d(67%, 0, 0); }
 }
 
 .zg-nav--stuck {
@@ -202,9 +214,13 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
+/* The hero is deliberately a single composited layer. The colour grade and the
+   blueprint tint are baked into excavator-mountain.webp and hero-ambient.*, so
+   nothing has to be filtered or blended over the playing video each frame —
+   that alone took the hero from ~18fps to ~47fps while scrolling. */
 .zg-hero__parallax {
   position: absolute;
-  inset: -26% 0 0 0;
+  inset: -14% 0 0 0;
   will-change: transform;
 }
 
@@ -214,13 +230,6 @@ textarea:focus-visible {
   background-image: url('../assets/excavator-mountain.webp');
   background-size: cover;
   background-position: center 30%;
-  filter: saturate(.82) contrast(1.06);
-  animation: zg-hero-settle 14s var(--ease-standard) both;
-}
-
-@keyframes zg-hero-settle {
-  from { transform: scale(1.07); }
-  to { transform: scale(1); }
 }
 
 .zg-hero__video {
@@ -230,23 +239,11 @@ textarea:focus-visible {
   height: 100%;
   object-fit: cover;
   object-position: center 30%;
-  filter: saturate(.82) contrast(1.06);
   opacity: 0;
   transition: opacity 1.4s var(--ease-standard);
 }
 
 .zg-hero__video.is-playing { opacity: 1; }
-
-.zg-hero__tint {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(160deg,
-    rgba(13, 71, 161, .28) 0%,
-    rgba(31, 122, 168, .10) 45%,
-    transparent 70%);
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
 
 .zg-hero__scrim {
   position: absolute;
