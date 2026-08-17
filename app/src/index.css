@@ -1,0 +1,270 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: <html class="dark"> */
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   gradient-button.tsx expects these two classes (they ship as plain CSS on
+   21st.dev rather than as Tailwind utilities).
+   --------------------------------------------------------------------------- */
+
+@property --pos-x {
+  syntax: "<percentage>";
+  initial-value: 11.14%;
+  inherits: false;
+}
+@property --pos-y {
+  syntax: "<percentage>";
+  initial-value: 140%;
+  inherits: false;
+}
+@property --spread-x {
+  syntax: "<percentage>";
+  initial-value: 150%;
+  inherits: false;
+}
+@property --spread-y {
+  syntax: "<percentage>";
+  initial-value: 180.06%;
+  inherits: false;
+}
+@property --color-1 {
+  syntax: "<color>";
+  initial-value: #000;
+  inherits: false;
+}
+@property --color-2 {
+  syntax: "<color>";
+  initial-value: #08012c;
+  inherits: false;
+}
+@property --color-3 {
+  syntax: "<color>";
+  initial-value: #4e1e40;
+  inherits: false;
+}
+@property --color-4 {
+  syntax: "<color>";
+  initial-value: #70464e;
+  inherits: false;
+}
+@property --color-5 {
+  syntax: "<color>";
+  initial-value: #88394c;
+  inherits: false;
+}
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 20deg;
+  inherits: true;
+}
+@property --border-color-1 {
+  syntax: "<color>";
+  initial-value: hsla(340, 75%, 60%, 0.2);
+  inherits: true;
+}
+@property --border-color-2 {
+  syntax: "<color>";
+  initial-value: hsla(340, 75%, 40%, 0.75);
+  inherits: true;
+}
+@property --stop-1 {
+  syntax: "<percentage>";
+  initial-value: 37.35%;
+  inherits: false;
+}
+@property --stop-2 {
+  syntax: "<percentage>";
+  initial-value: 61.36%;
+  inherits: false;
+}
+@property --stop-3 {
+  syntax: "<percentage>";
+  initial-value: 78.42%;
+  inherits: false;
+}
+@property --stop-4 {
+  syntax: "<percentage>";
+  initial-value: 89.52%;
+  inherits: false;
+}
+@property --stop-5 {
+  syntax: "<percentage>";
+  initial-value: 100%;
+  inherits: false;
+}
+
+.gradient-button {
+  appearance: none;
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    radial-gradient(
+        var(--spread-x) var(--spread-y) at var(--pos-x) var(--pos-y),
+        var(--color-1) var(--stop-1),
+        var(--color-2) var(--stop-2),
+        var(--color-3) var(--stop-3),
+        var(--color-4) var(--stop-4),
+        var(--color-5) var(--stop-5)
+      )
+      padding-box,
+    conic-gradient(
+        from var(--border-angle),
+        var(--border-color-1) 0%,
+        var(--border-color-2) 25%,
+        var(--border-color-1) 50%,
+        var(--border-color-2) 75%,
+        var(--border-color-1) 100%
+      )
+      border-box;
+  transition:
+    --pos-x 0.5s,
+    --pos-y 0.5s,
+    --spread-x 0.5s,
+    --spread-y 0.5s,
+    --color-1 0.5s,
+    --color-2 0.5s,
+    --color-3 0.5s,
+    --color-4 0.5s,
+    --color-5 0.5s,
+    --border-angle 0.5s,
+    --border-color-1 0.5s,
+    --border-color-2 0.5s,
+    --stop-1 0.5s,
+    --stop-2 0.5s,
+    --stop-3 0.5s,
+    --stop-4 0.5s,
+    --stop-5 0.5s;
+}
+
+.gradient-button:hover {
+  --pos-x: 0%;
+  --pos-y: 91.51%;
+  --spread-x: 120.24%;
+  --spread-y: 103.18%;
+  --color-1: #c96287;
+  --color-2: #c66c64;
+  --color-3: #cc7d23;
+  --color-4: #37140a;
+  --color-5: #000;
+  --border-angle: 190deg;
+  --border-color-1: hsla(340, 78%, 90%, 0.1);
+  --border-color-2: hsla(340, 75%, 90%, 0.6);
+  --stop-1: 0%;
+  --stop-2: 8.8%;
+  --stop-3: 21.44%;
+  --stop-4: 71.34%;
+  --stop-5: 85.76%;
+}
+
+.gradient-button-variant {
+  --color-1: #000022;
+  --color-2: #1f3f6d;
+  --color-3: #469396;
+  --color-4: #f1ffa5;
+  --border-angle: 200deg;
+  --border-color-1: hsla(320, 75%, 90%, 0.6);
+  --border-color-2: hsla(320, 50%, 90%, 0.15);
+}
+
+.gradient-button-variant:hover {
+  --pos-x: 0%;
+  --pos-y: 95.51%;
+  --spread-x: 110.24%;
+  --spread-y: 110.2%;
+  --color-1: #000020;
+  --color-2: #f1ffa5;
+  --color-3: #469396;
+  --color-4: #1f3f6d;
+  --color-5: #000;
+  --stop-1: 0%;
+  --stop-2: 10%;
+  --stop-3: 35.44%;
+  --stop-4: 71.34%;
+  --stop-5: 90.76%;
+  --border-angle: 210deg;
+  --border-color-1: hsla(320, 75%, 90%, 0.2);
+  --border-color-2: hsla(320, 50%, 90%, 0.75);
+}

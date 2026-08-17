@@ -1,6 +1,6 @@
 import { Spinner } from "@/components/ui/spinner"
 
-const variants = ['default', 'circle', 'pinwheel', 'circle-filled', 'ellipsis', 'ring', 'bars', 'infinite'];
+const variants = ['default', 'circle', 'pinwheel', 'circle-filled', 'ellipsis', 'ring', 'bars', 'infinite'] as const;
 
 const Demo = () => (
   <div className="grid grid-cols-4 gap-16">

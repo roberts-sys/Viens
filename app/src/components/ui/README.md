@@ -1,12 +1,11 @@
 # 21st.dev component archive
 
-Snippets pasted from 21st.dev, saved as-is for later integration. Not yet wired up —
-they assume TypeScript, Tailwind, shadcn/ui conventions (`@/lib/utils` → `cn`), and these
-packages that aren't installed yet: `@radix-ui/react-slot`, `class-variance-authority`,
-`lucide-react`, `tailwind-merge` / `clsx`. The current `/app` scaffold is plain JS + Framer
-Motion only (no TypeScript, no Tailwind).
+Components pasted from 21st.dev. **These are now wired up and rendering** — the `/app`
+scaffold has TypeScript, Tailwind v4, the `@/*` path alias, and the shadcn token layer.
+Run `npm run dev` and every component below renders in a gallery at `localhost:5173`
+(with a light/dark toggle).
 
-## Archived so far
+## Components
 
 - `morphing-text.tsx` — blurred cross-fade text morph between a list of strings
 - `spotlight-card.tsx` (`GlowCard`) — pointer-tracked radial glow border card
@@ -14,18 +13,31 @@ Motion only (no TypeScript, no Tailwind).
 - `animated-tabs.tsx` — tab switcher with a `layoutId` sliding active-tab highlight
 - `spinner.tsx` — 8 loader variants (default/circle/pinwheel/circle-filled/ellipsis/ring/bars/infinite)
 - `gradient-button.tsx` — cva-based button with a gradient variant
+- `shimmer-text.tsx` — background-clip gradient sweep across text, 20 color variants
+- `animated-beam.tsx` — SVG beam with an animated gradient between two element refs
 
-Each component has a matching `*.demo.tsx` showing example usage.
+Plus `button.tsx` — a standard shadcn Button, added because `background-paths.tsx`
+imports it.
 
-## Still to come
+Each component has a matching `*.demo.tsx` showing example usage. `app/src/App.tsx`
+renders all of them as a gallery.
 
-More snippets to be pasted in (up to ~10 total per the original request).
+## Setup notes
 
-## Integration TODO (once all snippets are in)
+- Tailwind v4 via `@tailwindcss/vite` (no `tailwind.config.js` — theme lives in
+  `app/src/index.css` under `@theme inline`).
+- Dark mode is class-based (`<html class="dark">`), wired to the gallery's toggle.
+- `index.css` also carries the plain-CSS `.gradient-button` rules that
+  `gradient-button.tsx` expects; they don't ship as Tailwind utilities.
+- `motion` and `framer-motion` are both installed — the newer snippets import
+  `motion/react`, the older ones `framer-motion`. Same library post-rename.
 
-1. Add TypeScript to the Vite app (`tsconfig.json`, rename remaining `.jsx` → `.tsx`).
-2. Add Tailwind CSS + configure `@/*` path alias to `app/src/*`.
-3. Add `app/src/lib/utils.ts` exporting `cn` (clsx + tailwind-merge).
-4. Install `@radix-ui/react-slot`, `class-variance-authority`, `lucide-react`, `clsx`, `tailwind-merge`.
-5. Add a shadcn-style `Button` component (referenced by `background-paths.tsx`).
-6. Verify each demo renders.
+## Known rough edges
+
+- `spotlight-card.demo.tsx` uses `w-screen h-screen`, so inside the gallery frame it
+  overflows and only 2 of its 3 cards are visible.
+- `animated-beam.demo.tsx` uses hand-drawn approximations of the SolidWorks / KiCad /
+  Blender / Raspberry Pi / Arduino / Claude marks. Swap in `simple-icons` paths for
+  accurate artwork.
+- `AnimatedBeam` recomputes its path only on container resize, so beams go stale if
+  children move without the container changing size (visible under HMR; fine on reload).

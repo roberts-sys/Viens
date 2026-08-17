@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, ReactNode } from 'react';
 
 interface GlowCardProps {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   glowColor?: 'blue' | 'purple' | 'green' | 'red' | 'orange';
   size?: 'sm' | 'md' | 'lg';
@@ -88,7 +88,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
       border: 'var(--border-size) solid var(--backup-border)',
       position: 'relative' as const,
       touchAction: 'none' as const,
-    };
+    } as React.CSSProperties & Record<string, string | number>;
 
     // Add width and height if provided
     if (width !== undefined) {
