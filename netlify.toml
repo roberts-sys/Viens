@@ -1,0 +1,10 @@
+# The site is plain static HTML served straight from the repo root.
+#
+# This is pinned explicitly because the root package.json (the Vite + React
+# component sandbox under app/) would otherwise trip Netlify's build
+# auto-detection. That would run `vite build`, which writes to app-dist/ --
+# the sandbox only -- and publish that instead of the actual website.
+
+[build]
+  command = ""
+  publish = "."
