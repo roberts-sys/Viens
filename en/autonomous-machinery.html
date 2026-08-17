@@ -73,7 +73,7 @@
   </h2>
 
   <div class="zg-signal__diagram" data-reveal data-signal>
-    <svg class="zg-signal__svg" viewBox="0 0 880 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="LiDAR, ultrasonic sensors and inertial sensors feeding an AI control system that drives the machinery">
+    <svg class="zg-signal__svg" viewBox="0 0 880 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="LiDAR, computer-vision cameras and inertial sensors feeding an AI control system that drives the machinery">
 
       <g class="zg-signal__beams" fill="none" stroke-linecap="round">
         <path class="zg-signal__track" pathLength="100" d="M140,86 Q300,112 440,200"></path>
@@ -102,12 +102,11 @@
         <g class="zg-signal__node">
           <circle class="zg-signal__disc" cx="140" cy="200" r="38"></circle>
           <g class="zg-signal__glyph">
-            <path d="M128,190 L128,210"></path>
-            <path d="M136,183 L136,217"></path>
-            <path d="M144,188 L144,212"></path>
-            <path d="M152,194 L152,206"></path>
+            <rect x="124" y="193" width="32" height="19" rx="3"></rect>
+            <path d="M132,193 L134.5,188 L145.5,188 L148,193"></path>
+            <circle cx="140" cy="202.5" r="5.5"></circle>
           </g>
-          <text class="zg-signal__label mono" x="140" y="260">Ultrasonic</text>
+          <text class="zg-signal__label mono" x="140" y="252">Computer<tspan x="140" dy="1.25em">vision</tspan></text>
         </g>
 
         <g class="zg-signal__node">
