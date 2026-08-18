@@ -13,6 +13,7 @@
 <link rel="alternate" hreflang="lv" href="https://ziedinagilde.id.lv/privacy.html">
 <link rel="alternate" hreflang="en" href="https://ziedinagilde.id.lv/en/privacy.html">
 <link rel="stylesheet" href="/css/fonts.css">
+<link rel="stylesheet" href="/css/consent.css">
 <style>
   :root {
     --iron: #1A1E24;
@@ -117,7 +118,7 @@
     <li>Your <strong>email address</strong> — so we can reply;</li>
     <li>Your <strong>message</strong> — so we understand your enquiry.</li>
   </ul>
-  <p>We do not ask for or collect any other personal data. The site uses no cookies and does not build a profile of you.</p>
+  <p>We do not ask for or collect any other personal data. For visitor statistics and cookies, see section 6.</p>
 
   <h2>3. Why we process it, and on what basis</h2>
   <p>We process this data to answer your enquiry and, where relevant, to prepare a quote. The legal basis is Article 6(1)(b) GDPR — steps taken at your request prior to entering a contract — and Article 6(1)(f) — our legitimate interest in corresponding with clients and enquirers.</p>
@@ -129,11 +130,15 @@
   <p>We do not sell or rent your data. Only the following service providers, acting on our behalf, have access:</p>
   <ul>
     <li><strong>Netlify</strong> — website hosting and contact form processing. Netlify is a US company, so data may be processed outside the EEA under appropriate safeguards.</li>
-    <li><strong>GoatCounter</strong> — visitor statistics. This tool sets no cookies, does not track you across websites, and does not collect personal data.</li>
+    <li><strong>GoatCounter</strong> — visitor statistics. This tool sets no cookies, does not track you across websites, and does not collect personal data. It runs at all times.</li>
+    <li><strong>Google Analytics</strong> — more detailed visitor analytics. Runs <strong>only if you have consented to it</strong>. Google is a US company, so data may be processed outside the EEA under appropriate safeguards.</li>
   </ul>
 
   <h2>6. Cookies</h2>
-  <p>This website <strong>sets no cookies</strong> and runs no advertising or tracking scripts. There is nothing for you to consent to.</p>
+  <p>This website uses no advertising cookies and sells no data to advertisers. Cookies are set only by <strong>Google Analytics</strong>, and only if you have explicitly agreed by choosing “Accept” in the consent bar.</p>
+  <p>If you choose “Decline”, or simply do not respond, Google Analytics is never loaded and its cookies are never set. Your choice is stored in your browser so the bar does not reappear on every visit.</p>
+  <p>Visitor statistics via <strong>GoatCounter</strong> run regardless of your choice, because that tool sets no cookies and collects no personal data.</p>
+  <p><strong>You can withdraw consent at any time:</strong> <a href="#" id="zg-consent-reset">reset my cookie choice</a>. The consent bar will then appear again so you can choose differently.</p>
 
   <h2>7. Your rights</h2>
   <p>Under the GDPR you have the right to:</p>
@@ -153,5 +158,17 @@
   <a class="back" href="/en/">← Back home</a>
 
 </div>
+<script src="/js/consent.js" defer></script>
+<script>
+  // Withdrawing consent must be as easy as giving it: clear the stored
+  // choice and reload so consent.js shows the bar again on this page.
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('#zg-consent-reset');
+    if (!link) return;
+    e.preventDefault();
+    try { localStorage.removeItem('zg-consent'); } catch (err) {}
+    location.reload();
+  });
+</script>
 </body>
 </html>

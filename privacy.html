@@ -13,6 +13,7 @@
 <link rel="alternate" hreflang="en" href="https://ziedinagilde.id.lv/en/privacy.html">
 <link rel="alternate" hreflang="lv" href="https://ziedinagilde.id.lv/privacy.html">
 <link rel="stylesheet" href="/css/fonts.css">
+<link rel="stylesheet" href="/css/consent.css">
 <style>
   :root {
     --iron: #1A1E24;
@@ -117,7 +118,7 @@
     <li><strong>E-pasta adresi</strong> — lai varētu atbildēt;</li>
     <li><strong>Ziņas tekstu</strong> — lai saprastu jūsu jautājumu.</li>
   </ul>
-  <p>Mēs neprasām un nevācam nekādus citus personas datus. Mājaslapa neizmanto sīkdatnes un neveido jūsu profilu.</p>
+  <p>Mēs neprasām un nevācam nekādus citus personas datus. Par apmeklējumu statistiku un sīkdatnēm lasiet 6. sadaļā.</p>
 
   <h2>3. Kāpēc mēs to darām un uz kāda pamata</h2>
   <p>Mēs apstrādājam šos datus, lai atbildētu uz jūsu jautājumu un, ja nepieciešams, sagatavotu piedāvājumu. Tiesiskais pamats ir Vispārīgās datu aizsardzības regulas (VDAR) 6. panta 1. punkta b) apakšpunkts — pasākumi pēc jūsu pieprasījuma pirms līguma noslēgšanas — un f) apakšpunkts — mūsu leģitīmās intereses uzturēt saziņu ar klientiem un interesentiem.</p>
@@ -129,11 +130,15 @@
   <p>Mēs nepārdodam un neiznomājam jūsu datus. Tiem piekļūst tikai šādi pakalpojumu sniedzēji, kas darbojas mūsu uzdevumā:</p>
   <ul>
     <li><strong>Netlify</strong> — mājaslapas mitināšana un saziņas formas apstrāde. Netlify ir ASV uzņēmums, tāpēc dati var tikt apstrādāti ārpus EEZ, piemērojot atbilstošus aizsardzības pasākumus.</li>
-    <li><strong>GoatCounter</strong> — apmeklējumu statistika. Šis rīks neizmanto sīkdatnes, neseko jums starp mājaslapām un nevāc personas datus.</li>
+    <li><strong>GoatCounter</strong> — apmeklējumu statistika. Šis rīks neizmanto sīkdatnes, neseko jums starp mājaslapām un nevāc personas datus. Tas darbojas vienmēr.</li>
+    <li><strong>Google Analytics</strong> — detalizētāka apmeklējumu analītika. Darbojas <strong>tikai tad, ja esat tam piekritis</strong>. Google ir ASV uzņēmums, tāpēc dati var tikt apstrādāti ārpus EEZ, piemērojot atbilstošus aizsardzības pasākumus.</li>
   </ul>
 
   <h2>6. Sīkdatnes</h2>
-  <p>Šī mājaslapa <strong>neizvieto sīkdatnes</strong> un neizmanto reklāmas vai izsekošanas skriptus. Tāpēc jums nav jāpiekrīt nekādiem sīkdatņu iestatījumiem.</p>
+  <p>Šī mājaslapa neizmanto reklāmas sīkdatnes un nepārdod datus reklāmdevējiem. Sīkdatnes izvieto tikai <strong>Google Analytics</strong>, un tikai tad, ja jūs tam esat skaidri piekritis, nospiežot “Piekrītu” piekrišanas joslā.</p>
+  <p>Ja izvēlaties “Noraidīt” vai vienkārši neko nespiežat, Google Analytics netiek ielādēts un tā sīkdatnes netiek izvietotas. Jūsu izvēle tiek saglabāta jūsu pārlūkā, lai josla neparādītos katru reizi.</p>
+  <p>Apmeklējumu statistika ar <strong>GoatCounter</strong> darbojas neatkarīgi no jūsu izvēles, jo tā neizmanto sīkdatnes un nevāc personas datus.</p>
+  <p><strong>Piekrišanu var atsaukt jebkurā brīdī:</strong> <a href="#" id="zg-consent-reset">atiestatīt manu sīkdatņu izvēli</a>. Pēc tam piekrišanas josla parādīsies no jauna, un varēsiet izvēlēties citādi.</p>
 
   <h2>7. Jūsu tiesības</h2>
   <p>Saskaņā ar VDAR jums ir tiesības:</p>
@@ -153,5 +158,17 @@
   <a class="back" href="/">← Atpakaļ uz sākumu</a>
 
 </div>
+<script src="/js/consent.js" defer></script>
+<script>
+  // Withdrawing consent must be as easy as giving it: clear the stored
+  // choice and reload so consent.js shows the bar again on this page.
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('#zg-consent-reset');
+    if (!link) return;
+    e.preventDefault();
+    try { localStorage.removeItem('zg-consent'); } catch (err) {}
+    location.reload();
+  });
+</script>
 </body>
 </html>

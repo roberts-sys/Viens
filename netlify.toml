@@ -20,7 +20,11 @@
 #   connect-src GoatCounter reports pageviews with navigator.sendBeacon(),
 #               which CSP governs under connect-src -- NOT img-src. Removing
 #               the goatcounter origin here silently breaks analytics.
-#   img/font/media are all first-party; no data: URIs are used anywhere.
+#   img/font/media are otherwise first-party; no data: URIs are used anywhere.
+#   Google Analytics (js/consent.js, loaded only after opt-in) needs
+#   googletagmanager.com to serve gtag and *.google-analytics.com /
+#   *.analytics.google.com to receive hits. Drop those and GA fails silently
+#   for every visitor who accepted the consent bar.
 
 [[headers]]
   for = "/*"
@@ -30,7 +34,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=(), usb=(), payment=()"
     Cross-Origin-Opener-Policy = "same-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; media-src 'self'; connect-src 'self' https://ziedinagilde.goatcounter.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.google-analytics.com https://*.googletagmanager.com; font-src 'self'; media-src 'self'; connect-src 'self' https://ziedinagilde.goatcounter.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
 
 # Long-lived caching for immutable assets (fonts are content-named).
 [[headers]]
