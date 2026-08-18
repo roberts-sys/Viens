@@ -2,4 +2,6 @@
 # /src/main.jsx, which only resolves under the dev server. On the deployed
 # site it renders a blank page and hands out raw .jsx sources, so keep it off
 # the production domain. Run it locally with `npm run dev` instead.
-/app/*    /404.html    404
+# The ! is required: Netlify serves a matching static file in preference to
+# a redirect rule unless the status is forced, and app/index.html is real.
+/app/*    /404.html    404!
