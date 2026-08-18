@@ -302,6 +302,22 @@
       var ticking = false;
       var lastX = 0, lastY = 0;
 
+      function place() {
+        var rect = tile.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        tile.style.setProperty('--mx', ((lastX - rect.left) / rect.width * 100).toFixed(1) + '%');
+        tile.style.setProperty('--my', ((lastY - rect.top) / rect.height * 100).toFixed(1) + '%');
+      }
+
+      // Place the glow before the opacity fade starts. Without this it spends
+      // its first frames at dead centre -- or wherever the pointer left it last
+      // time -- and visibly slides across the tile as it fades in.
+      tile.addEventListener('pointerenter', function (e) {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        place();
+      }, { passive: true });
+
       tile.addEventListener('pointermove', function (e) {
         lastX = e.clientX;
         lastY = e.clientY;
@@ -309,59 +325,58 @@
         ticking = true;
         requestAnimationFrame(function () {
           ticking = false;
-          var rect = tile.getBoundingClientRect();
-          if (!rect.width || !rect.height) return;
-          tile.style.setProperty('--mx', ((lastX - rect.left) / rect.width * 100).toFixed(1) + '%');
-          tile.style.setProperty('--my', ((lastY - rect.top) / rect.height * 100).toFixed(1) + '%');
+          place();
         });
       }, { passive: true });
     });
   }
 
-  // Blur-crossfade the hero accent word through a short list of synonyms.
+  // Blur-crossfade the hero accent word through a short list of synonyms. The
+  // words sit stacked in a single grid cell (see .zg-morph__stack), so the box
+  // is intrinsically as wide as the longest of them and nothing here has to
+  // measure text. A measured px width was wrong twice over: it is taken before
+  // Inter swaps in over the fallback font, and it does not follow the type
+  // dropping from 56px/700 to 33px/800 under the 768px breakpoint.
   function initHeroMorph() {
     if (REDUCED_MOTION) return;
-    var el = document.querySelector('.zg-morph[data-words]');
-    if (!el) return;
-    var words = el.dataset.words.split(',').map(function (w) { return w.trim(); }).filter(Boolean);
+    var stack = document.querySelector('.zg-morph__stack');
+    if (!stack) return;
+    var words = stack.querySelectorAll('.zg-morph__w');
     if (words.length < 2) return;
-
-    // The hero title is centre-aligned, so a narrower word would drag the whole
-    // line sideways. Pin the box to the widest word up front.
-    var widest = 0;
-    var original = el.textContent;
-    words.forEach(function (w) {
-      el.textContent = w;
-      widest = Math.max(widest, el.getBoundingClientRect().width);
-    });
-    el.textContent = original;
-    el.style.minWidth = Math.ceil(widest) + 'px';
 
     var i = 0;
     var timer = null;
+    var onscreen = true;
 
     function step() {
+      words[i].classList.remove('is-on');
       i = (i + 1) % words.length;
-      el.classList.add('is-morphing');
-      setTimeout(function () {
-        el.textContent = words[i];
-        el.classList.remove('is-morphing');
-      }, 420);
+      words[i].classList.add('is-on');
     }
 
-    function start() { if (!timer) timer = setInterval(step, 3400); }
-    function stop() { clearInterval(timer); timer = null; }
+    function sync() {
+      var run = onscreen && !document.hidden;
+      if (run && !timer) timer = setInterval(step, 3400);
+      else if (!run && timer) { clearInterval(timer); timer = null; }
+    }
 
-    start();
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) stop(); else start();
-    });
+    // Repainting a blurred word every 3.4s behind the fold buys nothing.
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        onscreen = entries[0].isIntersecting;
+        sync();
+      }, { threshold: 0 }).observe(stack);
+    }
+
+    document.addEventListener('visibilitychange', sync);
+    sync();
   }
 
   function initFormSubmitSpinner() {
     var form = document.querySelector('.zg-contact__form');
     var btn = form && form.querySelector('.zg-form__submit');
     if (!form || !btn) return;
+    var idleHTML = btn.innerHTML;
     var loadingLabel = btn.dataset.loadingLabel || 'Loading...';
 
     form.addEventListener('submit', function () {
@@ -370,8 +385,18 @@
       // handler can cancel the submission in some browsers.
       setTimeout(function () {
         btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
         btn.innerHTML = '<svg class="zg-form__spinner" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-opacity=".25"></circle><path d="M21 12a9 9 0 0 0-9-9"></path></svg>' + loadingLabel;
       }, 0);
+    });
+
+    // Backing out of /thanks restores this page from bfcache with the button
+    // still disabled and spinning. Hand it back in its idle state.
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+      btn.innerHTML = idleHTML;
     });
   }
 

@@ -1,0 +1,5 @@
+# The /app Vite sandbox is a dev-only component studio -- its entry points at
+# /src/main.jsx, which only resolves under the dev server. On the deployed
+# site it renders a blank page and hands out raw .jsx sources, so keep it off
+# the production domain. Run it locally with `npm run dev` instead.
+/app/*    /404.html    404
