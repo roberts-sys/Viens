@@ -333,18 +333,28 @@ textarea:focus-visible {
   color: inherit;
 }
 
-/* word-cycling accent, driven by initHeroMorph() in js/main.js */
-.zg-hero__title mark.zg-morph {
-  display: inline-block;
-  filter: blur(0);
-  opacity: 1;
-  transition: filter .42s ease, opacity .42s ease;
+/* Word-cycling accent, cycled by initHeroMorph() in js/main.js. Every word is
+   laid into the same grid cell, so the box is intrinsically as wide as the
+   longest one at whatever size the type happens to be -- no measured px width
+   to go stale across the 768px breakpoint or a late font swap. */
+.zg-hero__title .zg-morph__stack {
+  display: inline-grid;
+  justify-items: center;
 }
 
-/* 6px, not more: .zg-line clips at overflow:hidden and a wider blur shows the cut */
-.zg-hero__title mark.zg-morph.is-morphing {
-  filter: blur(6px);
+.zg-hero__title .zg-morph__w {
+  grid-area: 1 / 1;
+  white-space: nowrap;
   opacity: 0;
+  /* 6px, not more: .zg-line clips at overflow:hidden and a wider blur shows the cut */
+  filter: blur(6px);
+  transition: opacity .42s ease, filter .42s ease;
+}
+
+/* The markup ships .is-on on the first word, so it stands still without JS */
+.zg-hero__title .zg-morph__w.is-on {
+  opacity: 1;
+  filter: blur(0);
 }
 
 .zg-hero__sub {
@@ -1691,13 +1701,15 @@ textarea:focus-visible {
   transition: opacity .35s;
 }
 
-.zg-form__submit:hover,
+/* :not(:disabled) so the gradient does not keep lighting up under the pointer
+   once the button has gone into its spinning state */
+.zg-form__submit:not(:disabled):hover,
 .zg-form__submit:focus-visible {
   color: #fff;
   border-color: transparent;
 }
 
-.zg-form__submit:hover::before,
+.zg-form__submit:not(:disabled):hover::before,
 .zg-form__submit:focus-visible::before {
   opacity: 1;
 }
