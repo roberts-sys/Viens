@@ -8,3 +8,49 @@
 [build]
   command = ""
   publish = "."
+
+# --- Security headers -------------------------------------------------------
+#
+# CSP notes (verified against the actual markup, not guessed):
+#   script-src  'unsafe-inline' is required: every page carries an inline
+#               redirect snippet and a `classList.add("js")` block in <head>,
+#               plus JSON-LD. gc.zgo.at serves the GoatCounter script.
+#   style-src   'unsafe-inline' is required: 64 inline style="" attributes
+#               across the pages, plus <style> blocks in 404/thanks.
+#   connect-src GoatCounter reports pageviews with navigator.sendBeacon(),
+#               which CSP governs under connect-src -- NOT img-src. Removing
+#               the goatcounter origin here silently breaks analytics.
+#   img/font/media are all first-party; no data: URIs are used anywhere.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), usb=(), payment=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; media-src 'self'; connect-src 'self' https://ziedinagilde.goatcounter.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+
+# Long-lived caching for immutable assets (fonts are content-named).
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# --- Stop serving build metadata --------------------------------------------
+# `publish = "."` puts the repo root on the web. Netlify already withholds
+# dotfiles, app/ and the config files, but these two are reachable and only
+# serve to fingerprint the dependency tree.
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404.html"
+  status = 404
+  force = true

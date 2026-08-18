@@ -1883,3 +1883,26 @@ textarea:focus-visible {
 @media (max-width: 768px) {
   .zg-topic .zg-signal { padding-bottom: 84px; }
 }
+
+/* Footer legal link (privacy policy) */
+.zg-footer__legal {
+  margin-left: auto;
+  color: inherit;
+  opacity: .62;
+  text-decoration: none;
+  font-size: 12.5px;
+  letter-spacing: .04em;
+  transition: opacity .3s var(--ease-standard);
+}
+.zg-footer__legal:hover { opacity: 1; }
+
+/* GDPR notice under the contact form */
+.zg-form__notice {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--body-muted, #9CA3AF);
+  opacity: .8;
+}
+.zg-form__notice a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.zg-form__notice a:hover { color: var(--guild-pink, #E7B8C4); }

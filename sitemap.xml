@@ -80,4 +80,17 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://ziedinagilde.id.lv/en/architects.html"/>
   </url>
 
+  <url>
+    <loc>https://ziedinagilde.id.lv/privacy.html</loc>
+    <lastmod>2026-08-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="lv" href="https://ziedinagilde.id.lv/privacy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ziedinagilde.id.lv/en/privacy.html"/>
+  </url>
+  <url>
+    <loc>https://ziedinagilde.id.lv/en/privacy.html</loc>
+    <lastmod>2026-08-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="lv" href="https://ziedinagilde.id.lv/privacy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ziedinagilde.id.lv/en/privacy.html"/>
+  </url>
+
 </urlset>
