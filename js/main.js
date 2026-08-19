@@ -350,6 +350,10 @@
 
     var i = 0;
 
+    // Per-stack cadence: the architecture panel turns over faster than the
+    // hero, which holds each phrase long enough to be read as a claim.
+    var period = parseInt(stack.getAttribute('data-interval'), 10) || 3400;
+
     // Opted-in stacks size to the word actually showing, so a short word does
     // not leave a gap mid-sentence. Measured live rather than baked: the
     // widths move with the breakpoint and with a late font swap.
@@ -382,7 +386,7 @@
 
     function sync() {
       var run = onscreen && !document.hidden;
-      if (run && !timer) timer = setInterval(step, 3400);
+      if (run && !timer) timer = setInterval(step, period);
       else if (!run && timer) { clearInterval(timer); timer = null; }
     }
 
