@@ -2038,19 +2038,174 @@ textarea:focus-visible {
   margin: 0;
 }
 
-.zg-gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+/* ---------- Terraces: project sets ---------- */
+
+/* Wider than .zg-topicbody's 960px on purpose. Four photos across 848px of
+   body would stand 155px tall; out here they get 200px, which is the
+   difference between seeing the work and seeing thumbnails. */
+.zg-projects { padding: 8px 56px 96px; }
+.zg-projects__inner { max-width: 1200px; margin: 0 auto; }
+.zg-project + .zg-project { margin-top: 52px; }
+
+.zg-project__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  border-bottom: 1px solid var(--border-dark);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
 }
 
-.zg-gallery .zg-photoslot { aspect-ratio: 4 / 3; }
+.zg-project__name { font-size: 17px; font-weight: 600; color: #fff; margin: 0; }
 
-.zg-gallery__img {
+.zg-project__meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--body-muted);
+  white-space: nowrap;
+}
+
+.zg-project__strip { display: flex; }
+
+/* Width tracks the photo's own aspect ratio and the height falls out equal
+   across the row, so portrait and landscape sit together without either
+   being cropped -- the reason this is a strip and not a fixed-box fan. */
+.zg-project__shot {
+  flex: var(--ar) 1 0;
+  aspect-ratio: var(--ar);
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--border-dark);
+  background: var(--iron);
+  cursor: zoom-in;
+  border-radius: 3px;
+}
+
+.zg-project__shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* earlier photos sit on top, so a closed set reads as a stack with its first
+   page facing you */
+.zg-project__shot:nth-child(1) { z-index: 4; }
+.zg-project__shot:nth-child(2) { z-index: 3; }
+.zg-project__shot:nth-child(3) { z-index: 2; }
+.zg-project__shot:nth-child(4) { z-index: 1; }
+
+.zg-project__n {
+  position: absolute;
+  left: 8px; top: 8px;
+  font: 600 10px 'IBM Plex Mono', monospace;
+  letter-spacing: .1em;
+  color: #1A1E24;
+  background: rgba(231, 184, 196, .92);
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+/* No hover to open with, so the set is already open. Nothing is reachable
+   only by pointer. */
+.zg-project__shot + .zg-project__shot { margin-left: 8px; }
+
+@media (hover: hover) {
+  /* Closed at rest, opens under the cursor. The overlap has to be deep: the
+     strip redistributes its width as the photos separate, so a shallow
+     overlap makes them merely shrink and the set never looks shut. At -15%
+     each photo shows a ~140px edge closed and stands ~294px open. */
+  .zg-project__shot + .zg-project__shot { margin-left: -15%; }
+
+  .zg-project__shot {
+    transition: margin-left .55s var(--ease-standard), filter .3s var(--ease-standard);
+    box-shadow: -16px 0 30px rgba(10, 12, 15, .55);
+  }
+
+  .zg-project__strip:hover .zg-project__shot + .zg-project__shot { margin-left: 8px; }
+  .zg-project__shot:hover { filter: brightness(1.09); }
+  .zg-project__shot:focus-visible { filter: brightness(1.09); }
+}
+
+/* A single-photo project has nothing to open, so it just stands as one frame. */
+.zg-project--single .zg-project__shot { box-shadow: none; }
+
+/* ---------- Lightbox ---------- */
+
+/* Deliberately short of the viewport edges: big enough to read the work,
+   small enough that the page is still visibly behind it. */
+.zg-lightbox {
+  width: min(1000px, 86vw);
+  max-width: min(1000px, 86vw);
+  max-height: 86vh;
+  padding: 0;
+  border: 1px solid var(--border-dark);
+  border-radius: 6px;
+  background: var(--iron);
+  color: var(--concrete);
+  overflow: hidden;
+}
+
+.zg-lightbox::backdrop { background: rgba(8, 10, 13, .82); }
+
+.zg-lightbox__img {
+  display: block;
   width: 100%;
-  height: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  max-height: 72vh;
+  object-fit: contain;
+  background: #14171b;
+}
+
+.zg-lightbox__bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+}
+
+.zg-lightbox__caption {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--body-muted);
+  margin: 0;
+}
+
+.zg-lightbox__count {
+  font: 600 11px 'IBM Plex Mono', monospace;
+  letter-spacing: .1em;
+  color: var(--guild-pink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.zg-lightbox__btn {
+  flex: none;
+  width: 34px; height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border-dark);
+  background: transparent;
+  color: var(--concrete);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  transition: border-color .25s, color .25s;
+}
+
+.zg-lightbox__btn:hover { border-color: var(--guild-pink); color: var(--guild-pink); }
+.zg-lightbox__btn[hidden] { display: none; }
+
+@media (max-width: 768px) {
+  .zg-projects { padding: 4px 20px 64px; }
+  .zg-project + .zg-project { margin-top: 36px; }
+  .zg-project__head { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .zg-project__meta { white-space: normal; }
+  .zg-project__shot + .zg-project__shot { margin-left: 5px; }
+  .zg-lightbox { width: 94vw; max-width: 94vw; }
+  .zg-lightbox__caption { font-size: 12px; }
 }
 
 @media (max-width: 768px) {

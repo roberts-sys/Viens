@@ -337,6 +337,63 @@
   // measure text. A measured px width was wrong twice over: it is taken before
   // Inter swaps in over the fallback font, and it does not follow the type
   // dropping from 56px/700 to 33px/800 under the 768px breakpoint.
+  // Project photos open in a modal that pages within its own set. <dialog>
+  // carries the focus trap, Escape and background-inert for free, which a
+  // hand-rolled overlay would all have to reimplement.
+  function initLightbox() {
+    var dlg = document.querySelector('[data-lightbox]');
+    if (!dlg || !dlg.showModal) return;
+
+    var img = dlg.querySelector('[data-lightbox-img]');
+    var cap = dlg.querySelector('[data-lightbox-caption]');
+    var count = dlg.querySelector('[data-lightbox-count]');
+    var prev = dlg.querySelector('[data-lightbox-prev]');
+    var next = dlg.querySelector('[data-lightbox-next]');
+    var shots = [];
+    var i = 0;
+    var opener = null;
+
+    function show() {
+      var im = shots[i].querySelector('img');
+      img.src = im.currentSrc || im.src;
+      img.alt = im.alt;
+      cap.textContent = im.alt;
+      count.textContent = (i + 1) + ' / ' + shots.length;
+      // a single-photo set has nothing to page to
+      prev.hidden = next.hidden = shots.length < 2;
+    }
+
+    function step(d) {
+      i = (i + d + shots.length) % shots.length;
+      show();
+    }
+
+    document.addEventListener('click', function (e) {
+      var shot = e.target.closest('.zg-project__shot');
+      if (shot) {
+        shots = Array.prototype.slice.call(
+          shot.parentNode.querySelectorAll('.zg-project__shot'));
+        i = shots.indexOf(shot);
+        opener = shot;
+        show();
+        dlg.showModal();
+        return;
+      }
+      if (!dlg.open) return;
+      if (e.target.closest('[data-lightbox-prev]')) step(-1);
+      else if (e.target.closest('[data-lightbox-next]')) step(1);
+      else if (e.target.closest('[data-lightbox-close]') || e.target === dlg) dlg.close();
+    });
+
+    dlg.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    });
+
+    // send focus back where it came from, or the page loses its place
+    dlg.addEventListener('close', function () { if (opener) opener.focus(); });
+  }
+
   function initMorphs() {
     if (REDUCED_MOTION) return;
     // every stack on the page, not just the first: the hero title and the
@@ -456,6 +513,7 @@
     initNavSheenVisibility();
     initTileGlow();
     initMorphs();
+    initLightbox();
     initFormSubmitSpinner();
   });
 })();
