@@ -359,15 +359,20 @@ textarea:focus-visible {
   filter: blur(0);
 }
 
+/* Same face as .zg-hero__eyebrow above it, so the two uppercase lines under
+   the title read as one typographic block. Mono sets wider than Inter at the
+   same px, so the size drops and max-width grows to keep the line count. */
 .zg-hero__sub {
-  font-size: 18px;
-  line-height: 1.6;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
   color: var(--concrete);
   opacity: .85;
-  max-width: 600px;
+  max-width: 680px;
   margin: 28px 0 0;
   text-transform: uppercase;
-  letter-spacing: .01em;
+  letter-spacing: .04em;
 }
 
 /* ---------- Tiles ---------- */
@@ -1015,7 +1020,7 @@ textarea:focus-visible {
   .zg-hero__eyebrow { font-size: 10px; letter-spacing: .12em; margin-bottom: 18px; }
   .zg-hero__title { font-size: 33px; font-weight: 800; letter-spacing: -.01em; }
   .zg-hero__title br { display: none; }
-  .zg-hero__sub { font-size: 14.5px; margin-top: 18px; }
+  .zg-hero__sub { font-size: 13px; letter-spacing: .02em; margin-top: 18px; }
 
   .zg-tiles { padding: 56px 20px; }
   .zg-tiles__inner { max-width: 340px; }
