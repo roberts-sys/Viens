@@ -2094,8 +2094,9 @@ textarea:focus-visible {
   font-size: 23px;
   line-height: 1.22;
   letter-spacing: .05em;
-  max-width: 19ch;
-  text-wrap: balance;
+  /* the panel is wide enough to hold this on one line; capping the measure
+     only forced an arbitrary break */
+  white-space: nowrap;
 }
 
 /* Each half is its own link: the two styles keep their own pages, so the
@@ -2156,7 +2157,8 @@ textarea:focus-visible {
 @media (max-width: 768px) {
   /* a 2:1 strip in a 340px column left both buildings unreadable */
   .zg-archpanel { aspect-ratio: 4 / 3; }
-  .zg-archpanel .zg-tile__title { font-size: 14px; max-width: 22ch; letter-spacing: .04em; }
+  /* sized so the line still clears 390px without wrapping */
+  .zg-archpanel .zg-tile__title { font-size: 12.5px; letter-spacing: .02em; }
   .zg-archpanel__half { padding-top: 12px; bottom: 80px; }
   .zg-archpanel__tag { font-size: 8px; letter-spacing: .1em; padding: 4px 8px; }
 }
