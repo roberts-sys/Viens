@@ -337,14 +337,39 @@
   // measure text. A measured px width was wrong twice over: it is taken before
   // Inter swaps in over the fallback font, and it does not follow the type
   // dropping from 56px/700 to 33px/800 under the 768px breakpoint.
-  function initHeroMorph() {
+  function initMorphs() {
     if (REDUCED_MOTION) return;
-    var stack = document.querySelector('.zg-morph__stack');
-    if (!stack) return;
+    // every stack on the page, not just the first: the hero title and the
+    // architecture panel each carry one
+    Array.prototype.forEach.call(document.querySelectorAll('.zg-morph__stack'), initMorph);
+  }
+
+  function initMorph(stack) {
     var words = stack.querySelectorAll('.zg-morph__w');
     if (words.length < 2) return;
 
     var i = 0;
+
+    // Opted-in stacks size to the word actually showing, so a short word does
+    // not leave a gap mid-sentence. Measured live rather than baked: the
+    // widths move with the breakpoint and with a late font swap.
+    var fit = stack.hasAttribute('data-fit');
+
+    function fitWidth() {
+      if (!fit) return;
+      stack.style.width = words[i].getBoundingClientRect().width.toFixed(1) + 'px';
+    }
+
+    if (fit) {
+      fitWidth();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitWidth);
+      var rt;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        // remeasure from the natural width, not the one we just pinned
+        rt = setTimeout(function () { stack.style.width = ''; fitWidth(); }, 150);
+      }, { passive: true });
+    }
     var timer = null;
     var onscreen = true;
 
@@ -352,6 +377,7 @@
       words[i].classList.remove('is-on');
       i = (i + 1) % words.length;
       words[i].classList.add('is-on');
+      fitWidth();
     }
 
     function sync() {
@@ -425,7 +451,7 @@
     initWorldMapPing();
     initNavSheenVisibility();
     initTileGlow();
-    initHeroMorph();
+    initMorphs();
     initFormSubmitSpinner();
   });
 })();

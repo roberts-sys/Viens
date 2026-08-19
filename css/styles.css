@@ -328,34 +328,51 @@ textarea:focus-visible {
   text-transform: uppercase;
 }
 
-.zg-hero__title mark {
+/* the morph is a <mark>; strip the browser highlight wherever it is used */
+.zg-morph {
   background: none;
   color: inherit;
 }
 
-/* Word-cycling accent, cycled by initHeroMorph() in js/main.js. Every word is
+/* Word-cycling accent, cycled by initMorphs() in js/main.js. Every word is
    laid into the same grid cell, so the box is intrinsically as wide as the
    longest one at whatever size the type happens to be -- no measured px width
-   to go stale across the 768px breakpoint or a late font swap. */
-.zg-hero__title .zg-morph__stack {
+   to go stale across the 768px breakpoint or a late font swap.
+   Not scoped to the hero: the architecture panel uses the same component. */
+.zg-morph__stack {
   display: inline-grid;
   justify-items: center;
 }
 
-.zg-hero__title .zg-morph__w {
+/* Mid-sentence the fixed slot shows: every word shorter than the longest one
+   leaves a hole on both sides of it. Opting in makes initMorph() drive the
+   width off the live word, so the tail of the sentence closes up behind it.
+   The hero doesn't opt in -- its morph ends the line, so it has nothing to
+   close up, and it keeps the intrinsic sizing its comment above argues for. */
+.zg-morph__stack[data-fit] {
+  justify-items: start;
+  transition: width .42s var(--ease-standard);
+}
+
+.zg-morph__w {
   grid-area: 1 / 1;
   white-space: nowrap;
   opacity: 0;
-  /* 6px, not more: .zg-line clips at overflow:hidden and a wider blur shows the cut */
+  /* 6px, not more: .zg-line and .zg-tile both clip at overflow:hidden,
+     and a wider blur shows the cut */
   filter: blur(6px);
   transition: opacity .42s ease, filter .42s ease;
 }
 
 /* The markup ships .is-on on the first word, so it stands still without JS */
-.zg-hero__title .zg-morph__w.is-on {
+.zg-morph__w.is-on {
   opacity: 1;
   filter: blur(0);
 }
+
+/* The hero cycles whole phrases rather than single words, so they have to be
+   allowed to break; the nowrap above suits the short words the panel cycles. */
+.zg-hero__title .zg-morph__w { white-space: normal; }
 
 /* ---------- Tiles ---------- */
 
@@ -2091,11 +2108,12 @@ textarea:focus-visible {
 }
 
 .zg-archpanel .zg-tile__title {
-  font-size: 23px;
+  /* 21px is set by the English line, which runs longer than the Latvian:
+     at 23px it overshot the caption by ~49px. Sized so the widest morph
+     state of either language holds one line. */
+  font-size: 21px;
   line-height: 1.22;
-  letter-spacing: .05em;
-  /* the panel is wide enough to hold this on one line; capping the measure
-     only forced an arbitrary break */
+  letter-spacing: .045em;
   white-space: nowrap;
 }
 
@@ -2157,8 +2175,10 @@ textarea:focus-visible {
 @media (max-width: 768px) {
   /* a 2:1 strip in a 340px column left both buildings unreadable */
   .zg-archpanel { aspect-ratio: 4 / 3; }
-  /* sized so the line still clears 390px without wrapping */
-  .zg-archpanel .zg-tile__title { font-size: 12.5px; letter-spacing: .02em; }
+  /* A ~50-character title cannot hold one line on a 390px phone at any
+     readable size -- one line there would mean 10px type -- so it wraps
+     here and keeps its size instead. */
+  .zg-archpanel .zg-tile__title { font-size: 13px; letter-spacing: .02em; white-space: normal; }
   .zg-archpanel__half { padding-top: 12px; bottom: 80px; }
   .zg-archpanel__tag { font-size: 8px; letter-spacing: .1em; padding: 4px 8px; }
 }
