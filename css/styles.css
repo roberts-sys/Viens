@@ -2041,3 +2041,94 @@ textarea:focus-visible {
   .zg-step { grid-template-columns: 32px 1fr; gap: 14px; padding: 18px 0; }
   .zg-photoslot__hint { font-size: 9px; }
 }
+
+/* ---------- Architecture panel (merged gothic + greek tile) ---------- */
+
+/* One panel where two tiles used to be: gothic holds the left, greek the
+   right, and they cross-fade through the middle -- no seam line, no gap.
+   The mask sits on the layer while the hover zoom sits on the image inside
+   it. Masking the transformed element instead drags the blend sideways as it
+   scales, which pulls the seam off-centre. */
+.zg-archpanel {
+  grid-column: 1 / -1;
+  aspect-ratio: 2 / 1;
+}
+
+.zg-archpanel__layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.zg-archpanel__layer--greek {
+  -webkit-mask-image: linear-gradient(90deg, transparent 28%, #000 72%);
+  mask-image: linear-gradient(90deg, transparent 28%, #000 72%);
+}
+
+.zg-archpanel .zg-tile__title {
+  font-size: 26px;
+  line-height: 1.15;
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+/* Each half is its own link: the two styles keep their own pages, so the
+   merged panel must still offer both destinations. */
+.zg-archpanel__half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 22px;
+  text-decoration: none;
+}
+
+.zg-archpanel__half--left { left: 0; }
+.zg-archpanel__half--right { right: 0; }
+
+.zg-archpanel__tag {
+  font: 600 10px 'IBM Plex Mono', monospace;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(20, 22, 26, .55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(231, 184, 196, .45);
+}
+
+@media (hover: hover) {
+  .zg-archpanel__layer { transition: filter .4s var(--ease-standard); }
+
+  .zg-archpanel__tag {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .3s var(--ease-standard), transform .3s var(--ease-standard);
+  }
+
+  .zg-archpanel__half:hover .zg-archpanel__tag,
+  .zg-archpanel__half:focus-visible .zg-archpanel__tag {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* lift only the side being pointed at, so it is obvious which page a click
+     would open while the panel still reads as one image */
+  .zg-archpanel:has(.zg-archpanel__half--left:hover) .zg-archpanel__layer--gothic,
+  .zg-archpanel:has(.zg-archpanel__half--right:hover) .zg-archpanel__layer--greek {
+    filter: brightness(1.12);
+  }
+}
+
+@media (max-width: 768px) {
+  .zg-archpanel .zg-tile__title { font-size: 15px; max-width: 20ch; }
+  /* no hover on touch, so both destinations stay labelled */
+  .zg-archpanel__half { padding-top: 12px; }
+  .zg-archpanel__tag { font-size: 8px; letter-spacing: .1em; padding: 4px 8px; }
+}
