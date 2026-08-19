@@ -511,11 +511,18 @@ textarea:focus-visible {
 }
 
 .zg-tile__title {
-  font: 700 19px Inter, sans-serif;
+  font: 700 18px Inter, sans-serif;
   color: #fff;
-  margin-top: 3px;
-  text-shadow: -1px -1px 0 var(--footer-muted), 1px -1px 0 var(--footer-muted),
-    -1px 1px 0 var(--footer-muted), 1px 1px 0 var(--footer-muted);
+  margin-top: 5px;
+  /* caps need the tracking opened up, and lose the descender rhythm that
+     keeps mixed case legible, so the size comes down a touch to compensate */
+  text-transform: uppercase;
+  letter-spacing: .045em;
+  line-height: 1.2;
+  /* A 1px grey outline haloes the letterforms once the type is set in caps.
+     A dark drop shadow buys the same legibility over a bright photograph
+     without fringing the strokes. */
+  text-shadow: 0 1px 2px rgba(10, 12, 15, .55), 0 2px 14px rgba(10, 12, 15, .45);
 }
 
 .zg-tile__rule {
@@ -1041,7 +1048,9 @@ textarea:focus-visible {
   .zg-tile__caption { padding: 12px; transform: none; transition: none; }
   .zg-tile:hover .zg-tile__caption { transform: none; }
   .zg-tile__eyebrow { font-size: 8px; letter-spacing: .06em; color: var(--body-muted); }
-  .zg-tile__title { font-size: 13px; margin-top: 2px; }
+  /* 'Elektroinstalācija' is one unbreakable word: in caps it has to fit the
+     155px tile on its own, which sets the ceiling for this size */
+  .zg-tile__title { font-size: 10.5px; margin-top: 3px; letter-spacing: .015em; }
   .zg-tile__rule { width: 22px; margin-top: 6px; }
 
   .zg-band__text { padding: 48px 20px; }
@@ -2100,9 +2109,10 @@ textarea:focus-visible {
 }
 
 .zg-archpanel .zg-tile__title {
-  font-size: 26px;
-  line-height: 1.15;
-  max-width: 16ch;
+  font-size: 23px;
+  line-height: 1.22;
+  letter-spacing: .05em;
+  max-width: 19ch;
   text-wrap: balance;
 }
 
@@ -2164,7 +2174,7 @@ textarea:focus-visible {
 @media (max-width: 768px) {
   /* a 2:1 strip in a 340px column left both buildings unreadable */
   .zg-archpanel { aspect-ratio: 4 / 3; }
-  .zg-archpanel .zg-tile__title { font-size: 15px; max-width: 20ch; }
+  .zg-archpanel .zg-tile__title { font-size: 14px; max-width: 22ch; letter-spacing: .04em; }
   .zg-archpanel__half { padding-top: 12px; bottom: 80px; }
   .zg-archpanel__tag { font-size: 8px; letter-spacing: .1em; padding: 4px 8px; }
 }
