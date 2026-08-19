@@ -284,11 +284,11 @@ textarea:focus-visible {
 }
 
 .zg-hero__eyebrow {
-  font: 600 12px 'IBM Plex Mono', monospace;
+  font: 600 14px 'IBM Plex Mono', monospace;
   color: var(--concrete);
-  letter-spacing: .16em;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
   opacity: .85;
   animation: zg-rise .9s var(--ease-standard) .25s both;
 }
@@ -296,8 +296,6 @@ textarea:focus-visible {
 @keyframes zg-rise {
   from { opacity: 0; transform: translateY(16px); }
 }
-
-.zg-hero__sub { animation: zg-rise .9s var(--ease-standard) .72s both; }
 
 /* kinetic title: each line slides out of an invisible mask */
 .zg-hero__title .zg-line {
@@ -321,9 +319,9 @@ textarea:focus-visible {
 }
 
 .zg-hero__title {
-  font-size: 56px;
+  font-size: 68px;
   font-weight: 700;
-  line-height: 1.08;
+  line-height: 1.06;
   letter-spacing: -0.02em;
   color: #fff;
   margin: 0;
@@ -357,22 +355,6 @@ textarea:focus-visible {
 .zg-hero__title .zg-morph__w.is-on {
   opacity: 1;
   filter: blur(0);
-}
-
-/* Same face as .zg-hero__eyebrow above it, so the two uppercase lines under
-   the title read as one typographic block. Mono sets wider than Inter at the
-   same px, so the size drops and max-width grows to keep the line count. */
-.zg-hero__sub {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.65;
-  color: var(--concrete);
-  opacity: .85;
-  max-width: 680px;
-  margin: 28px 0 0;
-  text-transform: uppercase;
-  letter-spacing: .04em;
 }
 
 /* ---------- Tiles ---------- */
@@ -1018,10 +1000,10 @@ textarea:focus-visible {
   }
   .zg-grain { opacity: .4; }
   .zg-hero__content { padding: 0 24px; }
-  .zg-hero__eyebrow { font-size: 10px; letter-spacing: .12em; margin-bottom: 18px; }
-  .zg-hero__title { font-size: 33px; font-weight: 800; letter-spacing: -.01em; }
+  /* held to one line at 390px: any larger and the rule wraps after a separator */
+  .zg-hero__eyebrow { font-size: 10.5px; letter-spacing: .12em; margin-bottom: 22px; }
+  .zg-hero__title { font-size: 39px; font-weight: 800; letter-spacing: -.01em; }
   .zg-hero__title br { display: none; }
-  .zg-hero__sub { font-size: 13px; letter-spacing: .02em; margin-top: 18px; }
 
   .zg-tiles { padding: 56px 20px; }
   .zg-tiles__inner { max-width: 340px; }
