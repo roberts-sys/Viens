@@ -552,7 +552,7 @@ textarea:focus-visible {
     opacity: 0;
     transition: opacity .4s;
     pointer-events: none;
-    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--glow-color, rgba(255, 255, 255, .35)), transparent 70%);
+    background: radial-gradient(156px circle at var(--mx, 50%) var(--my, 50%), var(--glow-color, rgba(255, 255, 255, .35)), transparent 70%);
     /* screen only ever lightens -- overlay crushes the darker photos */
     mix-blend-mode: screen;
   }
