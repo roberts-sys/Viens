@@ -148,6 +148,8 @@ textarea:focus-visible {
   text-decoration: none;
   cursor: pointer;
   display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: .02em;
   transition: transform .3s var(--ease-standard), color .3s;
 }
 
@@ -364,6 +366,8 @@ textarea:focus-visible {
   opacity: .85;
   max-width: 600px;
   margin: 28px 0 0;
+  text-transform: uppercase;
+  letter-spacing: .01em;
 }
 
 /* ---------- Tiles ---------- */
@@ -445,6 +449,23 @@ textarea:focus-visible {
 
 .zg-tile--grayscale15 .zg-tile__img { filter: grayscale(15%); }
 .zg-tile--grayscale30 .zg-tile__img { filter: grayscale(30%); }
+
+.zg-tile--wide {
+  grid-column: 1 / -1;
+  aspect-ratio: 21 / 9;
+}
+
+.zg-tile__img--placeholder {
+  background:
+    linear-gradient(135deg, rgba(13, 71, 161, .5), rgba(13, 71, 161, .15) 65%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .05) 0 2px, transparent 2px 16px),
+    var(--asphalt, #1a1e24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zg-tile__img--placeholder svg { opacity: .3; }
 
 .zg-tile:hover .zg-tile__img {
   transform: scale(1.1);
