@@ -465,10 +465,8 @@ textarea:focus-visible {
   inset: 0;
   opacity: 0;
   transition: opacity .4s;
+  background: linear-gradient(to top, rgba(231, 184, 196, .55), rgba(231, 184, 196, 0) 60%);
 }
-
-.zg-tile--blue .zg-tile__wash { background: linear-gradient(to top, rgba(13, 71, 161, .55), rgba(13, 71, 161, 0) 60%); }
-.zg-tile--pink .zg-tile__wash { background: linear-gradient(to top, rgba(231, 184, 196, .55), rgba(231, 184, 196, 0) 60%); }
 
 .zg-tile:hover .zg-tile__wash { opacity: 1; }
 
@@ -489,10 +487,8 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(231, 184, 196, .9);
 }
-
-.zg-tile--blue .zg-tile__badge { background: rgba(13, 71, 161, .9); }
-.zg-tile--pink .zg-tile__badge { background: rgba(231, 184, 196, .9); }
 
 .zg-tile__caption {
   position: absolute;
@@ -527,6 +523,7 @@ textarea:focus-visible {
   width: 34px; height: 3px;
   margin-top: 9px;
   border-radius: 2px;
+  background: var(--guild-pink);
 }
 
 @media (hover: hover) {
@@ -543,8 +540,6 @@ textarea:focus-visible {
   }
 }
 
-.zg-tile--blue .zg-tile__rule { background: var(--blueprint); }
-.zg-tile--pink .zg-tile__rule { background: var(--guild-pink); }
 
 /* mobile-only legibility scrim + no-hover-wash variant, engaged via media query */
 .zg-tile__mobile-scrim { display: none; }
@@ -564,8 +559,7 @@ textarea:focus-visible {
 
   .zg-tile:hover .zg-tile__glow { opacity: 1; }
 
-  .zg-tile--blue { --glow-color: rgba(91, 155, 224, .6); }
-  .zg-tile--pink { --glow-color: rgba(231, 184, 196, .6); }
+  .zg-tile { --glow-color: rgba(231, 184, 196, .6); }
 }
 
 /* ---------- Video + What We Do band ---------- */
@@ -1049,7 +1043,6 @@ textarea:focus-visible {
   .zg-tile__eyebrow { font-size: 8px; letter-spacing: .06em; color: var(--body-muted); }
   .zg-tile__title { font-size: 13px; margin-top: 2px; }
   .zg-tile__rule { width: 22px; margin-top: 6px; }
-  .zg-tile--blue .zg-tile__rule { background: var(--blueprint-light); }
 
   .zg-band__text { padding: 48px 20px; }
   .zg-band__fade-top { height: 60px; filter: blur(4px); }
