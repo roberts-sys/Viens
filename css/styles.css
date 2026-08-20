@@ -2096,17 +2096,6 @@ textarea:focus-visible {
 .zg-project__shot:nth-child(3) { z-index: 2; }
 .zg-project__shot:nth-child(4) { z-index: 1; }
 
-.zg-project__n {
-  position: absolute;
-  left: 8px; top: 8px;
-  font: 600 10px 'IBM Plex Mono', monospace;
-  letter-spacing: .1em;
-  color: #1A1E24;
-  background: rgba(231, 184, 196, .92);
-  padding: 3px 7px;
-  border-radius: 999px;
-}
-
 /* No hover to open with, so the set is already open. Nothing is reachable
    only by pointer. */
 .zg-project__shot + .zg-project__shot { margin-left: 8px; }
