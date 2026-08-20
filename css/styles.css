@@ -728,7 +728,6 @@ textarea:focus-visible {
 .zg-map__seam-grain,
 .zg-contact__seam-grain,
 .zg-contact__grain,
-.zg-map__wave,
 .zg-map__grain,
 .zg-grain {
   transform: translateZ(0);
@@ -754,25 +753,6 @@ textarea:focus-visible {
   mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
   pointer-events: none;
   z-index: 3;
-}
-
-.zg-map__wave {
-  position: absolute;
-  left: 0; right: 0; bottom: 5px;
-  height: 160px;
-  background: linear-gradient(180deg, rgba(91, 155, 224, .1) 0%, rgba(35, 74, 102, .12) 55%, rgba(26, 30, 36, .5) 100%);
-  clip-path: polygon(0.0% 84.5%, 4.2% 78.1%, 8.3% 68.6%, 12.5% 57.3%, 16.7% 45.7%, 20.8% 35.3%, 25.0% 27.6%, 29.2% 23.5%, 33.3% 23.6%, 37.5% 27.8%, 41.7% 35.7%, 45.8% 46.1%, 50.0% 57.7%, 54.2% 69.0%, 58.3% 78.4%, 62.5% 84.7%, 66.7% 87.0%, 70.8% 85.1%, 75.0% 79.2%, 79.2% 70.1%, 83.3% 58.9%, 87.5% 47.3%, 91.7% 36.7%, 95.8% 28.5%, 100.0% 23.8%, 100% 100%, 0% 100%);
-  filter: blur(22px);
-  opacity: .5;
-}
-
-.zg-map__wave--2 {
-  bottom: 0;
-  height: 220px;
-  background: linear-gradient(180deg, rgba(26, 30, 36, 0) 0%, rgba(26, 30, 36, .2) 40%, rgba(26, 30, 36, .55) 65%, var(--iron) 90%);
-  clip-path: polygon(0.0% 57.1%, 4.2% 47.0%, 8.3% 36.9%, 12.5% 27.9%, 16.7% 20.7%, 20.8% 15.9%, 25.0% 14.0%, 29.2% 15.2%, 33.3% 19.3%, 37.5% 26.0%, 41.7% 34.7%, 45.8% 44.6%, 50.0% 54.8%, 54.2% 64.3%, 58.3% 72.5%, 62.5% 78.4%, 66.7% 81.5%, 70.8% 81.7%, 75.0% 78.8%, 79.2% 73.2%, 83.3% 65.3%, 87.5% 55.8%, 91.7% 45.6%, 95.8% 35.7%, 100.0% 26.8%, 100% 100%, 0% 100%);
-  filter: blur(32px);
-  opacity: .7;
 }
 
 .zg-map__grain {
@@ -1107,8 +1087,6 @@ textarea:focus-visible {
   .zg-band__row p { font-size: 13px; line-height: 1.6; }
 
   .zg-map { padding: 56px 20px 140px; }
-  .zg-map__wave { bottom: 3px; height: 100px; filter: blur(14px); }
-  .zg-map__wave--2 { height: 150px; filter: blur(20px); }
   .zg-map__seam, .zg-map__seam-grain { height: 180px; }
   .zg-contact__seam-grain { height: 150px; }
   .zg-map__eyebrow { font-size: 10.5px; letter-spacing: .12em; margin-bottom: 8px; }
@@ -1986,45 +1964,6 @@ textarea:focus-visible {
 
 /* ---------- Terraces page ---------- */
 
-/* Stand-in for photography that hasn't been shot yet. Deliberately reads as a
-   reserved slot rather than a broken image: hatched ground, dashed accent
-   border, and a mono line naming the shot that belongs there.
-   To fill one: replace the whole element with
-   <div class="zg-card__img" style="background-image:url('assets/your.webp')">
-   (keeping the .zg-card__icon inside), or for a gallery slot swap it for
-   <img class="zg-gallery__img" src="assets/your.webp" alt="…">. */
-.zg-photoslot {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  text-align: center;
-  background-color: #1E232B;
-  background-image: repeating-linear-gradient(135deg, rgba(231, 184, 196, .055) 0 1px, transparent 1px 13px);
-  border: 1px dashed rgba(231, 184, 196, .3);
-}
-
-.zg-photoslot svg { opacity: .45; }
-
-.zg-photoslot__hint {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--body-muted);
-  opacity: .8;
-  max-width: 30ch;
-  line-height: 1.5;
-}
-
-/* the card grid draws its own seams, so a slot inside a card drops the dashes
-   on the edges the grid already rules */
-.zg-card__img.zg-photoslot { border-width: 0 0 1px 0; }
-
 .zg-section-eyebrow {
   display: block;
   font-family: 'IBM Plex Mono', monospace;
@@ -2674,7 +2613,6 @@ textarea:focus-visible {
   .zg-section-head { font-size: 20px; }
   .zg-gallery { grid-template-columns: 1fr 1fr; gap: 8px; }
   .zg-step { grid-template-columns: 32px 1fr; gap: 14px; padding: 18px 0; }
-  .zg-photoslot__hint { font-size: 9px; }
 }
 
 /* ---------- Architecture panel (merged gothic + greek tile) ---------- */
