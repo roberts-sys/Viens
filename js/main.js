@@ -371,8 +371,12 @@
     document.addEventListener('click', function (e) {
       var shot = e.target.closest('.zg-project__shot');
       if (shot) {
+        /* Scope to the strip, not the parent node: in the feature layout the
+           rail's photos sit inside .zg-project__rail, so parentNode would page
+           only those three and drop the hero. */
+        var scope = shot.closest('.zg-project__strip') || shot.parentNode;
         shots = Array.prototype.slice.call(
-          shot.parentNode.querySelectorAll('.zg-project__shot'));
+          scope.querySelectorAll('.zg-project__shot'));
         i = shots.indexOf(shot);
         opener = shot;
         show();
@@ -392,6 +396,18 @@
 
     // send focus back where it came from, or the page loses its place
     dlg.addEventListener('close', function () { if (opener) opener.focus(); });
+  }
+
+  /* Before/after wipe. One custom property per input event -- a range fires at
+     most once per pointer sample, so there is nothing here worth throttling. */
+  function initCompare() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-compare]'), function (r) {
+      var box = r.closest('.zg-compare');
+      if (!box) return;
+      function set() { box.style.setProperty('--pos', r.value + '%'); }
+      r.addEventListener('input', set);
+      set();
+    });
   }
 
   function initMorphs() {
@@ -514,6 +530,7 @@
     initTileGlow();
     initMorphs();
     initLightbox();
+    initCompare();
     initFormSubmitSpinner();
   });
 })();

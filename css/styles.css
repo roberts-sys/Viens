@@ -2069,14 +2069,29 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
-.zg-project__strip { display: flex; }
+/* --arsum is the sum of the set's photo ratios, written into the markup.
+   Deriving the row's height from it pins the height: opening the set then
+   changes only how the width is shared out, never how tall the row is.
+   Without this the negative margin resolves against the container, a closed
+   row measures ~130px taller than an open one, and everything below it jumps
+   up the moment the cursor lands -- tolerable once, not down a page of eight.
+   The 8px gaps are deliberately left out of the ratio: that makes a closed
+   shot crop about 2% horizontally, which is invisible, and only happens while
+   it is overlapped by the next photo anyway. */
+.zg-project__strip {
+  display: flex;
+  --gap: 8px;
+  --ol: var(--gap);
+  aspect-ratio: var(--arsum);
+  align-items: stretch;
+}
 
 /* Width tracks the photo's own aspect ratio and the height falls out equal
    across the row, so portrait and landscape sit together without either
    being cropped -- the reason this is a strip and not a fixed-box fan. */
 .zg-project__shot {
   flex: var(--ar) 1 0;
-  aspect-ratio: var(--ar);
+  height: 100%;
   min-width: 0;
   position: relative;
   overflow: hidden;
@@ -2098,27 +2113,298 @@ textarea:focus-visible {
 
 /* No hover to open with, so the set is already open. Nothing is reachable
    only by pointer. */
-.zg-project__shot + .zg-project__shot { margin-left: 8px; }
+.zg-project__shot + .zg-project__shot { margin-left: var(--ol); }
 
 @media (hover: hover) {
   /* Closed at rest, opens under the cursor. The overlap has to be deep: the
      strip redistributes its width as the photos separate, so a shallow
      overlap makes them merely shrink and the set never looks shut. At -15%
      each photo shows a ~140px edge closed and stands ~294px open. */
-  .zg-project__shot + .zg-project__shot { margin-left: -15%; }
+  .zg-project__strip { --ol: -15%; }
 
   .zg-project__shot {
     transition: margin-left .55s var(--ease-standard), filter .3s var(--ease-standard);
     box-shadow: -16px 0 30px rgba(10, 12, 15, .55);
   }
 
-  .zg-project__strip:hover .zg-project__shot + .zg-project__shot { margin-left: 8px; }
+  .zg-project__strip:hover .zg-project__shot + .zg-project__shot { margin-left: var(--gap); }
+
+  /* A keyboard user must be able to open the set too, or half of every strip
+     is reachable only by pointer. Same declaration, so --seq inherits it. */
+  .zg-project__strip:focus-within .zg-project__shot + .zg-project__shot { margin-left: var(--gap); }
   .zg-project__shot:hover { filter: brightness(1.09); }
   .zg-project__shot:focus-visible { filter: brightness(1.09); }
 }
 
 /* A single-photo project has nothing to open, so it just stands as one frame. */
 .zg-project--single .zg-project__shot { box-shadow: none; }
+
+/* ---------- Project tiers ---------- */
+
+/* Eight sets stacked as eight identical rows read as one long undifferentiated
+   list. Grouping them into three labelled tiers -- finished work, how it is
+   built, adjacent trades -- means a visitor who reads only the three headings
+   already knows the range. The rule and the 96px above it carry the
+   separation, so rows inside a tier can sit closer than they used to. */
+.zg-project + .zg-project,
+.zg-projects__duo + .zg-project,
+.zg-project + .zg-projects__duo,
+.zg-projects__duo + .zg-projects__duo { margin-top: 36px; }
+
+.zg-projectgroup + .zg-projectgroup {
+  margin-top: 96px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-dark);
+}
+
+.zg-projectgroup__head { margin-bottom: 26px; }
+
+.zg-projectgroup__lede {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--body-muted);
+}
+
+/* Marks a set that is not a terrace, so the odd one out reads as deliberate
+   rather than as a filing mistake. */
+.zg-project__tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--guild-pink);
+  background: rgba(231, 184, 196, .10);
+  border: 1px solid rgba(231, 184, 196, .28);
+  border-radius: 2px;
+  padding: 4px 7px;
+  margin-right: 10px;
+  flex: none;
+}
+
+/* English strings run longer than Latvian; once a tag shares the line the
+   head has to be allowed to wrap rather than squeeze the name. */
+.zg-project__head { flex-wrap: wrap; }
+.zg-project__name { margin-right: auto; }
+
+/* ---------- Two projects side by side ---------- */
+
+/* 32px between two different projects against 8px between photos of one set:
+   the gap is what says these are separate jobs. */
+.zg-projects__duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.zg-projects__duo .zg-project + .zg-project { margin-top: 0; }
+
+/* The adjacent-trades cell is much shorter than the before/after beside it.
+   The tier's explanation lives here rather than above the row, which both
+   fills the column and puts the sentence next to the thing it describes. */
+.zg-projects__aside .zg-projectgroup__lede { margin: 20px 0 0; }
+.zg-projects__duo .zg-project__meta { white-space: normal; }
+
+.zg-projects__note {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid var(--border-dark);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, .02);
+}
+
+.zg-projects__note p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--body-muted);
+}
+
+/* ---------- Feature set: rail of stages, then the result ---------- */
+
+/* The best photograph on the page should not be one of four equal thumbnails
+   behind a hover. Three context frames run down the left in build order and
+   the finished shot takes the right at full size. DOM order stays
+   chronological, so tab order, lightbox paging and reading order all agree.
+   23.5% lands the rail's stacked heights within ~4px of the hero's -- close
+   enough that align-items: start never shows a ragged edge. */
+.zg-project--feature .zg-project__strip {
+  display: grid;
+  grid-template-columns: var(--railw, 23.5%) 1fr;
+  gap: var(--gap);
+  align-items: start;
+}
+
+.zg-project--feature .zg-project__strip { aspect-ratio: auto; }
+.zg-project--feature .zg-project__shot {
+  box-shadow: none;
+  height: auto;
+  aspect-ratio: var(--ar);
+}
+.zg-project--feature .zg-project__shot + .zg-project__shot { margin-left: 0; }
+
+.zg-project__rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.zg-project__rail .zg-project__shot { flex: none; width: 100%; }
+
+/* ---------- Sequence sets: the same job, seen from inside ---------- */
+
+/* Three build sequences in a row would read as three duplicates at hero size.
+   Pinned to 200px they read as contact sheets under one heading -- which is
+   the actual claim: every job looks like this from the inside.
+   Fixing the height also kills a reflow the fluid variant has: with
+   flex-basis 0 the negative margin resolves against the container, so a
+   closed row measures ~130px taller than an open one and everything below it
+   jumps up the moment the cursor lands. Harmless once; not harmless three
+   times in a column. Here only the strip's width changes. */
+.zg-project--seq { max-width: 880px; }
+
+/* ---------- Before and after ---------- */
+
+/* A two-photo repair is not a set to fan open -- the whole point is seeing the
+   same frame twice. A draggable wipe puts both states in one box. Both halves
+   stay .zg-project__shot buttons inside the strip, so the existing lightbox
+   picks them up untouched and pages 1/2 with no special case. clip-path clips
+   hit-testing as well as pixels, so the visible half is the clickable half. */
+.zg-compare {
+  position: relative;
+  --pos: 50%;
+  border: 1px solid var(--border-dark);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.zg-compare .zg-project__shot {
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  margin-left: 0;
+}
+
+/* The fan's nth-child stacking ladder puts the first photo on top, which here
+   is the "after" -- it would bury the before half, the seam and both labels.
+   Restate the order for the compare; same specificity, later in the file. */
+.zg-compare .zg-compare__after { z-index: 1; }
+.zg-compare .zg-compare__before { z-index: 2; }
+.zg-compare .zg-compare__seam { z-index: 3; }
+.zg-compare .zg-compare__label { z-index: 4; }
+.zg-compare .zg-compare__range { z-index: 5; }
+
+.zg-compare__after { flex: 1 1 0; height: 100%; }
+
+.zg-compare__before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  flex: none;
+  height: auto;
+  clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+}
+
+.zg-compare__seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  left: var(--pos);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--guild-pink);
+  opacity: .9;
+  pointer-events: none;
+}
+
+.zg-compare__seam::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid var(--guild-pink);
+  border-radius: 50%;
+  background: rgba(26, 30, 36, .75);
+}
+
+.zg-compare__label {
+  position: absolute;
+  bottom: 10px;
+  z-index: 3;
+  pointer-events: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  background: rgba(26, 30, 36, .78);
+  padding: 5px 8px;
+  border-radius: 2px;
+}
+
+.zg-compare__label--before { left: 10px; }
+.zg-compare__label--after { right: 10px; }
+
+/* A full-width transparent range, but only a 48px band down the middle takes
+   pointer events -- everywhere else the photo underneath still opens the
+   lightbox. Gives touch a native drag and the keyboard arrows/Home/End free. */
+.zg-compare__range {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 48px;
+  margin-top: -24px;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.zg-compare__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.zg-compare__range::-moz-range-thumb {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.zg-compare__range::-webkit-slider-runnable-track { background: transparent; }
+.zg-compare__range::-moz-range-track { background: transparent; }
+.zg-compare__range:focus-visible { outline: 2px solid var(--blueprint-light); outline-offset: 3px; }
+
+/* The global reduced-motion block only clamps transition-duration, which
+   leaves these strips sitting closed and snapping open -- half the photos
+   hidden behind other photos with no visible affordance. Render every set
+   already open instead. The wipe has nothing to disable: it is direct
+   manipulation, not an animation. */
+@media (prefers-reduced-motion: reduce) {
+  .zg-project__strip { --ol: var(--gap); }
+  .zg-project__shot { box-shadow: none; }
+}
 
 /* ---------- Lightbox ---------- */
 
@@ -2189,10 +2475,56 @@ textarea:focus-visible {
 
 @media (max-width: 768px) {
   .zg-projects { padding: 4px 20px 64px; }
-  .zg-project + .zg-project { margin-top: 36px; }
+  .zg-project + .zg-project,
+  .zg-projects__duo + .zg-project,
+  .zg-project + .zg-projects__duo,
+  .zg-projects__duo + .zg-projects__duo { margin-top: 28px; }
   .zg-project__head { flex-direction: column; align-items: flex-start; gap: 4px; }
   .zg-project__meta { white-space: normal; }
+  .zg-project__tag { margin: 0 0 2px; }
+
+  .zg-projectgroup + .zg-projectgroup { margin-top: 64px; padding-top: 32px; }
+  .zg-projects__duo { grid-template-columns: 1fr; gap: 28px; }
+  .zg-projects__note { padding: 20px; }
+
+  /* Four photos across 335px is 82px each -- too small to be worth tapping.
+     Scroll them instead. Focusing a button scrolls it into view natively, so
+     nothing goes out of reach. */
+  .zg-project__strip {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .zg-project__strip::-webkit-scrollbar { display: none; }
+  .zg-project__strip { aspect-ratio: auto; }
+  .zg-project__shot {
+    flex: 0 0 74%;
+    height: auto;
+    aspect-ratio: var(--ar);
+    scroll-snap-align: start;
+  }
   .zg-project__shot + .zg-project__shot { margin-left: 5px; }
+
+  /* These two are composed layouts, not rails -- they must not scroll. */
+  .zg-project--feature .zg-project__strip,
+  .zg-compare {
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  .zg-project--feature .zg-project__strip {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--gap);
+  }
+  .zg-project__rail { flex-direction: row; }
+  .zg-project__rail .zg-project__shot { flex: var(--ar) 1 0; width: auto; }
+  .zg-project--single .zg-project__shot { flex: 1 1 auto; }
+  .zg-compare .zg-project__shot { flex: 1 1 0; }
+  .zg-compare__before { flex: none; }
+
+  .zg-project--seq { max-width: none; }
+
   .zg-lightbox { width: 94vw; max-width: 94vw; }
   .zg-lightbox__caption { font-size: 12px; }
 }
