@@ -2151,6 +2151,10 @@ textarea:focus-visible {
 .zg-project + .zg-projects__duo,
 .zg-projects__duo + .zg-projects__duo { margin-top: 36px; }
 
+/* The feature set ends on a caption under a full-width print. At 36px the next
+   set's title crowded it, and the two read as one run-on block. */
+.zg-project--feature + .zg-project { margin-top: 72px; }
+
 .zg-projectgroup + .zg-projectgroup {
   margin-top: 96px;
   padding-top: 40px;
@@ -2344,7 +2348,12 @@ textarea:focus-visible {
    closed row measures ~130px taller than an open one and everything below it
    jumps up the moment the cursor lands. Harmless once; not harmless three
    times in a column. Here only the strip's width changes. */
-.zg-project--seq { max-width: 880px; }
+/* Was 880px, which put these at 212px tall. That was defensible when the
+   feature set was ~510px, but beside a 675px print they read as an afterthought
+   rather than as evidence. At full width each frame is ~300px instead of ~220px
+   and the tier holds its own. The height is pinned by --arsum on the strip, so
+   widening cannot bring back the open/closed reflow the comment above guards. */
+.zg-project--seq { max-width: none; }
 
 /* ---------- Adjacent trades ---------- */
 
