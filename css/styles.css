@@ -2193,37 +2193,38 @@ textarea:focus-visible {
 
 /* 32px between two different projects against 8px between photos of one set:
    the gap is what says these are separate jobs. */
+/* Not 1fr 1fr: the note beside the photo is three lines long, so an equal
+   split left half the row empty. Weighting it to the photo puts the text at a
+   comfortable ~46 characters and gives the picture the space it earns. */
 .zg-projects__duo {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 40px;
   align-items: start;
 }
 
 .zg-projects__duo .zg-project + .zg-project { margin-top: 0; }
 
-/* The adjacent-trades cell is much shorter than the before/after beside it.
-   The tier's explanation lives here rather than above the row, which both
-   fills the column and puts the sentence next to the thing it describes. */
-.zg-projects__aside .zg-projectgroup__lede { margin: 20px 0 0; }
 .zg-projects__duo .zg-project__meta { white-space: normal; }
 
+/* This sat beside a single photo as a bordered panel with the text pinned to
+   the bottom, which framed a large empty rectangle -- the box read as missing
+   content rather than as a caption. Dropping the frame and centring against
+   the photo turns it into a margin note, which is what it always was. */
 .zg-projects__note {
-  align-self: stretch;
+  align-self: center;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 18px;
-  padding: 24px;
-  border: 1px solid var(--border-dark);
-  border-radius: 3px;
-  background: rgba(255, 255, 255, .02);
+  padding: 4px 0 4px 22px;
+  border-left: 2px solid rgba(231, 184, 196, .32);
 }
 
 .zg-projects__note p {
   margin: 0;
-  font-size: 14.5px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.7;
   color: var(--body-muted);
 }
 
@@ -2270,6 +2271,17 @@ textarea:focus-visible {
    jumps up the moment the cursor lands. Harmless once; not harmless three
    times in a column. Here only the strip's width changes. */
 .zg-project--seq { max-width: 880px; }
+
+/* ---------- Adjacent trades ---------- */
+
+/* The facade set is the only one that is not a terrace, so it gets the widest
+   strip on the page rather than half of a two-column row: at 1200px its three
+   frames land 415/233/553px, all big enough to read, where sharing the row
+   with the before/after squeezed the portrait frame to 113px.
+   The before/after is a single 4:3 frame, so full width would make it 900px
+   tall and push everything else off the screen. 720px caps it at 540px. */
+.zg-project--wide { max-width: none; }
+.zg-project--compare { max-width: 720px; }
 
 /* ---------- Before and after ---------- */
 
@@ -2485,7 +2497,7 @@ textarea:focus-visible {
 
   .zg-projectgroup + .zg-projectgroup { margin-top: 64px; padding-top: 32px; }
   .zg-projects__duo { grid-template-columns: 1fr; gap: 28px; }
-  .zg-projects__note { padding: 20px; }
+  .zg-projects__note { padding: 0 0 0 18px; }
 
   /* Four photos across 335px is 82px each -- too small to be worth tapping.
      Scroll them instead. Focusing a button scrolls it into view natively, so
