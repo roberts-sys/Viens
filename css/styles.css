@@ -2262,35 +2262,38 @@ textarea:focus-visible {
   box-shadow: none;
 }
 
+/* Was a 2x2 with the fourth cell left empty for a caption. On the page that
+   quarter read as a missing photo, not as a drawing's title block -- a void
+   with two lines at the bottom of it. One row of three removes the cell
+   entirely. Each column is weighted by its own aspect ratio, so the three
+   frames come out the same height with no cropping: at 1200px they land
+   296 / 493 / 394px wide and 222px tall. */
 .zg-project__build {
   display: grid;
-  grid-template-columns: 1.3333fr 2.2222fr;
-  grid-template-areas:
-    "s1    s2"
-    "plate s3";
+  grid-template-columns: 1.3333fr 2.2222fr 1.7766fr;
   gap: var(--gap);
   align-items: start;   /* stretch would beat aspect-ratio and crop */
 }
 
-.zg-project__shot--s1 { grid-area: s1; }
-.zg-project__shot--s2 { grid-area: s2; }
-.zg-project__shot--s3 { grid-area: s3; }
-
-/* A rule across the empty quarter turns it into a drawing's title block
-   rather than a hole in the grid -- the same distinction that made the
-   lakeside note work once its frame came off. Bottom-aligned so it sits on
-   photo 3's baseline. */
 .zg-project__plate--build {
-  grid-area: plate;
-  align-self: end;
+  grid-column: 1 / -1;
   padding-top: 12px;
-  padding-bottom: 2px;
   border-top: 1px solid var(--border-dark);
 }
 
 /* 44px against the 8px inside the sheet. The gap carries the whole separation
    -- a rule here would read as two projects, which it is not. */
 .zg-project__print { margin-top: 44px; }
+/* The three-across strip is weighted by aspect ratio, so the narrowest column
+   shrinks fastest: by 900px it is 218px wide and 148px tall, which is a
+   thumbnail rather than a photograph. Stack before that rather than after --
+   the page's own breakpoint is 768px, and the band between the two is where
+   this row would have been at its least legible. */
+@media (max-width: 900px) {
+  .zg-project__build { grid-template-columns: 1fr; gap: 6px; }
+  .zg-project__plate--build { margin-top: 10px; }
+}
+
 
 .zg-project__shot--hero { box-shadow: 0 30px 70px -24px rgba(0, 0, 0, .78); }
 
@@ -2610,12 +2613,6 @@ textarea:focus-visible {
   /* Not column-reverse as the rail was: that put the hero first visually while
      tab order still ran 1-2-3-4. One column, in build order, hero last. */
   .zg-project--feature .zg-project__strip { display: block; }
-  .zg-project__build {
-    grid-template-columns: 1fr;
-    grid-template-areas: "s1" "s2" "s3" "plate";
-    gap: 6px;
-  }
-  .zg-project__plate--build { align-self: start; margin-top: 10px; }
   .zg-project__print { margin-top: 26px; }
   .zg-project__shot--hero { box-shadow: 0 14px 34px -16px rgba(0, 0, 0, .8); }
   .zg-project--single .zg-project__shot { flex: 1 1 auto; }
