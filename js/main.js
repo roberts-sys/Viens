@@ -372,8 +372,10 @@
       var shot = e.target.closest('.zg-project__shot');
       if (shot) {
         /* Scope to the strip, not the parent node: in the feature layout the
-           rail's photos sit inside .zg-project__rail, so parentNode would page
-           only those three and drop the hero. */
+           build frames sit inside .zg-project__build and the hero inside
+           .zg-project__print, so parentNode would page only one of the two.
+           querySelectorAll is a descendant query in document order, so the
+           nesting costs nothing here. */
         var scope = shot.closest('.zg-project__strip') || shot.parentNode;
         shots = Array.prototype.slice.call(
           scope.querySelectorAll('.zg-project__shot'));

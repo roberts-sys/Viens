@@ -2228,37 +2228,111 @@ textarea:focus-visible {
   color: var(--body-muted);
 }
 
-/* ---------- Feature set: rail of stages, then the result ---------- */
+/* ---------- Feature set: worksheet, then print ---------- */
 
-/* The best photograph on the page should not be one of four equal thumbnails
-   behind a hover. Three context frames run down the left in build order and
-   the finished shot takes the right at full size. DOM order stays
-   chronological, so tab order, lightbox paging and reading order all agree.
-   23.5% lands the rail's stacked heights within ~4px of the hero's -- close
-   enough that align-items: start never shows a ragged edge. */
+/* The best photograph on the page should not be one of four thumbnails behind
+   a hover, and the three build frames should not be 265px slivers in a rail.
+   Photos 1 and 2 are 1.3333 and 2.2222, which sum-share a row at exactly
+   37.5%/62.5% -- so `1.3333fr 2.2222fr` makes their baselines flush by
+   construction rather than by a measured percentage. Photo 3 inherits column
+   two's edges, the caption bottom-aligns in the empty quarter, and then the
+   sheet stops and the finished shot breaks the full width on its own line.
+   The width jump from 745px to 1200px is what says "finished". */
 .zg-project--feature .zg-project__strip {
-  display: grid;
-  grid-template-columns: var(--railw, 23.5%) 1fr;
-  gap: var(--gap);
-  align-items: start;
+  display: block;
+  aspect-ratio: auto;
+  overflow: visible;
 }
 
-.zg-project--feature .zg-project__strip { aspect-ratio: auto; }
+/* Undo the fan. The hover block sets margin-left: var(--ol) (-15%) on every
+   adjacent shot plus a -16px side shadow, and the base rule stretches shots to
+   the strip height -- all three are wrong for a grid, so all three are reset
+   unconditionally and the grid never sees them. If a property is ever added to
+   the `@media (hover: hover)` strip block, check it against this reset. */
 .zg-project--feature .zg-project__shot {
-  box-shadow: none;
+  display: block;
+  width: 100%;
   height: auto;
+  margin-left: 0;
   aspect-ratio: var(--ar);
+  box-shadow: none;
 }
-.zg-project--feature .zg-project__shot + .zg-project__shot { margin-left: 0; }
 
-.zg-project__rail {
-  display: flex;
-  flex-direction: column;
+.zg-project__build {
+  display: grid;
+  grid-template-columns: 1.3333fr 2.2222fr;
+  grid-template-areas:
+    "s1    s2"
+    "plate s3";
   gap: var(--gap);
+  align-items: start;   /* stretch would beat aspect-ratio and crop */
+}
+
+.zg-project__shot--s1 { grid-area: s1; }
+.zg-project__shot--s2 { grid-area: s2; }
+.zg-project__shot--s3 { grid-area: s3; }
+
+/* A rule across the empty quarter turns it into a drawing's title block
+   rather than a hole in the grid -- the same distinction that made the
+   lakeside note work once its frame came off. Bottom-aligned so it sits on
+   photo 3's baseline. */
+.zg-project__plate--build {
+  grid-area: plate;
+  align-self: end;
+  padding-top: 12px;
+  padding-bottom: 2px;
+  border-top: 1px solid var(--border-dark);
+}
+
+/* 44px against the 8px inside the sheet. The gap carries the whole separation
+   -- a rule here would read as two projects, which it is not. */
+.zg-project__print { margin-top: 44px; }
+
+.zg-project__shot--hero { box-shadow: 0 30px 70px -24px rgba(0, 0, 0, .78); }
+
+.zg-project__plate {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
   min-width: 0;
 }
 
-.zg-project__rail .zg-project__shot { flex: none; width: 100%; }
+.zg-project__plate-k {
+  flex: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--guild-pink);
+}
+
+.zg-project__plate p {
+  margin: 0;
+  max-width: 46ch;
+  max-height: 100%;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--body-muted);
+}
+
+.zg-project__plate--print { margin-top: 10px; }
+
+/* Every frame is fully visible at rest here, so hover is decoration, not an
+   affordance -- and it touches no layout property, so nothing below can shift.
+   The global reduced-motion block clamps the duration and the end state is
+   identical, which is why this set needs no reduced-motion rule of its own. */
+@media (hover: hover) {
+  .zg-project--feature .zg-project__shot {
+    transition: filter .3s var(--ease-standard), border-color .3s var(--ease-standard);
+  }
+  .zg-project--feature .zg-project__shot:hover,
+  .zg-project--feature .zg-project__shot:focus-visible {
+    filter: brightness(1.08);
+    border-color: rgba(255, 255, 255, .30);
+  }
+}
 
 /* ---------- Sequence sets: the same job, seen from inside ---------- */
 
@@ -2524,13 +2598,17 @@ textarea:focus-visible {
     overflow-x: visible;
     scroll-snap-type: none;
   }
-  .zg-project--feature .zg-project__strip {
-    display: flex;
-    flex-direction: column-reverse;
-    gap: var(--gap);
+  /* Not column-reverse as the rail was: that put the hero first visually while
+     tab order still ran 1-2-3-4. One column, in build order, hero last. */
+  .zg-project--feature .zg-project__strip { display: block; }
+  .zg-project__build {
+    grid-template-columns: 1fr;
+    grid-template-areas: "s1" "s2" "s3" "plate";
+    gap: 6px;
   }
-  .zg-project__rail { flex-direction: row; }
-  .zg-project__rail .zg-project__shot { flex: var(--ar) 1 0; width: auto; }
+  .zg-project__plate--build { align-self: start; margin-top: 10px; }
+  .zg-project__print { margin-top: 26px; }
+  .zg-project__shot--hero { box-shadow: 0 14px 34px -16px rgba(0, 0, 0, .8); }
   .zg-project--single .zg-project__shot { flex: 1 1 auto; }
   .zg-compare .zg-project__shot { flex: 1 1 0; }
   .zg-compare__before { flex: none; }
