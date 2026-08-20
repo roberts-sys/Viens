@@ -689,19 +689,35 @@ textarea:focus-visible {
 
 /* ---------- World map ---------- */
 
+/* Deep bottom padding is load-bearing, not decoration: the seam below is
+   300px tall and sits over everything, so with the old symmetric 100px it
+   covered the bottom 190px of the map and washed Africa and Australia out.
+   240px leaves the ramp somewhere to happen that is not on top of the
+   artwork. Shorten one and you must shorten the other. */
 .zg-map {
   position: relative;
-  padding: 100px 56px;
+  padding: 100px 56px 240px;
   background: linear-gradient(160deg, #081620 0%, #0c2e3f 55%, #164a63 100%);
   text-align: center;
   overflow: hidden;
 }
 
+/* 160px with three stops put most of the colour change into a short band, so
+   the eye caught it as an edge. 300px with stops following an ease curve
+   spreads the same change over nearly twice the distance and never moves fast
+   enough in any 20px to register as a line. */
 .zg-map__seam {
   position: absolute;
   left: 0; right: 0; bottom: -1px;
-  height: 160px;
-  background: linear-gradient(180deg, transparent 0%, rgba(26, 30, 36, .5) 40%, var(--iron) 92%);
+  height: 300px;
+  background: linear-gradient(180deg,
+    rgba(26, 30, 36, 0) 0%,
+    rgba(26, 30, 36, .05) 18%,
+    rgba(26, 30, 36, .17) 34%,
+    rgba(26, 30, 36, .38) 50%,
+    rgba(26, 30, 36, .63) 66%,
+    rgba(26, 30, 36, .85) 82%,
+    var(--iron) 100%);
   pointer-events: none;
   z-index: 2;
 }
@@ -722,16 +738,20 @@ textarea:focus-visible {
 .zg-map__seam-grain {
   position: absolute;
   left: 0; right: 0; bottom: -1px;
-  height: 160px;
+  height: 300px;
   background-image:
     radial-gradient(rgba(255, 255, 255, .9) 1.5px, transparent 1.5px),
     radial-gradient(rgba(0, 0, 0, .6) 1.5px, transparent 1.5px);
   background-size: 4px 4px, 4px 4px;
   background-position: 0 0, 2px 2px;
-  opacity: .6;
+  /* This dither exists to break banding in the ramp, but at .6 with a 20%
+     fade-in its own onset was the sharpest edge in the section -- a texture
+     boundary is as visible as a colour one. Quieter, and fading in across
+     more than half its height, it does the anti-banding job invisibly. */
+  opacity: .28;
   mix-blend-mode: overlay;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 20%, black 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, black 20%, black 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
   pointer-events: none;
   z-index: 3;
 }
@@ -840,10 +860,20 @@ textarea:focus-visible {
 
 /* ---------- Contact ---------- */
 
+/* The map above ends on --iron, so this must start on --iron across its whole
+   width. The 160deg gradient alone did not: at the top-right corner it was
+   already stepping toward #26221c, which drew a colour break along the join.
+   Holding iron flat for the first 20% fixes it, and the warm tone still
+   arrives by the time the heading does. Do not add a blue tint here to
+   "continue" the panel above -- it re-brightens below a boundary the map has
+   already faded through, which reads as a second seam. */
 .zg-contact {
   position: relative;
   padding: 130px 56px;
-  background: linear-gradient(160deg, var(--iron) 0%, #26221c 85%);
+  background: linear-gradient(160deg,
+    var(--iron) 0%,
+    var(--iron) 20%,
+    #26221c 92%);
   text-align: center;
   overflow: hidden;
   scroll-margin-top: 20px;
@@ -852,16 +882,18 @@ textarea:focus-visible {
 .zg-contact__seam-grain {
   position: absolute;
   left: 0; right: 0; top: -1px;
-  height: 160px;
+  height: 260px;
   background-image:
     radial-gradient(rgba(255, 255, 255, .9) 1.5px, transparent 1.5px),
     radial-gradient(rgba(0, 0, 0, .6) 1.5px, transparent 1.5px);
   background-size: 4px 4px, 4px 4px;
   background-position: 0 0, 2px 2px;
-  opacity: .6;
+  /* Started opaque at y=0, which drew the dot texture as a hard rule right on
+     the section join -- the most visible part of the whole seam. */
+  opacity: .28;
   mix-blend-mode: overlay;
-  -webkit-mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 100%);
-  mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 45%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, black 45%, transparent 100%);
   pointer-events: none;
   z-index: 1;
 }
@@ -1074,11 +1106,11 @@ textarea:focus-visible {
   .zg-band__row h3 { font-size: 15.5px; margin-bottom: 6px; }
   .zg-band__row p { font-size: 13px; line-height: 1.6; }
 
-  .zg-map { padding: 56px 20px; }
+  .zg-map { padding: 56px 20px 140px; }
   .zg-map__wave { bottom: 3px; height: 100px; filter: blur(14px); }
   .zg-map__wave--2 { height: 150px; filter: blur(20px); }
-  .zg-map__seam, .zg-map__seam-grain { height: 100px; }
-  .zg-contact__seam-grain { height: 100px; }
+  .zg-map__seam, .zg-map__seam-grain { height: 180px; }
+  .zg-contact__seam-grain { height: 150px; }
   .zg-map__eyebrow { font-size: 10.5px; letter-spacing: .12em; margin-bottom: 8px; }
   .zg-map__frame { max-width: none; }
   .zg-worldmap { position: relative; z-index: 1; }
@@ -1594,27 +1626,39 @@ textarea:focus-visible {
   transform: translateX(101%);
 }
 
-/* map: one radar sweep across the frame when it reveals */
+/* One light sweep across the whole blue panel when the map reveals.
+   It used to live inside .zg-map__frame, which is capped at 900px and clips
+   its overflow -- so the glare was a bright rectangle the width of the map
+   rather than light crossing the section, and the frame's edges read as the
+   edges of the effect. Moved out to a sibling of the frame: .zg-map is the
+   containing block and already clips, so the sweep spans the full panel and
+   the `~` combinator still drives it off the frame's reveal class without
+   touching the JS.
+   Wider stops and a blur because the travel is now ~1900px instead of 900:
+   the same band across a bigger surface reads as a hard-edged bar. */
 .zg-map__scan {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: linear-gradient(90deg,
-    transparent 30%,
-    rgba(90, 170, 215, .10) 45%,
-    rgba(140, 205, 240, .22) 50%,
-    rgba(90, 170, 215, .10) 55%,
-    transparent 70%);
-  transform: translateX(-105%);
+  background: linear-gradient(100deg,
+    transparent 24%,
+    rgba(90, 170, 215, .05) 36%,
+    rgba(125, 195, 235, .13) 45%,
+    rgba(165, 220, 250, .19) 50%,
+    rgba(125, 195, 235, .13) 55%,
+    rgba(90, 170, 215, .05) 64%,
+    transparent 76%);
+  filter: blur(9px);
+  transform: translateX(-118%);
   pointer-events: none;
 }
 
-.js .zg-map__frame.is-inview .zg-map__scan {
-  animation: zg-scan 1.7s cubic-bezier(.55, .06, .35, .95) .25s both;
+.js .zg-map__frame.is-inview ~ .zg-map__scan {
+  animation: zg-scan 3s cubic-bezier(.42, 0, .32, 1) .2s both;
 }
 
 @keyframes zg-scan {
-  to { transform: translateX(105%); }
+  to { transform: translateX(118%); }
 }
 
 /* arrows nudge on hover */
