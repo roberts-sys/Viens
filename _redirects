@@ -5,3 +5,28 @@
 # The ! is required: Netlify serves a matching static file in preference to
 # a redirect rule unless the status is forced, and app/index.html is real.
 /app/*    /404.html    404!
+
+# Canonical URLs are extensionless (see the rel=canonical in every page head).
+# Netlify already *serves* /electro-installation for electro-installation.html,
+# so without these rules both spellings return 200 and Google files the clean
+# one as a duplicate. These make the .html spelling a 301 to the canonical one.
+# The ! is required for the same reason as the rule above: the .html file is
+# real, and Netlify prefers a matching static file over an unforced redirect.
+#
+# thanks.html is deliberately absent: it is the Netlify form POST target
+# (action="/thanks.html") and is noindex, so it needs no clean URL and
+# redirecting it would add a hop to every form submission.
+/index.html                       /                             301!
+/terraces.html                    /terraces                     301!
+/electro-installation.html        /electro-installation         301!
+/gothic-modern-architecture.html  /gothic-modern-architecture   301!
+/classical-precision.html         /classical-precision          301!
+/architects.html                  /architects                   301!
+/privacy.html                     /privacy                      301!
+/en/index.html                    /en/                          301!
+/en/terraces.html                 /en/terraces                  301!
+/en/electro-installation.html     /en/electro-installation      301!
+/en/gothic-modern-architecture.html /en/gothic-modern-architecture 301!
+/en/classical-precision.html      /en/classical-precision       301!
+/en/architects.html               /en/architects                301!
+/en/privacy.html                  /en/privacy                   301!

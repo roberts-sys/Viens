@@ -45,7 +45,25 @@ Touch all of these, or the site ends up inconsistent:
 - `<title>`, `og:title`, `twitter:title`, `og:url`, `canonical`, and the
   three `hreflang` links in the page's own head
 - `sitemap.xml` — one `<url>` block per language
+- `_redirects` — one forced `301!` per language, sending the `.html` spelling
+  to the clean URL (see "URLs" below)
 - any assets the page alone used (delete them; nothing else references them)
+
+## URLs
+
+Pages are served and linked **without the `.html` extension**: `/architects`,
+`/en/architects`, and `/` + `/en/` for the two homepages. That clean form is
+what `canonical`, `og:url`, `hreflang` and `sitemap.xml` all name, and it is
+the only form internal links should use.
+
+The `.html` files still exist — they are what Netlify serves — but each one
+has a forced `301!` in `_redirects` pointing at its clean URL, so only one
+spelling ever returns 200. Link to pages **root-absolutely** (`/en/privacy`,
+not `privacy.html`): a relative href resolves against the extensionless URL
+and silently escapes its language directory.
+
+`thanks.html` is the exception and keeps its extension — it is the Netlify
+form POST target and is `noindex`.
 
 ## Assets
 
