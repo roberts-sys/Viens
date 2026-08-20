@@ -749,14 +749,25 @@ textarea:focus-visible {
      more than half its height, it does the anti-banding job invisibly. */
   opacity: .28;
   mix-blend-mode: overlay;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, black 55%, transparent 100%);
   pointer-events: none;
   z-index: 3;
 }
 
+/* The colour ramp across the map/contact join is already continuous -- what
+   was still drawing a line there is TEXTURE. This grain runs at .5 over the
+   whole panel and used to stop dead at the section edge, while the contact
+   section's own grain starts at .2 with a different pattern: measured, the
+   row-to-row grain amplitude fell from 4.00 to 0.10 across a single pixel row.
+   The eye reads that as an edge even when every colour matches.
+   Fixed by making every texture layer on both sides reach zero AT the join and
+   ramp back up away from it, so the grain cross-fades instead of switching.
+   If you change one of these four masks, change its opposite number too. */
 .zg-map__grain {
   opacity: .5;
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 340px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 340px), transparent 100%);
 }
 
 .zg-map__eyebrow {
@@ -881,6 +892,8 @@ textarea:focus-visible {
 .zg-contact__grain {
   position: absolute;
   inset: 0;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 340px);
+  mask-image: linear-gradient(180deg, transparent 0, #000 340px);
   background-image:
     radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
     radial-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px);
@@ -1088,6 +1101,15 @@ textarea:focus-visible {
 
   .zg-map { padding: 56px 20px 140px; }
   .zg-map__seam, .zg-map__seam-grain { height: 180px; }
+  /* the panel is only ~400px tall here, so a 340px grain fade would eat it */
+  .zg-map__grain {
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 170px), transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 170px), transparent 100%);
+  }
+  .zg-contact__grain {
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 170px);
+    mask-image: linear-gradient(180deg, transparent 0, #000 170px);
+  }
   .zg-contact__seam-grain { height: 150px; }
   .zg-map__eyebrow { font-size: 10.5px; letter-spacing: .12em; margin-bottom: 8px; }
   .zg-map__frame { max-width: none; }
