@@ -596,7 +596,12 @@ textarea:focus-visible {
   border-right: 1px solid var(--border-dark);
 }
 
-.zg-band__video-cell video {
+/* Two stills cross-faded on hover, where two stock clips used to be. The cell
+   ranges from 1.41 down to 0.83 as the band narrows, so both photos are
+   cropped by object-fit rather than sized -- keep the subject centred in any
+   replacement. Pure CSS: the swap needs no JS now that there is nothing to
+   load or play, and the pair costs ~0.4MB against the 4.3MB of video. */
+.zg-band__pic {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -605,8 +610,14 @@ textarea:focus-visible {
   transition: opacity .8s ease-in-out;
 }
 
-.zg-band__video-cell video.is-hidden { opacity: 0; }
-.zg-band__video-cell video.is-visible { opacity: 1; }
+.zg-band__pic--b { opacity: 0; }
+
+/* Guarded: without it a touch tap latches the second photo and never releases.
+   Nothing here is information, so touch simply keeps the first frame. */
+@media (hover: hover) {
+  .zg-band__video-cell:hover .zg-band__pic--a { opacity: 0; }
+  .zg-band__video-cell:hover .zg-band__pic--b { opacity: 1; }
+}
 
 .zg-band__fade-top,
 .zg-band__fade-bottom {
