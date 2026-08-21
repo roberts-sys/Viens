@@ -216,36 +216,61 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
-/* The hero is deliberately a single composited layer. The colour grade and the
-   blueprint tint are baked into excavator-mountain.webp and hero-ambient.*, so
-   nothing has to be filtered or blended over the playing video each frame —
-   that alone took the hero from ~18fps to ~47fps while scrolling. */
+/* The hero is deliberately a single composited layer. The colour grade is baked
+   into the hero-*.webp stills, so nothing has to be filtered or blended over the
+   moving layer each frame — that alone took the hero from ~18fps to ~47fps while
+   scrolling. Six stills replaced the ambient video: same slow push-in read, a
+   third of the bytes, and no decode cost on low-end phones. */
 .zg-hero__parallax {
   position: absolute;
   inset: -14% 0 0 0;
   will-change: transform;
 }
 
-.zg-hero__bg {
+.zg-hero__slides {
   position: absolute;
   inset: 0;
-  background-image: url('../assets/excavator-mountain.webp');
-  background-size: cover;
-  background-position: center 30%;
 }
 
-.zg-hero__video {
+.zg-hero__slide {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 30%;
+  object-position: center 42%;
   opacity: 0;
-  transition: opacity 1.4s var(--ease-standard);
+  transform: scale(1.02);
+  transition: opacity 1.6s var(--ease-standard);
+  will-change: opacity, transform;
 }
 
-.zg-hero__video.is-playing { opacity: 1; }
+/* .is-leaving carries the SAME animation-name as .is-active, so swapping the
+   class lets the outgoing frame keep drifting while it fades rather than
+   snapping back to its start scale mid-crossfade. Duration is paired with
+   HOLD + FADE in initHeroSlides(). */
+.zg-hero__slide.is-active,
+.zg-hero__slide.is-leaving {
+  animation: zg-heropush 7.6s linear both;
+}
+
+.zg-hero__slide.is-active { opacity: 1; }
+
+@keyframes zg-heropush {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.13); }
+}
+
+/* The push-in is the whole point of the hero, but it is also the one animation
+   on the page that never stops. Reduced motion gets a still first frame — the
+   global .01ms override would otherwise leave it parked at the end scale. */
+@media (prefers-reduced-motion: reduce) {
+  .zg-hero__slide.is-active,
+  .zg-hero__slide.is-leaving {
+    animation: none !important;
+    transform: scale(1.02) !important;
+  }
+}
 
 .zg-hero__scrim {
   position: absolute;

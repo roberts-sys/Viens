@@ -2,33 +2,6 @@
   'use strict';
 
   var REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var VIDEOS_ENABLED = !REDUCED_MOTION;
-
-  function loadVideoSrc(v) {
-    if (v.getAttribute('src')) return;
-    var small = window.matchMedia('(max-width: 768px)').matches && v.dataset.srcSm;
-    var src = small || v.dataset.src;
-    if (src) v.src = src;
-  }
-
-  function initLazyVideos() {
-    var vids = document.querySelectorAll('video[data-src]:not([data-video]):not([data-hero-video])');
-    if (!vids.length || !VIDEOS_ENABLED) return;
-
-    vids.forEach(function (v) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            loadVideoSrc(v);
-            var p = v.play();
-            if (p && p.catch) p.catch(function () {});
-            io.disconnect();
-          }
-        });
-      }, { threshold: 0.25 });
-      io.observe(v);
-    });
-  }
 
   function initCrosshairScene() {
     if (window.__ZG_MOTION__) return; // GSAP layer drives this scene
@@ -64,55 +37,55 @@
     }, { passive: true });
   }
 
-  function initHeroVideo() {
-    var v = document.querySelector('[data-hero-video]');
-    if (!v || !VIDEOS_ENABLED) return;
-    if (v.dataset.srcWebm) {
-      // Phones get a 960-wide cut: a third of the bytes and far cheaper to decode
-      var small = window.matchMedia('(max-width: 768px)').matches && v.dataset.srcSm;
-      // <source> children so browsers without H.264 fall back to WebM
-      var mp4 = document.createElement('source');
-      mp4.src = small ? v.dataset.srcSm : v.dataset.src;
-      mp4.type = 'video/mp4; codecs="avc1.640028"';
-      var webm = document.createElement('source');
-      webm.src = small ? v.dataset.srcSmWebm : v.dataset.srcWebm;
-      webm.type = 'video/webm; codecs="vp9"';
-      v.appendChild(mp4);
-      v.appendChild(webm);
-    } else {
-      loadVideoSrc(v);
-    }
-    v.addEventListener('canplay', function () {
-      var p = v.play();
-      if (p && p.then) {
-        p.then(function () { v.classList.add('is-playing'); }).catch(function () {});
-      } else {
-        v.classList.add('is-playing');
-      }
-    }, { once: true });
-    v.load();
-  }
+  /* The hero cycles six stills with a slow push-in, the same read as the video
+     it replaces but at a third of the bytes and no decode cost. Only the first
+     frame ships a src; the rest are pulled in one ahead of when they are needed,
+     so first paint pays for one image, not six. */
+  function initHeroSlides() {
+    var wrap = document.querySelector('[data-hero-slides]');
+    if (!wrap) return;
+    var slides = wrap.querySelectorAll('.zg-hero__slide');
+    if (slides.length < 2 || REDUCED_MOTION) return;
 
-  // Decoding a video that has scrolled out of view costs frames for nothing.
-  function initVideoVisibility() {
-    if (!('IntersectionObserver' in window)) return;
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        var v = entry.target;
-        if (entry.isIntersecting) {
-          if (v.dataset.wasPlaying === '1') {
-            var p = v.play();
-            if (p && p.catch) p.catch(function () {});
-          }
-        } else if (!v.paused) {
-          v.dataset.wasPlaying = '1';
-          v.pause();
-        }
-      });
-    }, { threshold: 0.01 });
-    document.querySelectorAll('video').forEach(function (v) {
-      v.addEventListener('play', function () { v.dataset.wasPlaying = '1'; });
-      io.observe(v);
+    var HOLD = 6000;   // must match the .is-active push-in duration in the CSS
+    var FADE = 1600;   // must match the .zg-hero__slide opacity transition
+    var i = 0;
+    var timer = null;
+
+    function ensure(n) {
+      var s = slides[n % slides.length];
+      if (s && !s.getAttribute('src') && s.dataset.src) s.setAttribute('src', s.dataset.src);
+    }
+
+    function step() {
+      var cur = slides[i];
+      i = (i + 1) % slides.length;
+      var next = slides[i];
+      // is-leaving keeps the same animation-name, so the outgoing frame carries on
+      // drifting while it fades instead of snapping back to its start scale.
+      cur.classList.remove('is-active');
+      cur.classList.add('is-leaving');
+      next.classList.add('is-active');
+      window.setTimeout(function () { cur.classList.remove('is-leaving'); }, FADE);
+      ensure(i + 1);
+    }
+
+    function start() {
+      if (timer) return;
+      timer = window.setInterval(step, HOLD);
+    }
+    function stop() {
+      if (!timer) return;
+      window.clearInterval(timer);
+      timer = null;
+    }
+
+    ensure(1);
+    start();
+
+    // A hero cycling behind a hidden tab is pure wasted decode work.
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else start();
     });
   }
 
@@ -429,9 +402,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    initLazyVideos();
-    initHeroVideo();
-    initVideoVisibility();
+    initHeroSlides();
     initCrosshairScene();
     initHeroParallax();
     initNavReturn();
