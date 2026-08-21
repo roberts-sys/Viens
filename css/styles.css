@@ -34,10 +34,14 @@ body {
 
 img, video { max-width: 100%; display: block; }
 
+/* Every heading on the site is set in capitals. Individual heading rules below
+   no longer repeat text-transform -- this is the one place that decides it. */
+h1, h2, h3, h4, h5, h6 { text-transform: uppercase; }
+
 a { color: var(--blueprint); }
 a:hover { color: #0A3A7A; }
 
-.mono { font-family: 'IBM Plex Mono', monospace; }
+.mono { font-family: 'Inter', system-ui, sans-serif; }
 
 a:focus-visible,
 button:focus-visible,
@@ -130,7 +134,7 @@ textarea:focus-visible {
 }
 
 .zg-nav__wordmark {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
 }
@@ -326,7 +330,7 @@ textarea:focus-visible {
    mid-luminance: on a bright photo it has nowhere to get contrast from. Near
    white borrows its contrast from the same direction as the title. */
 .zg-hero__eyebrow {
-  font: 600 14px 'IBM Plex Mono', monospace;
+  font: 600 14px 'Inter', system-ui, sans-serif;
   color: #E9EBEE;
   letter-spacing: .18em;
   text-transform: uppercase;
@@ -556,7 +560,7 @@ textarea:focus-visible {
 .zg-tile:hover .zg-tile__caption { transform: translateY(0); }
 
 .zg-tile__eyebrow {
-  font: 600 10px 'IBM Plex Mono', monospace;
+  font: 600 10px 'Inter', system-ui, sans-serif;
   color: var(--concrete);
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -694,7 +698,7 @@ textarea:focus-visible {
 
 .zg-band__eyebrow {
   position: relative;
-  font: 600 12px 'IBM Plex Mono', monospace;
+  font: 600 12px 'Inter', system-ui, sans-serif;
   color: var(--blueprint);
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -825,7 +829,7 @@ textarea:focus-visible {
 
 .zg-map__eyebrow {
   position: relative;
-  font: 600 12px 'IBM Plex Mono', monospace;
+  font: 600 12px 'Inter', system-ui, sans-serif;
   color: #cfe8f3;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -978,7 +982,7 @@ textarea:focus-visible {
 .zg-contact__pill {
   position: relative;
   display: inline-block;
-  font: 600 14px 'IBM Plex Mono', monospace;
+  font: 600 14px 'Inter', system-ui, sans-serif;
   color: var(--guild-pink);
   text-decoration: none;
   letter-spacing: .1em;
@@ -1012,7 +1016,7 @@ textarea:focus-visible {
   justify-content: center;
   gap: 28px;
   margin-top: 36px;
-  font: 500 14px 'IBM Plex Mono', monospace;
+  font: 500 14px 'Inter', system-ui, sans-serif;
   color: var(--body-muted);
   list-style: none;
   padding: 0;
@@ -1293,7 +1297,7 @@ textarea:focus-visible {
 }
 
 .zg-topichero__eyebrow {
-  font: 600 12px 'IBM Plex Mono', monospace;
+  font: 600 12px 'Inter', system-ui, sans-serif;
   color: var(--blueprint-light);
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -1410,7 +1414,7 @@ textarea:focus-visible {
   padding: 28px 56px;
   border-top: 1px solid var(--border-dark);
   background: rgba(255, 255, 255, .02);
-  font: 500 13px 'IBM Plex Mono', monospace;
+  font: 500 13px 'Inter', system-ui, sans-serif;
   color: var(--body-muted);
   list-style: none;
   margin: 0;
@@ -1522,7 +1526,7 @@ textarea:focus-visible {
 }
 
 .zg-refcard-label {
-  font: 600 14px 'IBM Plex Mono', monospace;
+  font: 600 14px 'Inter', system-ui, sans-serif;
   color: var(--guild-pink);
   letter-spacing: .04em;
   margin-bottom: 36px;
@@ -2041,7 +2045,7 @@ textarea:focus-visible {
 
 .zg-section-eyebrow {
   display: block;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: .16em;
@@ -2073,7 +2077,7 @@ textarea:focus-visible {
 }
 
 .zg-step__n {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .08em;
@@ -2118,7 +2122,7 @@ textarea:focus-visible {
 .zg-project__name { font-size: 17px; font-weight: 600; color: #fff; margin: 0; }
 
 .zg-project__meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: .13em;
@@ -2232,7 +2236,7 @@ textarea:focus-visible {
 /* Marks a set that is not a terrace, so the odd one out reads as deliberate
    rather than as a filing mistake. */
 .zg-project__tag {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: .12em;
@@ -2364,7 +2368,7 @@ textarea:focus-visible {
 
 .zg-project__plate-k {
   flex: none;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: .13em;
@@ -2500,7 +2504,7 @@ textarea:focus-visible {
   bottom: 10px;
   z-index: 3;
   pointer-events: none;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: .13em;
@@ -2604,7 +2608,7 @@ textarea:focus-visible {
 }
 
 .zg-lightbox__count {
-  font: 600 11px 'IBM Plex Mono', monospace;
+  font: 600 11px 'Inter', system-ui, sans-serif;
   letter-spacing: .1em;
   color: var(--guild-pink);
   font-variant-numeric: tabular-nums;
@@ -2778,7 +2782,7 @@ textarea:focus-visible {
 .zg-archpanel__half--right { right: 0; }
 
 .zg-archpanel__tag {
-  font: 600 10px 'IBM Plex Mono', monospace;
+  font: 600 10px 'Inter', system-ui, sans-serif;
   letter-spacing: .16em;
   text-transform: uppercase;
   color: #fff;
