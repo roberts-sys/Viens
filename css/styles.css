@@ -2566,7 +2566,14 @@ textarea:focus-visible {
     padding-bottom: 2px;
   }
   .zg-project__strip::-webkit-scrollbar { display: none; }
-  .zg-project__strip { aspect-ratio: auto; }
+  /* aspect-ratio on the shot only decides its height if nothing else does.
+     The base rule's align-items: stretch does, so on a mixed-ratio set every
+     frame took the tallest frame's height and object-fit cropped the rest to
+     match: the pergola's two 4:3 frames and the facade's 16:9 one all rendered
+     at 259x345, the facade losing well over half its width. flex-start hands
+     the height back to aspect-ratio. Rows come out ragged-bottomed, which is
+     correct -- these are photos of different shapes, not a grid. */
+  .zg-project__strip { aspect-ratio: auto; align-items: flex-start; }
   .zg-project__shot {
     flex: 0 0 74%;
     height: auto;
