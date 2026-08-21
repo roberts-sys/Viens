@@ -431,6 +431,20 @@ textarea:focus-visible {
    allowed to break; the nowrap above suits the short words the panel cycles. */
 .zg-hero__title .zg-morph__w { white-space: normal; }
 
+/* A whole phrase needs longer to hand over than the single words the panel
+   cycles, so the hero gets its own, slower pair. Both curves are the tuned
+   .46s/.8s+.1s scaled by the same 1.5x: stretching all three in time leaves
+   the summed-opacity profile identical, so the line still troughs at .87 and
+   peaks at 1.02 and never doubles. Paired with data-interval on the stack. */
+.zg-hero__title .zg-morph__w {
+  transition: opacity .69s cubic-bezier(.4, 0, .7, 1), filter .69s cubic-bezier(.4, 0, .7, 1);
+}
+
+.zg-hero__title .zg-morph__w.is-on {
+  transition: opacity 1.2s cubic-bezier(.22, .61, .24, 1) .15s,
+              filter 1.2s cubic-bezier(.22, .61, .24, 1) .15s;
+}
+
 /* ---------- Tiles ---------- */
 
 .zg-tiles {
