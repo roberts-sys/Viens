@@ -641,16 +641,20 @@ textarea:focus-visible {
 
 /* ---------- Video + What We Do band ---------- */
 
+/* The photo column is the wider one. At an even split the cell went to 960x484
+   on a 1920 screen -- a 2:1 letterbox that cropped the top and bottom off every
+   frame, and the three photos here are the only look at the other two trades on
+   the page. 1.18fr plus a taller floor brings it back to about 3:2. */
 .zg-band {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.18fr 1fr;
   border-top: 1px solid var(--border-dark);
   border-bottom: 1px solid var(--border-dark);
 }
 
 .zg-band__video-cell {
   position: relative;
-  min-height: 480px;
+  min-height: 620px;
   overflow: hidden;
   background: #000;
   border-right: 1px solid var(--border-dark);
@@ -2289,12 +2293,27 @@ textarea:focus-visible {
 
 .zg-projects__duo .zg-project + .zg-project { margin-top: 0; }
 
+/* The lakeside photo and the stairs before/after are both 4:3 and both single
+   frames, so they pair as equal columns rather than photo-plus-margin-note.
+   The note keeps its place under the photo it describes -- it is about
+   founding on a slope, which is what that house is doing. */
+.zg-projects__duo--even { grid-template-columns: 1fr 1fr; }
+
+.zg-projects__col { display: flex; flex-direction: column; gap: 18px; }
+
+/* 720px was a cap for standing alone in a full-width row. In the pair the
+   column already does the capping, and the cap would leave the compare
+   narrower than the photo beside it. */
+.zg-projects__duo--even .zg-project--compare { max-width: none; }
+
 .zg-projects__duo .zg-project__meta { white-space: normal; }
 
 /* This sat beside a single photo as a bordered panel with the text pinned to
    the bottom, which framed a large empty rectangle -- the box read as missing
    content rather than as a caption. Dropping the frame and centring against
    the photo turns it into a margin note, which is what it always was. */
+.zg-projects__col .zg-projects__note { align-self: stretch; }
+
 .zg-projects__note {
   align-self: center;
   display: flex;
