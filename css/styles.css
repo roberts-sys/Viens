@@ -1495,11 +1495,21 @@ textarea:focus-visible {
 
 .zg-card { background: var(--iron); }
 
+/* Was a CSS background, which meant the twenty card photographs across the
+   terraces and electrical pages carried no alt text and did not exist for a
+   screen reader -- the project strips on the same pages use real <img alt>.
+   The slot behaves identically; the photo is just addressable now. */
 .zg-card__img {
   position: relative;
   height: 180px;
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
+}
+
+.zg-card__img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .zg-card__icon {
