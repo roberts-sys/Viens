@@ -89,6 +89,29 @@
     });
   }
 
+  /* The discipline cell advances one frame on every pointer crossing -- in and
+     out both count -- so the three photos rotate through the slot instead of a
+     pair flipping back and forth. Guarded on (hover: hover): a touch tap fires
+     mouseenter and then never fires the matching leave, which would strand the
+     cell a frame in. Touch keeps the first frame, and the cell is display:none
+     below 768px anyway. */
+  function initBandRotate() {
+    if (!window.matchMedia('(hover: hover)').matches) return;
+    var cells = document.querySelectorAll('[data-band-rotate]');
+    Array.prototype.forEach.call(cells, function (cell) {
+      var pics = cell.querySelectorAll('.zg-band__pic');
+      if (pics.length < 2) return;
+      var i = 0;
+      function advance() {
+        pics[i].classList.remove('is-on');
+        i = (i + 1) % pics.length;
+        pics[i].classList.add('is-on');
+      }
+      cell.addEventListener('mouseenter', advance);
+      cell.addEventListener('mouseleave', advance);
+    });
+  }
+
   function initNavReturn() {
     var nav = document.querySelector('.zg-nav');
     if (!nav) return;
@@ -403,6 +426,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initHeroSlides();
+    initBandRotate();
     initCrosshairScene();
     initHeroParallax();
     initNavReturn();

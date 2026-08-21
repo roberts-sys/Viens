@@ -670,14 +670,13 @@ textarea:focus-visible {
   transition: opacity .8s ease-in-out;
 }
 
-.zg-band__pic--b { opacity: 0; }
-
-/* Guarded: without it a touch tap latches the second photo and never releases.
-   Nothing here is information, so touch simply keeps the first frame. */
-@media (hover: hover) {
-  .zg-band__video-cell:hover .zg-band__pic--a { opacity: 0; }
-  .zg-band__video-cell:hover .zg-band__pic--b { opacity: 1; }
-}
+/* Three frames now, one per discipline, advanced by initBandRotate(). Every
+   pointer crossing moves the cell on by one, so the pictures trade places
+   rather than a single pair toggling back and forth. The state lives in a
+   class rather than :hover because :hover can only express two frames.
+   Only .is-on is opaque, so the stack degrades to the first frame with no JS. */
+.zg-band__pic { opacity: 0; }
+.zg-band__pic.is-on { opacity: 1; }
 
 .zg-band__fade-top,
 .zg-band__fade-bottom {
@@ -1115,12 +1114,21 @@ textarea:focus-visible {
   .zg-flag--en__canton { width: 9px; height: 8px; }
 
   .zg-hero { height: 560px; }
+  /* This override replaces the whole background, so it has to restate the
+     centred ellipse or mobile silently loses it -- which is exactly how a
+     bright frame slipped to 3.94:1 here while desktop still measured 6.11:1.
+     Wider and shallower than the desktop one because the column is narrow. */
   .zg-hero__scrim {
-    background: linear-gradient(180deg,
-      rgba(10, 12, 15, .35) 0%,
-      rgba(15, 17, 21, .6) 42%,
-      rgba(20, 23, 28, .85) 72%,
-      rgba(26, 30, 36, 1) 100%);
+    background:
+      radial-gradient(ellipse 92% 34% at 50% 45%,
+        rgba(11, 13, 17, .62) 0%,
+        rgba(11, 13, 17, .44) 50%,
+        rgba(11, 13, 17, 0) 82%),
+      linear-gradient(180deg,
+        rgba(10, 12, 15, .35) 0%,
+        rgba(15, 17, 21, .6) 42%,
+        rgba(20, 23, 28, .85) 72%,
+        rgba(26, 30, 36, 1) 100%);
   }
   .zg-grain { opacity: .4; }
   .zg-hero__content { padding: 0 24px; }
@@ -2227,10 +2235,6 @@ textarea:focus-visible {
 .zg-project + .zg-projects__duo,
 .zg-projects__duo + .zg-projects__duo { margin-top: 36px; }
 
-/* The feature set ends on a caption under a full-width print. At 36px the next
-   set's title crowded it, and the two read as one run-on block. */
-.zg-project--feature + .zg-project { margin-top: 72px; }
-
 .zg-projectgroup + .zg-projectgroup {
   margin-top: 96px;
   padding-top: 40px;
@@ -2306,115 +2310,6 @@ textarea:focus-visible {
   font-size: 16px;
   line-height: 1.7;
   color: var(--body-muted);
-}
-
-/* ---------- Feature set: worksheet, then print ---------- */
-
-/* The best photograph on the page should not be one of four thumbnails behind
-   a hover, and the three build frames should not be 265px slivers in a rail.
-   Photos 1 and 2 are 1.3333 and 2.2222, which sum-share a row at exactly
-   37.5%/62.5% -- so `1.3333fr 2.2222fr` makes their baselines flush by
-   construction rather than by a measured percentage. Photo 3 inherits column
-   two's edges, the caption bottom-aligns in the empty quarter, and then the
-   sheet stops and the finished shot breaks the full width on its own line.
-   The width jump from 745px to 1200px is what says "finished". */
-.zg-project--feature .zg-project__strip {
-  display: block;
-  aspect-ratio: auto;
-  overflow: visible;
-}
-
-/* Undo the fan. The hover block sets margin-left: var(--ol) (-15%) on every
-   adjacent shot plus a -16px side shadow, and the base rule stretches shots to
-   the strip height -- all three are wrong for a grid, so all three are reset
-   unconditionally and the grid never sees them. If a property is ever added to
-   the `@media (hover: hover)` strip block, check it against this reset. */
-.zg-project--feature .zg-project__shot {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-left: 0;
-  aspect-ratio: var(--ar);
-  box-shadow: none;
-}
-
-/* Was a 2x2 with the fourth cell left empty for a caption. On the page that
-   quarter read as a missing photo, not as a drawing's title block -- a void
-   with two lines at the bottom of it. One row of three removes the cell
-   entirely. Each column is weighted by its own aspect ratio, so the three
-   frames come out the same height with no cropping: at 1200px they land
-   296 / 493 / 394px wide and 222px tall. */
-.zg-project__build {
-  display: grid;
-  grid-template-columns: 1.3333fr 2.2222fr 1.7766fr;
-  gap: var(--gap);
-  align-items: start;   /* stretch would beat aspect-ratio and crop */
-}
-
-.zg-project__plate--build {
-  grid-column: 1 / -1;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-dark);
-}
-
-/* 44px against the 8px inside the sheet. The gap carries the whole separation
-   -- a rule here would read as two projects, which it is not. */
-.zg-project__print { margin-top: 44px; }
-/* The three-across strip is weighted by aspect ratio, so the narrowest column
-   shrinks fastest: by 900px it is 218px wide and 148px tall, which is a
-   thumbnail rather than a photograph. Stack before that rather than after --
-   the page's own breakpoint is 768px, and the band between the two is where
-   this row would have been at its least legible. */
-@media (max-width: 900px) {
-  .zg-project__build { grid-template-columns: 1fr; gap: 6px; }
-  .zg-project__plate--build { margin-top: 10px; }
-}
-
-
-.zg-project__shot--hero { box-shadow: 0 30px 70px -24px rgba(0, 0, 0, .78); }
-
-.zg-project__plate {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  min-width: 0;
-}
-
-.zg-project__plate-k {
-  flex: none;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--guild-pink);
-}
-
-.zg-project__plate p {
-  margin: 0;
-  max-width: 46ch;
-  max-height: 100%;
-  overflow: hidden;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--body-muted);
-}
-
-.zg-project__plate--print { margin-top: 10px; }
-
-/* Every frame is fully visible at rest here, so hover is decoration, not an
-   affordance -- and it touches no layout property, so nothing below can shift.
-   The global reduced-motion block clamps the duration and the end state is
-   identical, which is why this set needs no reduced-motion rule of its own. */
-@media (hover: hover) {
-  .zg-project--feature .zg-project__shot {
-    transition: filter .3s var(--ease-standard), border-color .3s var(--ease-standard);
-  }
-  .zg-project--feature .zg-project__shot:hover,
-  .zg-project--feature .zg-project__shot:focus-visible {
-    filter: brightness(1.08);
-    border-color: rgba(255, 255, 255, .30);
-  }
 }
 
 /* ---------- Sequence sets: the same job, seen from inside ---------- */
@@ -2680,17 +2575,11 @@ textarea:focus-visible {
   }
   .zg-project__shot + .zg-project__shot { margin-left: 5px; }
 
-  /* These two are composed layouts, not rails -- they must not scroll. */
-  .zg-project--feature .zg-project__strip,
+  /* A composed layout, not a rail -- it must not scroll. */
   .zg-compare {
     overflow-x: visible;
     scroll-snap-type: none;
   }
-  /* Not column-reverse as the rail was: that put the hero first visually while
-     tab order still ran 1-2-3-4. One column, in build order, hero last. */
-  .zg-project--feature .zg-project__strip { display: block; }
-  .zg-project__print { margin-top: 26px; }
-  .zg-project__shot--hero { box-shadow: 0 14px 34px -16px rgba(0, 0, 0, .8); }
   .zg-project--single .zg-project__shot { flex: 1 1 auto; }
   .zg-compare .zg-project__shot { flex: 1 1 0; }
   .zg-compare__before { flex: none; }
