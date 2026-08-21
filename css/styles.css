@@ -693,19 +693,35 @@ textarea:focus-visible {
 
 /* ---------- World map ---------- */
 
+/* Deep bottom padding is load-bearing, not decoration: the seam below is
+   300px tall and sits over everything, so with the old symmetric 100px it
+   covered the bottom 190px of the map and washed Africa and Australia out.
+   240px leaves the ramp somewhere to happen that is not on top of the
+   artwork. Shorten one and you must shorten the other. */
 .zg-map {
   position: relative;
-  padding: 100px 56px;
+  padding: 100px 56px 240px;
   background: linear-gradient(160deg, #081620 0%, #0c2e3f 55%, #164a63 100%);
   text-align: center;
   overflow: hidden;
 }
 
+/* 160px with three stops put most of the colour change into a short band, so
+   the eye caught it as an edge. 300px with stops following an ease curve
+   spreads the same change over nearly twice the distance and never moves fast
+   enough in any 20px to register as a line. */
 .zg-map__seam {
   position: absolute;
   left: 0; right: 0; bottom: -1px;
-  height: 160px;
-  background: linear-gradient(180deg, transparent 0%, rgba(26, 30, 36, .5) 40%, var(--iron) 92%);
+  height: 300px;
+  background: linear-gradient(180deg,
+    rgba(26, 30, 36, 0) 0%,
+    rgba(26, 30, 36, .05) 18%,
+    rgba(26, 30, 36, .17) 34%,
+    rgba(26, 30, 36, .38) 50%,
+    rgba(26, 30, 36, .63) 66%,
+    rgba(26, 30, 36, .85) 82%,
+    var(--iron) 100%);
   pointer-events: none;
   z-index: 2;
 }
@@ -716,7 +732,6 @@ textarea:focus-visible {
 .zg-map__seam-grain,
 .zg-contact__seam-grain,
 .zg-contact__grain,
-.zg-map__wave,
 .zg-map__grain,
 .zg-grain {
   transform: translateZ(0);
@@ -726,37 +741,22 @@ textarea:focus-visible {
 .zg-map__seam-grain {
   position: absolute;
   left: 0; right: 0; bottom: -1px;
-  height: 160px;
+  height: 300px;
   background-image:
     radial-gradient(rgba(255, 255, 255, .9) 1.5px, transparent 1.5px),
     radial-gradient(rgba(0, 0, 0, .6) 1.5px, transparent 1.5px);
   background-size: 4px 4px, 4px 4px;
   background-position: 0 0, 2px 2px;
-  opacity: .6;
+  /* This dither exists to break banding in the ramp, but at .6 with a 20%
+     fade-in its own onset was the sharpest edge in the section -- a texture
+     boundary is as visible as a colour one. Quieter, and fading in across
+     more than half its height, it does the anti-banding job invisibly. */
+  opacity: .28;
   mix-blend-mode: overlay;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 20%, black 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, black 20%, black 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
   pointer-events: none;
   z-index: 3;
-}
-
-.zg-map__wave {
-  position: absolute;
-  left: 0; right: 0; bottom: 5px;
-  height: 160px;
-  background: linear-gradient(180deg, rgba(91, 155, 224, .1) 0%, rgba(35, 74, 102, .12) 55%, rgba(26, 30, 36, .5) 100%);
-  clip-path: polygon(0.0% 84.5%, 4.2% 78.1%, 8.3% 68.6%, 12.5% 57.3%, 16.7% 45.7%, 20.8% 35.3%, 25.0% 27.6%, 29.2% 23.5%, 33.3% 23.6%, 37.5% 27.8%, 41.7% 35.7%, 45.8% 46.1%, 50.0% 57.7%, 54.2% 69.0%, 58.3% 78.4%, 62.5% 84.7%, 66.7% 87.0%, 70.8% 85.1%, 75.0% 79.2%, 79.2% 70.1%, 83.3% 58.9%, 87.5% 47.3%, 91.7% 36.7%, 95.8% 28.5%, 100.0% 23.8%, 100% 100%, 0% 100%);
-  filter: blur(22px);
-  opacity: .5;
-}
-
-.zg-map__wave--2 {
-  bottom: 0;
-  height: 220px;
-  background: linear-gradient(180deg, rgba(26, 30, 36, 0) 0%, rgba(26, 30, 36, .2) 40%, rgba(26, 30, 36, .55) 65%, var(--iron) 90%);
-  clip-path: polygon(0.0% 57.1%, 4.2% 47.0%, 8.3% 36.9%, 12.5% 27.9%, 16.7% 20.7%, 20.8% 15.9%, 25.0% 14.0%, 29.2% 15.2%, 33.3% 19.3%, 37.5% 26.0%, 41.7% 34.7%, 45.8% 44.6%, 50.0% 54.8%, 54.2% 64.3%, 58.3% 72.5%, 62.5% 78.4%, 66.7% 81.5%, 70.8% 81.7%, 75.0% 78.8%, 79.2% 73.2%, 83.3% 65.3%, 87.5% 55.8%, 91.7% 45.6%, 95.8% 35.7%, 100.0% 26.8%, 100% 100%, 0% 100%);
-  filter: blur(32px);
-  opacity: .7;
 }
 
 .zg-map__grain {
@@ -844,10 +844,20 @@ textarea:focus-visible {
 
 /* ---------- Contact ---------- */
 
+/* The map above ends on --iron, so this must start on --iron across its whole
+   width. The 160deg gradient alone did not: at the top-right corner it was
+   already stepping toward #26221c, which drew a colour break along the join.
+   Holding iron flat for the first 20% fixes it, and the warm tone still
+   arrives by the time the heading does. Do not add a blue tint here to
+   "continue" the panel above -- it re-brightens below a boundary the map has
+   already faded through, which reads as a second seam. */
 .zg-contact {
   position: relative;
   padding: 130px 56px;
-  background: linear-gradient(160deg, var(--iron) 0%, #26221c 85%);
+  background: linear-gradient(160deg,
+    var(--iron) 0%,
+    var(--iron) 20%,
+    #26221c 92%);
   text-align: center;
   overflow: hidden;
   scroll-margin-top: 20px;
@@ -856,16 +866,18 @@ textarea:focus-visible {
 .zg-contact__seam-grain {
   position: absolute;
   left: 0; right: 0; top: -1px;
-  height: 160px;
+  height: 260px;
   background-image:
     radial-gradient(rgba(255, 255, 255, .9) 1.5px, transparent 1.5px),
     radial-gradient(rgba(0, 0, 0, .6) 1.5px, transparent 1.5px);
   background-size: 4px 4px, 4px 4px;
   background-position: 0 0, 2px 2px;
-  opacity: .6;
+  /* Started opaque at y=0, which drew the dot texture as a hard rule right on
+     the section join -- the most visible part of the whole seam. */
+  opacity: .28;
   mix-blend-mode: overlay;
-  -webkit-mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 100%);
-  mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 45%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, black 45%, transparent 100%);
   pointer-events: none;
   z-index: 1;
 }
@@ -1078,11 +1090,9 @@ textarea:focus-visible {
   .zg-band__row h3 { font-size: 15.5px; margin-bottom: 6px; }
   .zg-band__row p { font-size: 13px; line-height: 1.6; }
 
-  .zg-map { padding: 56px 20px; }
-  .zg-map__wave { bottom: 3px; height: 100px; filter: blur(14px); }
-  .zg-map__wave--2 { height: 150px; filter: blur(20px); }
-  .zg-map__seam, .zg-map__seam-grain { height: 100px; }
-  .zg-contact__seam-grain { height: 100px; }
+  .zg-map { padding: 56px 20px 140px; }
+  .zg-map__seam, .zg-map__seam-grain { height: 180px; }
+  .zg-contact__seam-grain { height: 150px; }
   .zg-map__eyebrow { font-size: 10.5px; letter-spacing: .12em; margin-bottom: 8px; }
   .zg-map__frame { max-width: none; }
   .zg-worldmap { position: relative; z-index: 1; }
@@ -1598,27 +1608,39 @@ textarea:focus-visible {
   transform: translateX(101%);
 }
 
-/* map: one radar sweep across the frame when it reveals */
+/* One light sweep across the whole blue panel when the map reveals.
+   It used to live inside .zg-map__frame, which is capped at 900px and clips
+   its overflow -- so the glare was a bright rectangle the width of the map
+   rather than light crossing the section, and the frame's edges read as the
+   edges of the effect. Moved out to a sibling of the frame: .zg-map is the
+   containing block and already clips, so the sweep spans the full panel and
+   the `~` combinator still drives it off the frame's reveal class without
+   touching the JS.
+   Wider stops and a blur because the travel is now ~1900px instead of 900:
+   the same band across a bigger surface reads as a hard-edged bar. */
 .zg-map__scan {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: linear-gradient(90deg,
-    transparent 30%,
-    rgba(90, 170, 215, .10) 45%,
-    rgba(140, 205, 240, .22) 50%,
-    rgba(90, 170, 215, .10) 55%,
-    transparent 70%);
-  transform: translateX(-105%);
+  background: linear-gradient(100deg,
+    transparent 24%,
+    rgba(90, 170, 215, .05) 36%,
+    rgba(125, 195, 235, .13) 45%,
+    rgba(165, 220, 250, .19) 50%,
+    rgba(125, 195, 235, .13) 55%,
+    rgba(90, 170, 215, .05) 64%,
+    transparent 76%);
+  filter: blur(9px);
+  transform: translateX(-118%);
   pointer-events: none;
 }
 
-.js .zg-map__frame.is-inview .zg-map__scan {
-  animation: zg-scan 1.7s cubic-bezier(.55, .06, .35, .95) .25s both;
+.js .zg-map__frame.is-inview ~ .zg-map__scan {
+  animation: zg-scan 3s cubic-bezier(.42, 0, .32, 1) .2s both;
 }
 
 @keyframes zg-scan {
-  to { transform: translateX(105%); }
+  to { transform: translateX(118%); }
 }
 
 /* arrows nudge on hover */
@@ -1946,45 +1968,6 @@ textarea:focus-visible {
 
 /* ---------- Terraces page ---------- */
 
-/* Stand-in for photography that hasn't been shot yet. Deliberately reads as a
-   reserved slot rather than a broken image: hatched ground, dashed accent
-   border, and a mono line naming the shot that belongs there.
-   To fill one: replace the whole element with
-   <div class="zg-card__img" style="background-image:url('assets/your.webp')">
-   (keeping the .zg-card__icon inside), or for a gallery slot swap it for
-   <img class="zg-gallery__img" src="assets/your.webp" alt="…">. */
-.zg-photoslot {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  text-align: center;
-  background-color: #1E232B;
-  background-image: repeating-linear-gradient(135deg, rgba(231, 184, 196, .055) 0 1px, transparent 1px 13px);
-  border: 1px dashed rgba(231, 184, 196, .3);
-}
-
-.zg-photoslot svg { opacity: .45; }
-
-.zg-photoslot__hint {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--body-muted);
-  opacity: .8;
-  max-width: 30ch;
-  line-height: 1.5;
-}
-
-/* the card grid draws its own seams, so a slot inside a card drops the dashes
-   on the edges the grid already rules */
-.zg-card__img.zg-photoslot { border-width: 0 0 1px 0; }
-
 .zg-section-eyebrow {
   display: block;
   font-family: 'Inter', system-ui, sans-serif;
@@ -2073,14 +2056,29 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
-.zg-project__strip { display: flex; }
+/* --arsum is the sum of the set's photo ratios, written into the markup.
+   Deriving the row's height from it pins the height: opening the set then
+   changes only how the width is shared out, never how tall the row is.
+   Without this the negative margin resolves against the container, a closed
+   row measures ~130px taller than an open one, and everything below it jumps
+   up the moment the cursor lands -- tolerable once, not down a page of eight.
+   The 8px gaps are deliberately left out of the ratio: that makes a closed
+   shot crop about 2% horizontally, which is invisible, and only happens while
+   it is overlapped by the next photo anyway. */
+.zg-project__strip {
+  display: flex;
+  --gap: 8px;
+  --ol: var(--gap);
+  aspect-ratio: var(--arsum);
+  align-items: stretch;
+}
 
 /* Width tracks the photo's own aspect ratio and the height falls out equal
    across the row, so portrait and landscape sit together without either
    being cropped -- the reason this is a strip and not a fixed-box fan. */
 .zg-project__shot {
   flex: var(--ar) 1 0;
-  aspect-ratio: var(--ar);
+  height: 100%;
   min-width: 0;
   position: relative;
   overflow: hidden;
@@ -2100,40 +2098,398 @@ textarea:focus-visible {
 .zg-project__shot:nth-child(3) { z-index: 2; }
 .zg-project__shot:nth-child(4) { z-index: 1; }
 
-.zg-project__n {
-  position: absolute;
-  left: 8px; top: 8px;
-  font: 600 10px 'Inter', system-ui, sans-serif;
-  letter-spacing: .1em;
-  color: #1A1E24;
-  background: rgba(231, 184, 196, .92);
-  padding: 3px 7px;
-  border-radius: 999px;
-}
-
 /* No hover to open with, so the set is already open. Nothing is reachable
    only by pointer. */
-.zg-project__shot + .zg-project__shot { margin-left: 8px; }
+.zg-project__shot + .zg-project__shot { margin-left: var(--ol); }
 
 @media (hover: hover) {
   /* Closed at rest, opens under the cursor. The overlap has to be deep: the
      strip redistributes its width as the photos separate, so a shallow
      overlap makes them merely shrink and the set never looks shut. At -15%
      each photo shows a ~140px edge closed and stands ~294px open. */
-  .zg-project__shot + .zg-project__shot { margin-left: -15%; }
+  .zg-project__strip { --ol: -15%; }
 
   .zg-project__shot {
     transition: margin-left .55s var(--ease-standard), filter .3s var(--ease-standard);
     box-shadow: -16px 0 30px rgba(10, 12, 15, .55);
   }
 
-  .zg-project__strip:hover .zg-project__shot + .zg-project__shot { margin-left: 8px; }
+  .zg-project__strip:hover .zg-project__shot + .zg-project__shot { margin-left: var(--gap); }
+
+  /* A keyboard user must be able to open the set too, or half of every strip
+     is reachable only by pointer. Same declaration, so --seq inherits it. */
+  .zg-project__strip:focus-within .zg-project__shot + .zg-project__shot { margin-left: var(--gap); }
   .zg-project__shot:hover { filter: brightness(1.09); }
   .zg-project__shot:focus-visible { filter: brightness(1.09); }
 }
 
 /* A single-photo project has nothing to open, so it just stands as one frame. */
 .zg-project--single .zg-project__shot { box-shadow: none; }
+
+/* ---------- Project tiers ---------- */
+
+/* Eight sets stacked as eight identical rows read as one long undifferentiated
+   list. Grouping them into three labelled tiers -- finished work, how it is
+   built, adjacent trades -- means a visitor who reads only the three headings
+   already knows the range. The rule and the 96px above it carry the
+   separation, so rows inside a tier can sit closer than they used to. */
+.zg-project + .zg-project,
+.zg-projects__duo + .zg-project,
+.zg-project + .zg-projects__duo,
+.zg-projects__duo + .zg-projects__duo { margin-top: 36px; }
+
+/* The feature set ends on a caption under a full-width print. At 36px the next
+   set's title crowded it, and the two read as one run-on block. */
+.zg-project--feature + .zg-project { margin-top: 72px; }
+
+.zg-projectgroup + .zg-projectgroup {
+  margin-top: 96px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-dark);
+}
+
+.zg-projectgroup__head { margin-bottom: 26px; }
+
+.zg-projectgroup__lede {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--body-muted);
+}
+
+/* Marks a set that is not a terrace, so the odd one out reads as deliberate
+   rather than as a filing mistake. */
+.zg-project__tag {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--guild-pink);
+  background: rgba(231, 184, 196, .10);
+  border: 1px solid rgba(231, 184, 196, .28);
+  border-radius: 2px;
+  padding: 4px 7px;
+  margin-right: 10px;
+  flex: none;
+}
+
+/* English strings run longer than Latvian; once a tag shares the line the
+   head has to be allowed to wrap rather than squeeze the name. */
+.zg-project__head { flex-wrap: wrap; }
+.zg-project__name { margin-right: auto; }
+
+/* ---------- Two projects side by side ---------- */
+
+/* 32px between two different projects against 8px between photos of one set:
+   the gap is what says these are separate jobs. */
+/* Not 1fr 1fr: the note beside the photo is three lines long, so an equal
+   split left half the row empty. Weighting it to the photo puts the text at a
+   comfortable ~46 characters and gives the picture the space it earns. */
+.zg-projects__duo {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.zg-projects__duo .zg-project + .zg-project { margin-top: 0; }
+
+.zg-projects__duo .zg-project__meta { white-space: normal; }
+
+/* This sat beside a single photo as a bordered panel with the text pinned to
+   the bottom, which framed a large empty rectangle -- the box read as missing
+   content rather than as a caption. Dropping the frame and centring against
+   the photo turns it into a margin note, which is what it always was. */
+.zg-projects__note {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  padding: 4px 0 4px 22px;
+  border-left: 2px solid rgba(231, 184, 196, .32);
+}
+
+.zg-projects__note p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--body-muted);
+}
+
+/* ---------- Feature set: worksheet, then print ---------- */
+
+/* The best photograph on the page should not be one of four thumbnails behind
+   a hover, and the three build frames should not be 265px slivers in a rail.
+   Photos 1 and 2 are 1.3333 and 2.2222, which sum-share a row at exactly
+   37.5%/62.5% -- so `1.3333fr 2.2222fr` makes their baselines flush by
+   construction rather than by a measured percentage. Photo 3 inherits column
+   two's edges, the caption bottom-aligns in the empty quarter, and then the
+   sheet stops and the finished shot breaks the full width on its own line.
+   The width jump from 745px to 1200px is what says "finished". */
+.zg-project--feature .zg-project__strip {
+  display: block;
+  aspect-ratio: auto;
+  overflow: visible;
+}
+
+/* Undo the fan. The hover block sets margin-left: var(--ol) (-15%) on every
+   adjacent shot plus a -16px side shadow, and the base rule stretches shots to
+   the strip height -- all three are wrong for a grid, so all three are reset
+   unconditionally and the grid never sees them. If a property is ever added to
+   the `@media (hover: hover)` strip block, check it against this reset. */
+.zg-project--feature .zg-project__shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-left: 0;
+  aspect-ratio: var(--ar);
+  box-shadow: none;
+}
+
+/* Was a 2x2 with the fourth cell left empty for a caption. On the page that
+   quarter read as a missing photo, not as a drawing's title block -- a void
+   with two lines at the bottom of it. One row of three removes the cell
+   entirely. Each column is weighted by its own aspect ratio, so the three
+   frames come out the same height with no cropping: at 1200px they land
+   296 / 493 / 394px wide and 222px tall. */
+.zg-project__build {
+  display: grid;
+  grid-template-columns: 1.3333fr 2.2222fr 1.7766fr;
+  gap: var(--gap);
+  align-items: start;   /* stretch would beat aspect-ratio and crop */
+}
+
+.zg-project__plate--build {
+  grid-column: 1 / -1;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-dark);
+}
+
+/* 44px against the 8px inside the sheet. The gap carries the whole separation
+   -- a rule here would read as two projects, which it is not. */
+.zg-project__print { margin-top: 44px; }
+/* The three-across strip is weighted by aspect ratio, so the narrowest column
+   shrinks fastest: by 900px it is 218px wide and 148px tall, which is a
+   thumbnail rather than a photograph. Stack before that rather than after --
+   the page's own breakpoint is 768px, and the band between the two is where
+   this row would have been at its least legible. */
+@media (max-width: 900px) {
+  .zg-project__build { grid-template-columns: 1fr; gap: 6px; }
+  .zg-project__plate--build { margin-top: 10px; }
+}
+
+
+.zg-project__shot--hero { box-shadow: 0 30px 70px -24px rgba(0, 0, 0, .78); }
+
+.zg-project__plate {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.zg-project__plate-k {
+  flex: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--guild-pink);
+}
+
+.zg-project__plate p {
+  margin: 0;
+  max-width: 46ch;
+  max-height: 100%;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--body-muted);
+}
+
+.zg-project__plate--print { margin-top: 10px; }
+
+/* Every frame is fully visible at rest here, so hover is decoration, not an
+   affordance -- and it touches no layout property, so nothing below can shift.
+   The global reduced-motion block clamps the duration and the end state is
+   identical, which is why this set needs no reduced-motion rule of its own. */
+@media (hover: hover) {
+  .zg-project--feature .zg-project__shot {
+    transition: filter .3s var(--ease-standard), border-color .3s var(--ease-standard);
+  }
+  .zg-project--feature .zg-project__shot:hover,
+  .zg-project--feature .zg-project__shot:focus-visible {
+    filter: brightness(1.08);
+    border-color: rgba(255, 255, 255, .30);
+  }
+}
+
+/* ---------- Sequence sets: the same job, seen from inside ---------- */
+
+/* Three build sequences in a row would read as three duplicates at hero size.
+   Pinned to 200px they read as contact sheets under one heading -- which is
+   the actual claim: every job looks like this from the inside.
+   Fixing the height also kills a reflow the fluid variant has: with
+   flex-basis 0 the negative margin resolves against the container, so a
+   closed row measures ~130px taller than an open one and everything below it
+   jumps up the moment the cursor lands. Harmless once; not harmless three
+   times in a column. Here only the strip's width changes. */
+/* Was 880px, which put these at 212px tall. That was defensible when the
+   feature set was ~510px, but beside a 675px print they read as an afterthought
+   rather than as evidence. At full width each frame is ~300px instead of ~220px
+   and the tier holds its own. The height is pinned by --arsum on the strip, so
+   widening cannot bring back the open/closed reflow the comment above guards. */
+.zg-project--seq { max-width: none; }
+
+/* ---------- Adjacent trades ---------- */
+
+/* The facade set is the only one that is not a terrace, so it gets the widest
+   strip on the page rather than half of a two-column row: at 1200px its three
+   frames land 415/233/553px, all big enough to read, where sharing the row
+   with the before/after squeezed the portrait frame to 113px.
+   The before/after is a single 4:3 frame, so full width would make it 900px
+   tall and push everything else off the screen. 720px caps it at 540px. */
+.zg-project--wide { max-width: none; }
+.zg-project--compare { max-width: 720px; }
+
+/* ---------- Before and after ---------- */
+
+/* A two-photo repair is not a set to fan open -- the whole point is seeing the
+   same frame twice. A draggable wipe puts both states in one box. Both halves
+   stay .zg-project__shot buttons inside the strip, so the existing lightbox
+   picks them up untouched and pages 1/2 with no special case. clip-path clips
+   hit-testing as well as pixels, so the visible half is the clickable half. */
+.zg-compare {
+  position: relative;
+  --pos: 50%;
+  border: 1px solid var(--border-dark);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.zg-compare .zg-project__shot {
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  margin-left: 0;
+}
+
+/* The fan's nth-child stacking ladder puts the first photo on top, which here
+   is the "after" -- it would bury the before half, the seam and both labels.
+   Restate the order for the compare; same specificity, later in the file. */
+.zg-compare .zg-compare__after { z-index: 1; }
+.zg-compare .zg-compare__before { z-index: 2; }
+.zg-compare .zg-compare__seam { z-index: 3; }
+.zg-compare .zg-compare__label { z-index: 4; }
+.zg-compare .zg-compare__range { z-index: 5; }
+
+.zg-compare__after { flex: 1 1 0; height: 100%; }
+
+.zg-compare__before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  flex: none;
+  height: auto;
+  clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+}
+
+.zg-compare__seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  left: var(--pos);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--guild-pink);
+  opacity: .9;
+  pointer-events: none;
+}
+
+.zg-compare__seam::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid var(--guild-pink);
+  border-radius: 50%;
+  background: rgba(26, 30, 36, .75);
+}
+
+.zg-compare__label {
+  position: absolute;
+  bottom: 10px;
+  z-index: 3;
+  pointer-events: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  background: rgba(26, 30, 36, .78);
+  padding: 5px 8px;
+  border-radius: 2px;
+}
+
+.zg-compare__label--before { left: 10px; }
+.zg-compare__label--after { right: 10px; }
+
+/* A full-width transparent range, but only a 48px band down the middle takes
+   pointer events -- everywhere else the photo underneath still opens the
+   lightbox. Gives touch a native drag and the keyboard arrows/Home/End free. */
+.zg-compare__range {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 48px;
+  margin-top: -24px;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.zg-compare__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.zg-compare__range::-moz-range-thumb {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.zg-compare__range::-webkit-slider-runnable-track { background: transparent; }
+.zg-compare__range::-moz-range-track { background: transparent; }
+.zg-compare__range:focus-visible { outline: 2px solid var(--blueprint-light); outline-offset: 3px; }
+
+/* The global reduced-motion block only clamps transition-duration, which
+   leaves these strips sitting closed and snapping open -- half the photos
+   hidden behind other photos with no visible affordance. Render every set
+   already open instead. The wipe has nothing to disable: it is direct
+   manipulation, not an animation. */
+@media (prefers-reduced-motion: reduce) {
+  .zg-project__strip { --ol: var(--gap); }
+  .zg-project__shot { box-shadow: none; }
+}
 
 /* ---------- Lightbox ---------- */
 
@@ -2204,10 +2560,54 @@ textarea:focus-visible {
 
 @media (max-width: 768px) {
   .zg-projects { padding: 4px 20px 64px; }
-  .zg-project + .zg-project { margin-top: 36px; }
+  .zg-project + .zg-project,
+  .zg-projects__duo + .zg-project,
+  .zg-project + .zg-projects__duo,
+  .zg-projects__duo + .zg-projects__duo { margin-top: 28px; }
   .zg-project__head { flex-direction: column; align-items: flex-start; gap: 4px; }
   .zg-project__meta { white-space: normal; }
+  .zg-project__tag { margin: 0 0 2px; }
+
+  .zg-projectgroup + .zg-projectgroup { margin-top: 64px; padding-top: 32px; }
+  .zg-projects__duo { grid-template-columns: 1fr; gap: 28px; }
+  .zg-projects__note { padding: 0 0 0 18px; }
+
+  /* Four photos across 335px is 82px each -- too small to be worth tapping.
+     Scroll them instead. Focusing a button scrolls it into view natively, so
+     nothing goes out of reach. */
+  .zg-project__strip {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .zg-project__strip::-webkit-scrollbar { display: none; }
+  .zg-project__strip { aspect-ratio: auto; }
+  .zg-project__shot {
+    flex: 0 0 74%;
+    height: auto;
+    aspect-ratio: var(--ar);
+    scroll-snap-align: start;
+  }
   .zg-project__shot + .zg-project__shot { margin-left: 5px; }
+
+  /* These two are composed layouts, not rails -- they must not scroll. */
+  .zg-project--feature .zg-project__strip,
+  .zg-compare {
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  /* Not column-reverse as the rail was: that put the hero first visually while
+     tab order still ran 1-2-3-4. One column, in build order, hero last. */
+  .zg-project--feature .zg-project__strip { display: block; }
+  .zg-project__print { margin-top: 26px; }
+  .zg-project__shot--hero { box-shadow: 0 14px 34px -16px rgba(0, 0, 0, .8); }
+  .zg-project--single .zg-project__shot { flex: 1 1 auto; }
+  .zg-compare .zg-project__shot { flex: 1 1 0; }
+  .zg-compare__before { flex: none; }
+
+  .zg-project--seq { max-width: none; }
+
   .zg-lightbox { width: 94vw; max-width: 94vw; }
   .zg-lightbox__caption { font-size: 12px; }
 }
@@ -2217,7 +2617,6 @@ textarea:focus-visible {
   .zg-section-head { font-size: 20px; }
   .zg-gallery { grid-template-columns: 1fr 1fr; gap: 8px; }
   .zg-step { grid-template-columns: 32px 1fr; gap: 14px; padding: 18px 0; }
-  .zg-photoslot__hint { font-size: 9px; }
 }
 
 /* ---------- Architecture panel (merged gothic + greek tile) ---------- */
