@@ -274,17 +274,20 @@ textarea:focus-visible {
 
 /* Two layers, and the first one is load-bearing. The old hero was one dark
    mountain photo, so a plain top-to-bottom ramp was enough to sit text on. The
-   job photos that replaced it are bright — pale timber, blue sky, white walls —
-   and against those the eyebrow measured as low as 1.28:1. The centred ellipse
-   pools shadow behind the copy block only, so the text clears 4.5:1 while the
-   photograph stays bright out at the edges where nothing sits on top of it. */
+   job photos that replaced it are bright — pale panels, timber, sky — and
+   against those the eyebrow measured as low as 1.28:1 on a plain ramp. The
+   centred ellipse pools shadow behind the copy block only: worst measured
+   eyebrow is now 7.72:1 against a 4.5:1 bar, while the photograph stays bright
+   out at the edges where no text sits on it. Alpha is deliberately no higher
+   than it needs to be — darkening the whole frame enough to carry the original
+   grey eyebrow would have taken ~0.9 and flattened every photo. */
 .zg-hero__scrim {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 64% 44% at 50% 46%,
-      rgba(11, 13, 17, .60) 0%,
-      rgba(11, 13, 17, .42) 48%,
+    radial-gradient(ellipse 66% 46% at 50% 46%,
+      rgba(11, 13, 17, .62) 0%,
+      rgba(11, 13, 17, .44) 46%,
       rgba(11, 13, 17, 0) 78%),
     linear-gradient(180deg,
       rgba(10, 12, 15, .2) 0%,
