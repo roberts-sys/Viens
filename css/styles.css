@@ -272,14 +272,25 @@ textarea:focus-visible {
   }
 }
 
+/* Two layers, and the first one is load-bearing. The old hero was one dark
+   mountain photo, so a plain top-to-bottom ramp was enough to sit text on. The
+   job photos that replaced it are bright — pale timber, blue sky, white walls —
+   and against those the eyebrow measured as low as 1.28:1. The centred ellipse
+   pools shadow behind the copy block only, so the text clears 4.5:1 while the
+   photograph stays bright out at the edges where nothing sits on top of it. */
 .zg-hero__scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg,
-    rgba(10, 12, 15, .2) 0%,
-    rgba(15, 17, 21, .35) 40%,
-    rgba(20, 23, 28, .6) 72%,
-    rgba(26, 30, 36, 1) 100%);
+  background:
+    radial-gradient(ellipse 64% 44% at 50% 46%,
+      rgba(11, 13, 17, .60) 0%,
+      rgba(11, 13, 17, .42) 48%,
+      rgba(11, 13, 17, 0) 78%),
+    linear-gradient(180deg,
+      rgba(10, 12, 15, .2) 0%,
+      rgba(15, 17, 21, .35) 40%,
+      rgba(20, 23, 28, .6) 72%,
+      rgba(26, 30, 36, 1) 100%);
 }
 
 /* Grain uses pure-white dots, where `overlay` is near-equivalent to normal
@@ -308,13 +319,16 @@ textarea:focus-visible {
   pointer-events: none;
 }
 
+/* Was --concrete at .85, which reads as a quiet label on a dark still but is
+   mid-luminance: on a bright photo it has nowhere to get contrast from. Near
+   white borrows its contrast from the same direction as the title. */
 .zg-hero__eyebrow {
   font: 600 14px 'IBM Plex Mono', monospace;
-  color: var(--concrete);
+  color: #E9EBEE;
   letter-spacing: .18em;
   text-transform: uppercase;
   margin-bottom: 30px;
-  opacity: .85;
+  opacity: .94;
   animation: zg-rise .9s var(--ease-standard) .25s both;
 }
 
