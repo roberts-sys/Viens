@@ -2318,29 +2318,6 @@ textarea:focus-visible {
 
 .zg-projects__duo .zg-project__meta { white-space: normal; }
 
-/* This sat beside a single photo as a bordered panel with the text pinned to
-   the bottom, which framed a large empty rectangle -- the box read as missing
-   content rather than as a caption. Dropping the frame and centring against
-   the photo turns it into a margin note, which is what it always was. */
-.zg-projects__col .zg-projects__note { align-self: stretch; }
-
-.zg-projects__note {
-  align-self: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 18px;
-  padding: 4px 0 4px 22px;
-  border-left: 2px solid rgba(231, 184, 196, .32);
-}
-
-.zg-projects__note p {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--body-muted);
-}
-
 /* ---------- Sequence sets: the same job, seen from inside ---------- */
 
 /* Three build sequences in a row would read as three duplicates at hero size.
@@ -2583,7 +2560,6 @@ textarea:focus-visible {
 
   .zg-projectgroup + .zg-projectgroup { margin-top: 64px; padding-top: 32px; }
   .zg-projects__duo { grid-template-columns: 1fr; gap: 28px; }
-  .zg-projects__note { padding: 0 0 0 18px; }
 
   /* Four photos across 335px is 82px each -- too small to be worth tapping.
      Scroll them instead. Focusing a button scrolls it into view natively, so
