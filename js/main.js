@@ -313,9 +313,19 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-compare]'), function (r) {
       var box = r.closest('.zg-compare');
       if (!box) return;
-      function set() { box.style.setProperty('--pos', r.value + '%'); }
-      r.addEventListener('input', set);
-      set();
+      function set(pos) { box.style.setProperty('--pos', pos + '%'); }
+      r.addEventListener('input', function () { set(r.value); });
+      set(r.value);
+
+      // Mouse users get the seam to follow the cursor directly, no drag
+      // needed -- touch keeps the native range thumb since touch input
+      // doesn't fire mousemove.
+      box.addEventListener('mousemove', function (e) {
+        var rect = box.getBoundingClientRect();
+        var pos = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        r.value = pos;
+        set(pos);
+      });
     });
   }
 
