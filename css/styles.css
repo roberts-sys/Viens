@@ -862,66 +862,113 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
-.zg-worldmap {
+/* Live Leaflet embed replacing the old illustrated world-map SVG. Colours
+   are picked to sit inside the section's own deep-teal gradient rather than
+   the site-wide palette -- this panel has always run its own colour story. */
+.zg-livemap {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 16 / 9;
   width: 100%;
-  height: auto;
-  display: block;
-  overflow: visible;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(197, 228, 245, .25);
+  background: #0c2331;
 }
 
-.zg-worldmap path {
-  fill: none;
-  stroke: rgba(197, 228, 245, .55);
-  stroke-width: 1;
-  stroke-linejoin: round;
+.zg-livemap__canvas {
+  position: absolute;
+  inset: 0;
 }
 
-.zg-dot {
+.zg-livemap__status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  font: 600 12px 'Inter', system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #cfe8f3;
+  background: #0c2331;
+  transition: opacity .35s ease;
+}
+
+.zg-livemap__status.is-hidden {
   opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(.2);
-  filter: drop-shadow(0 0 5px rgba(90, 170, 215, .75));
+  pointer-events: none;
 }
 
-.zg-dot.play {
-  animation:
-    zg-dot-in .6s cubic-bezier(.34, 1.56, .64, 1) .15s forwards,
-    zg-dot-breathe 4.4s ease-in-out 1.2s infinite;
+.zg-livemap__toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 400;
+  display: flex;
+  background: rgba(8, 22, 32, .82);
+  border: 1px solid rgba(197, 228, 245, .3);
+  border-radius: 4px;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
 }
 
-@keyframes zg-dot-in {
-  0% { opacity: 0; transform: scale(.2); }
-  60% { opacity: 1; transform: scale(1.25); }
-  100% { opacity: 1; transform: scale(1); }
+.zg-livemap__toggle button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #cfe8f3;
+  opacity: .7;
+  font: 600 11px 'Inter', system-ui, sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 8px 13px;
+  cursor: pointer;
+  transition: background .2s ease, opacity .2s ease;
 }
 
-@keyframes zg-dot-breathe {
-  0%, 100% { filter: drop-shadow(0 0 5px rgba(90, 170, 215, .75)); }
-  50% { filter: drop-shadow(0 0 9px rgba(120, 195, 235, .95)); }
+.zg-livemap__toggle button + button {
+  border-left: 1px solid rgba(197, 228, 245, .3);
 }
 
-.zg-ring {
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(.6);
+.zg-livemap__toggle button.active {
+  background: #1f7aa8;
+  opacity: 1;
 }
 
-.zg-ring.play {
-  animation: zg-ring-ping 4.4s cubic-bezier(0, .55, .45, 1) .3s infinite;
+.zg-livemap__toggle button:focus-visible {
+  outline: 2px solid #cfe8f3;
+  outline-offset: -2px;
 }
 
-.zg-ring--late.play {
-  animation-delay: 2.5s;
+.zg-livemap__pin {
+  width: 16px;
+  height: 16px;
+  border-radius: 50% 50% 50% 0;
+  background: #1f7aa8;
+  border: 2px solid #cfe8f3;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 8px rgba(31, 122, 168, .8);
 }
 
-@keyframes zg-ring-ping {
-  0% { opacity: 0; transform: scale(.6); stroke-width: 2.4; }
-  6% { opacity: .65; }
-  58% { opacity: 0; transform: scale(3.8); stroke-width: .4; }
-  100% { opacity: 0; transform: scale(3.8); stroke-width: .4; }
+/* Leaflet's own controls, repainted to match this section instead of the
+   library default light-grey chrome. */
+.zg-livemap .leaflet-control-attribution {
+  background: rgba(8, 22, 32, .78);
+  color: rgba(207, 232, 243, .7);
+  font: 500 9.5px 'Inter', system-ui, sans-serif;
 }
+
+.zg-livemap .leaflet-control-attribution a { color: #9cd3ec; }
+
+.zg-livemap .leaflet-control-zoom a {
+  background: rgba(8, 22, 32, .82);
+  color: #cfe8f3;
+  border-color: rgba(197, 228, 245, .3);
+}
+
+.zg-livemap .leaflet-control-zoom a:hover { background: rgba(31, 122, 168, .6); }
 
 /* ---------- Contact ---------- */
 
@@ -1196,7 +1243,7 @@ textarea:focus-visible {
   .zg-contact__seam-grain { height: 150px; }
   .zg-map__eyebrow { font-size: 10.5px; letter-spacing: .12em; margin-bottom: 8px; }
   .zg-map__frame { max-width: none; }
-  .zg-worldmap { position: relative; z-index: 1; }
+  .zg-livemap { aspect-ratio: 4 / 3; }
 
   .zg-contact { padding: 64px 20px; }
   .zg-contact__heading { font-size: 26px; margin-bottom: 14px; }
