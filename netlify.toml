@@ -20,7 +20,10 @@
 #   connect-src GoatCounter reports pageviews with navigator.sendBeacon(),
 #               which CSP governs under connect-src -- NOT img-src. Removing
 #               the goatcounter origin here silently breaks analytics.
-#   img/font/media are otherwise first-party; no data: URIs are used anywhere.
+#   img/font/media are otherwise first-party. The one data: URI on the site
+#   is MapLibre's own CSS (assets/vendor/maplibre-gl.css), which draws its
+#   zoom/compass control icons as inline data:image/svg+xml -- img-src needs
+#   data: or those icons render blank (the map itself still works either way).
 #   Google Analytics (js/consent.js, loaded only after opt-in) needs
 #   googletagmanager.com to serve gtag and *.google-analytics.com /
 #   *.analytics.google.com to receive hits. Drop those and GA fails silently
@@ -30,6 +33,12 @@
 #   from server.arcgisonline.com under img-src -- no separate connect-src
 #   entry is needed since Leaflet loads tiles as plain <img> requests and
 #   the marker coordinates are baked into the page, not geocoded live.
+#   The map's 3D toggle lazy-loads MapLibre GL (also vendored) only on
+#   first click, and fetches its style/vector-tiles/glyphs/sprites from
+#   tiles.openfreemap.org via fetch/XHR, so that host goes under
+#   connect-src rather than img-src. MapLibre's worker is loaded from the
+#   same-origin assets/vendor/ file (the CSP build), not a blob: URL, so
+#   no worker-src change is needed.
 
 [[headers]]
   for = "/*"
@@ -40,7 +49,7 @@
     Permissions-Policy = "geolocation=(), microphone=(), camera=(), usb=(), payment=()"
     Cross-Origin-Opener-Policy = "same-origin"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.google-analytics.com https://*.googletagmanager.com https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self'; media-src 'self'; connect-src 'self' https://ziedinagilde.goatcounter.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self'; media-src 'self'; connect-src 'self' https://ziedinagilde.goatcounter.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://tiles.openfreemap.org; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
 
 # Netlify was serving this as text/html, so browsers and Googlebot dropped
 # every unrecognized XML tag and rendered raw text on one line -- this is

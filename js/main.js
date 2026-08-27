@@ -168,9 +168,44 @@
     });
   }
 
+  // MapLibre (for the 3D toggle) is ~1MB with its worker, so it's only
+  // fetched the first time someone actually clicks "3D" -- never on a
+  // plain pageview. Reuses the same assets/vendor/ directory Leaflet's
+  // script tag was loaded from, so this works unchanged on both LV and EN.
+  var maplibreLoadPromise = null;
+  function vendorBase() {
+    var s = document.querySelector('script[src*="assets/vendor/leaflet.js"]');
+    return s ? s.getAttribute('src').replace('leaflet.js', '') : 'assets/vendor/';
+  }
+  function loadMapLibre() {
+    if (maplibreLoadPromise) return maplibreLoadPromise;
+    var base = vendorBase();
+    maplibreLoadPromise = new Promise(function (resolve, reject) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = base + 'maplibre-gl.css';
+      document.head.appendChild(link);
+
+      var script = document.createElement('script');
+      script.src = base + 'maplibre-gl.js';
+      script.onload = function () {
+        if (typeof maplibregl === 'undefined') { reject(new Error('maplibregl missing')); return; }
+        // CSP build: workers load from this same-origin file instead of an
+        // inline blob URL, so no worker-src change is needed in netlify.toml.
+        maplibregl.setWorkerUrl(base + 'maplibre-gl-worker.js');
+        resolve(maplibregl);
+      };
+      script.onerror = function () { reject(new Error('maplibre-gl.js failed to load')); };
+      document.head.appendChild(script);
+    });
+    return maplibreLoadPromise;
+  }
+
   // Free Leaflet embed (OpenStreetMap + Esri World Imagery tiles, no API key)
-  // replacing the old illustrated world-map SVG. Coordinates come from the
-  // page's own JSON-LD address block, so there's no runtime geocoding call.
+  // replacing the old illustrated world-map SVG, plus a lazy-loaded MapLibre
+  // 3D view (OpenFreeMap "liberty" style, also free/keyless) behind a third
+  // toggle button. Coordinates come from the page's own JSON-LD address
+  // block, so none of this needs a runtime geocoding call.
   function initLiveMap() {
     var els = document.querySelectorAll('.zg-livemap');
     if (!els.length || typeof L === 'undefined') return;
@@ -181,8 +216,13 @@
       if (isNaN(lat) || isNaN(lng)) return;
 
       var canvas = el.querySelector('.zg-livemap__canvas');
+      var canvas3d = el.querySelector('.zg-livemap__canvas-3d');
       var status = el.querySelector('.zg-livemap__status');
       var toggle = el.querySelector('.zg-livemap__toggle');
+      var lang = document.documentElement.lang === 'en' ? 'en' : 'lv';
+      var copy = lang === 'en'
+        ? { loading3d: 'Loading 3D view…', fail3d: '3D view is unavailable right now.' }
+        : { loading3d: 'Ielādē 3D skatu…', fail3d: '3D skats šobrīd nav pieejams.' };
 
       var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -207,6 +247,71 @@
         if (status) status.classList.add('is-hidden');
       });
 
+      var map3d = null;
+
+      function showStatus(text) {
+        if (!status) return;
+        status.textContent = text;
+        status.classList.remove('is-hidden');
+      }
+
+      function revertTo(layerName) {
+        var btn = toggle.querySelector('button[data-layer="' + layerName + '"]');
+        Array.prototype.forEach.call(toggle.querySelectorAll('button'), function (b) {
+          b.classList.remove('active');
+        });
+        if (btn) btn.classList.add('active');
+        if (canvas3d) canvas3d.classList.remove('is-active');
+        canvas.classList.remove('is-hidden');
+        map.invalidateSize();
+      }
+
+      function activate3d() {
+        if (map3d) {
+          canvas3d.classList.add('is-active');
+          canvas.classList.add('is-hidden');
+          map3d.resize();
+          return;
+        }
+        showStatus(copy.loading3d);
+        loadMapLibre().then(function (maplibregl) {
+          map3d = new maplibregl.Map({
+            container: canvas3d,
+            style: 'https://tiles.openfreemap.org/styles/liberty',
+            center: [lng, lat],
+            zoom: 17.5,
+            pitch: 60,
+            bearing: -20,
+            attributionControl: true
+          });
+          map3d.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+          // Only a failure before the first successful load is treated as
+          // fatal (bad style URL, no WebGL, offline). MapLibre also fires
+          // 'error' for a single dropped tile request once running, which
+          // should not boot someone back to the street view mid-browse.
+          var initialLoadFail = function () {
+            map3d = null;
+            revertTo('street');
+            showStatus(copy.fail3d);
+            setTimeout(function () { if (status) status.classList.add('is-hidden'); }, 3000);
+          };
+          map3d.once('error', initialLoadFail);
+          map3d.once('load', function () {
+            map3d.off('error', initialLoadFail);
+            if (status) status.classList.add('is-hidden');
+          });
+          var pinEl = document.createElement('div');
+          pinEl.className = 'zg-livemap__pin';
+          new maplibregl.Marker({ element: pinEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map3d);
+          canvas3d.classList.add('is-active');
+          canvas.classList.add('is-hidden');
+        }).catch(function () {
+          revertTo('street');
+          showStatus(copy.fail3d);
+          setTimeout(function () { if (status) status.classList.add('is-hidden'); }, 3000);
+        });
+      }
+
       if (toggle) {
         toggle.addEventListener('click', function (e) {
           var btn = e.target.closest('button[data-layer]');
@@ -215,6 +320,16 @@
             b.classList.remove('active');
           });
           btn.classList.add('active');
+
+          if (btn.dataset.layer === '3d') {
+            activate3d();
+            return;
+          }
+
+          if (canvas3d) canvas3d.classList.remove('is-active');
+          canvas.classList.remove('is-hidden');
+          map.invalidateSize();
+
           if (btn.dataset.layer === 'satellite') {
             map.removeLayer(streetLayer);
             map.addLayer(satelliteLayer);
