@@ -275,6 +275,13 @@
         }
         showStatus(copy.loading3d);
         loadMapLibre().then(function (maplibregl) {
+          // The container must already be visible (non-zero size) before
+          // the Map is constructed -- MapLibre measures it synchronously
+          // at init and never re-measures on its own, so doing this after
+          // construction left the canvas permanently sized 0x0.
+          canvas3d.classList.add('is-active');
+          canvas.classList.add('is-hidden');
+
           map3d = new maplibregl.Map({
             container: canvas3d,
             style: 'https://tiles.openfreemap.org/styles/liberty',
@@ -285,6 +292,9 @@
             attributionControl: true
           });
           map3d.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+          // Belt-and-suspenders against the same 0x0 issue if a later reflow
+          // (webfonts, aspect-ratio settling) changes the container size.
+          requestAnimationFrame(function () { if (map3d) map3d.resize(); });
           // Only a failure before the first successful load is treated as
           // fatal (bad style URL, no WebGL, offline). MapLibre also fires
           // 'error' for a single dropped tile request once running, which
@@ -303,8 +313,6 @@
           var pinEl = document.createElement('div');
           pinEl.className = 'zg-livemap__pin';
           new maplibregl.Marker({ element: pinEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map3d);
-          canvas3d.classList.add('is-active');
-          canvas.classList.add('is-hidden');
         }).catch(function () {
           revertTo('street');
           showStatus(copy.fail3d);
