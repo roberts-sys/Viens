@@ -299,24 +299,40 @@
           // fatal (bad style URL, no WebGL, offline). MapLibre also fires
           // 'error' for a single dropped tile request once running, which
           // should not boot someone back to the street view mid-browse.
-          var initialLoadFail = function () {
+          var settled = false;
+          var initialLoadFail = function (e) {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(loadTimeout);
+            // eslint-disable-next-line no-console
+            console.error('[zg-livemap] 3D style failed to load:', e && e.error ? e.error : e);
             map3d = null;
             revertTo('street');
             showStatus(copy.fail3d);
-            setTimeout(function () { if (status) status.classList.add('is-hidden'); }, 3000);
+            setTimeout(function () { if (status) status.classList.add('is-hidden'); }, 4000);
           };
+          var loadTimeout = window.setTimeout(function () {
+            // A CSP block or dead host can leave the map neither loaded nor
+            // erroring -- this catches that silent-hang case.
+            initialLoadFail(new Error('3D style load timed out'));
+          }, 10000);
           map3d.once('error', initialLoadFail);
           map3d.once('load', function () {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(loadTimeout);
             map3d.off('error', initialLoadFail);
             if (status) status.classList.add('is-hidden');
           });
           var pinEl = document.createElement('div');
           pinEl.className = 'zg-livemap__pin';
           new maplibregl.Marker({ element: pinEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map3d);
-        }).catch(function () {
+        }).catch(function (err) {
+          // eslint-disable-next-line no-console
+          console.error('[zg-livemap] failed to load MapLibre GL:', err);
           revertTo('street');
           showStatus(copy.fail3d);
-          setTimeout(function () { if (status) status.classList.add('is-hidden'); }, 3000);
+          setTimeout(function () { if (status) status.classList.add('is-hidden'); }, 4000);
         });
       }
 
