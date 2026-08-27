@@ -25,6 +25,11 @@
 #   googletagmanager.com to serve gtag and *.google-analytics.com /
 #   *.analytics.google.com to receive hits. Drop those and GA fails silently
 #   for every visitor who accepted the consent bar.
+#   The homepage location map (js/main.js initLiveMap, vendored Leaflet)
+#   pulls street tiles from *.tile.openstreetmap.org and satellite tiles
+#   from server.arcgisonline.com under img-src -- no separate connect-src
+#   entry is needed since Leaflet loads tiles as plain <img> requests and
+#   the marker coordinates are baked into the page, not geocoded live.
 
 [[headers]]
   for = "/*"
@@ -35,7 +40,7 @@
     Permissions-Policy = "geolocation=(), microphone=(), camera=(), usb=(), payment=()"
     Cross-Origin-Opener-Policy = "same-origin"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.google-analytics.com https://*.googletagmanager.com; font-src 'self'; media-src 'self'; connect-src 'self' https://ziedinagilde.goatcounter.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.google-analytics.com https://*.googletagmanager.com https://*.tile.openstreetmap.org https://server.arcgisonline.com; font-src 'self'; media-src 'self'; connect-src 'self' https://ziedinagilde.goatcounter.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
 
 # Netlify was serving this as text/html, so browsers and Googlebot dropped
 # every unrecognized XML tag and rendered raw text on one line -- this is

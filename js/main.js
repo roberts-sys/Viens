@@ -168,26 +168,62 @@
     });
   }
 
-  function initWorldMapPing() {
-    var maps = document.querySelectorAll('.zg-worldmap');
-    if (!maps.length) return;
+  // Free Leaflet embed (OpenStreetMap + Esri World Imagery tiles, no API key)
+  // replacing the old illustrated world-map SVG. Coordinates come from the
+  // page's own JSON-LD address block, so there's no runtime geocoding call.
+  function initLiveMap() {
+    var els = document.querySelectorAll('.zg-livemap');
+    if (!els.length || typeof L === 'undefined') return;
 
-    maps.forEach(function (svg) {
-      var dot = svg.querySelector('.zg-dot');
-      var rings = svg.querySelectorAll('.zg-ring');
-      if (!dot || !rings.length) return;
+    els.forEach(function (el) {
+      var lat = parseFloat(el.dataset.lat);
+      var lng = parseFloat(el.dataset.lng);
+      if (isNaN(lat) || isNaN(lng)) return;
 
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            dot.classList.add('play');
-            rings.forEach(function (r) { r.classList.add('play'); });
-            io.disconnect();
+      var canvas = el.querySelector('.zg-livemap__canvas');
+      var status = el.querySelector('.zg-livemap__status');
+      var toggle = el.querySelector('.zg-livemap__toggle');
+
+      var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      });
+      var satelliteLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { maxZoom: 19, attribution: 'Tiles &copy; Esri' }
+      );
+
+      var map = L.map(canvas, {
+        layers: [streetLayer],
+        zoomControl: true,
+        attributionControl: true,
+        scrollWheelZoom: false
+      }).setView([lat, lng], 18);
+
+      var pin = L.divIcon({ className: '', html: '<div class="zg-livemap__pin"></div>', iconSize: [16, 16], iconAnchor: [8, 16] });
+      L.marker([lat, lng], { icon: pin }).addTo(map);
+
+      streetLayer.once('load', function () {
+        if (status) status.classList.add('is-hidden');
+      });
+
+      if (toggle) {
+        toggle.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-layer]');
+          if (!btn) return;
+          Array.prototype.forEach.call(toggle.querySelectorAll('button'), function (b) {
+            b.classList.remove('active');
+          });
+          btn.classList.add('active');
+          if (btn.dataset.layer === 'satellite') {
+            map.removeLayer(streetLayer);
+            map.addLayer(satelliteLayer);
+          } else {
+            map.removeLayer(satelliteLayer);
+            map.addLayer(streetLayer);
           }
         });
-      }, { threshold: 0.3 });
-
-      io.observe(svg);
+      }
     });
   }
 
@@ -442,7 +478,7 @@
     initNavReturn();
     initReveals();
     initFooterFade();
-    initWorldMapPing();
+    initLiveMap();
     initNavSheenVisibility();
     initTileGlow();
     initMorphs();
